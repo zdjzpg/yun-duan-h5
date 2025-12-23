@@ -1,0 +1,262 @@
+# 自封装组件说明（YSwitch / YDatePicker / YDatePickerRange / YUpload / YUploadDraggable）
+
+本文档说明当前项目中自封装的通用组件的用途与用法：
+
+- `YSwitch`：启用/禁用双段开关
+- `YDatePicker`：带自定义底部工具条的日期选择器
+- `YDatePickerRange`：由两个 `YDatePicker` 组合的日期区间选择器
+- `YUpload`：图片填满卡片、右上角删除按钮的上传组件
+- `YUploadDraggable`：在 `YUpload` 基础上增加拖拽排序能力的上传组件
+
+所有组件均已在 `src/main.ts` 中通过 `app.component` 全局注册，可在任意 `.vue` 文件中直接使用。
+
+## 使用约定（重要）
+
+- 业务代码中，如需开关组件，请优先使用自封装的 `YSwitch`，不要直接使用 Ant Design Vue 的 `a-switch`。
+- 业务代码中，如需日期选择器，请优先使用 `YDatePicker`，不要直接使用 `a-date-picker`。
+- 业务代码中，如需日期区间选择器，请优先使用 `YDatePickerRange`，不要直接使用 `a-range-picker`。
+- 业务代码中，如需图片上传组件，请优先使用 `YUpload` / `YUploadDraggable`，不要直接使用 `a-upload`。
+
+> 目的：统一交互与视觉样式，避免重复封装；后续新增页面如有相同功能，请直接复用以上组件。
+
+---
+
+## YSwitch
+
+**文件位置**
+
+- 组件文件：`src/components/YSwitch.vue`
+- 全局注册名：`YSwitch`
+
+**典型用法**
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const enabled = ref(false)
+</script>
+
+<template>
+  <YSwitch v-model:checked="enabled" />
+</template>
+```
+
+**Props**
+
+| 名称               | 类型      | 默认值 | 说明                                                                                          |
+| ------------------ | --------- | ------ | --------------------------------------------------------------------------------------------- |
+| `v-model:checked`  | `boolean` | `false`| 当前是否启用（推荐用法）                                                                      |
+| `disabled`         | `boolean` | `false`| 是否禁用                                                                                      |
+| `activeText`       | `string`  | `启用` | 选中状态左侧文案                                                                              |
+| `inactiveText`     | `string`  | `禁用` | 未选中状态右侧文案                                                                            |
+| `item`             | `object`  | `{}`   | 兼容旧用法：其中可包含 `value/label/required/disabled/activeText/inactiveText/settingTip/errorMsg` 等 |
+
+**事件**
+
+| 事件名             | 参数                 | 说明                                  |
+| ------------------ | -------------------- | ------------------------------------- |
+| `update:checked`   | `(checked: boolean)` | `v-model:checked` 对应的更新事件      |
+| `change`           | `(checked: boolean)` | 新用法：仅基于 `checked` 的变更回调   |
+| `update:item`      | `(item: object)`     | 旧用法：整条 `item` 更新              |
+| `changeAndNotify`  | `(item: object)`     | 旧用法：变更并通知外层表单/配置模块   |
+
+---
+
+## YDatePicker
+
+**文件位置**
+
+- 组件文件：`src/components/YDatePicker.vue`
+- 全局注册名：`YDatePicker`
+
+**用途与特点**
+
+- 基于 `a-date-picker` 封装。
+- 默认使用中文 locale（由外层 `ConfigProvider` 提供）。
+- 去掉 Ant Design Vue 默认的底部“今天”按钮（`show-today=false`）。
+- 自定义底部工具条：**关闭 / 清空 / 现在时间**。
+- 点击底部按钮不会触发组件默认的关闭行为（使用 `@click.stop`）。
+
+**典型用法**
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import dayjs, { type Dayjs } from 'dayjs'
+
+const date = ref<Dayjs | null>(dayjs())
+</script>
+
+<template>
+  <YDatePicker v-model:value="date" style="width: 216px" />
+</template>
+```
+
+**Props**
+
+| 名称            | 类型            | 默认值 | 说明         |
+| --------------- | --------------- | ------ | ------------ |
+| `v-model:value` | `Dayjs \| null` | `null` | 当前选中日期 |
+
+> 说明：除 `value` 以外，传递给 `YDatePicker` 的其它属性（如 `format`、`picker`、`disabledDate` 等）会通过 `v-bind="$attrs"` 原样透传给内部的 `a-date-picker`。
+
+**事件**
+
+| 事件名          | 参数                                      | 说明                                      |
+| --------------- | ----------------------------------------- | ----------------------------------------- |
+| `update:value`  | `(value: Dayjs \| null)`                  | `v-model:value` 对应的更新事件            |
+| `change`        | `(value: Dayjs \| null, dateStr: string)` | 与 `a-date-picker` 的 `change` 事件签名一致 |
+
+---
+
+## YDatePickerRange
+
+**文件位置**
+
+- 组件文件：`src/components/YDatePickerRange.vue`
+- 全局注册名：`YDatePickerRange`
+
+**用途与特点**
+
+- 使用 **两个** `YDatePicker` 组合实现日期区间选择，UI 布局为：`开始日期 至 结束日期`。
+- 数值类型与 `a-range-picker` 类似：`[start, end]`，两端都是 `Dayjs \| null`。
+- 自动保持 `start <= end`：
+  - 当修改开始日期且大于结束日期时，自动把结束日期同步为开始日期。
+  - 当修改结束日期且小于开始日期时，自动把开始日期同步为结束日期。
+- 内部每个单项都具备 `YDatePicker` 的自定义底部按钮（关闭 / 清空 / 现在时间）。
+
+**典型用法**
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import dayjs, { type Dayjs } from 'dayjs'
+
+const range = ref<[Dayjs | null, Dayjs | null] | null>([
+  dayjs('2025-10-17'),
+  dayjs('2025-10-30'),
+])
+</script>
+
+<template>
+  <YDatePickerRange v-model:value="range" style="width: 216px" />
+</template>
+```
+
+**Props**
+
+| 名称            | 类型                                     | 默认值        | 说明                              |
+| --------------- | ---------------------------------------- | ------------- | --------------------------------- |
+| `v-model:value` | `[Dayjs \| null, Dayjs \| null] \| null` | `null`        | 区间值 `[start, end]`             |
+| `separator`     | `string`                                 | `'至'`        | 中间分隔符文案                    |
+| `disabled`      | `boolean`                                | `false`       | 是否禁用两个日期框                |
+| `format`        | `string`                                 | `'YYYY-MM-DD'`| `change` 事件里输出的日期字符串格式 |
+
+> 说明：传给 `YDatePickerRange` 的其它属性（如 `picker="month"`、`format`、`disabledDate` 等）会通过 `v-bind="$attrs"` 同时透传给左右两个 `YDatePicker`。
+
+**事件**
+
+| 事件名          | 参数                                                                          | 说明                                     |
+| --------------- | ----------------------------------------------------------------------------- | ---------------------------------------- |
+| `update:value`  | `(value: [Dayjs \| null, Dayjs \| null] \| null)`                             | `v-model:value` 更新事件                 |
+| `change`        | `(value: [Dayjs \| null, Dayjs \| null] \| null, dateStrs: [string, string])` | 区间变化时触发，包含格式化后的字符串     |
+
+---
+
+## YUpload
+
+**文件位置**
+
+- 组件文件：`src/components/YUpload.vue`
+- 全局注册名：`YUpload`
+
+**用途与特点**
+
+- 基于 `a-upload` 封装，`list-type="picture-card"`。
+- 重写 `itemRender`，图片以 `object-fit: cover` 的方式填满 80×80 的图片区域，超出部分自动裁剪。
+- 预览列表中每张图片右上角只有一个 `X` 删除按钮，不显示 antd 默认的预览/删除图标。
+
+**典型用法**
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { UploadFile } from 'ant-design-vue'
+
+const files = ref<UploadFile[]>([])
+</script>
+
+<template>
+  <YUpload v-model:fileList="files" action="/upload.do" :max-count="5" />
+</template>
+```
+
+**Props**
+
+| 名称               | 类型                 | 默认值                                           | 说明                                                   |
+| ------------------ | -------------------- | ------------------------------------------------ | ------------------------------------------------------ |
+| `v-model:fileList` | `UploadFile[]`       | `[]`                                             | 当前文件列表                                           |
+| `disabled`         | `boolean`            | `false`                                          | 是否禁用上传                                           |
+| `max-count`        | `number`             | `Infinity`                                       | 最多上传文件数量                                       |
+| `show-upload-list` | `boolean \| object`  | `{ showPreviewIcon: false, showRemoveIcon: false }` | 是否显示 antd 自带列表；可传 `false` 完全关闭          |
+| 其它               | -                    | -                                                | 通过 `v-bind="$attrs"` 透传给内部 `a-upload`（如 `action` 等） |
+
+**事件**
+
+| 事件名             | 参数                    | 说明                               |
+| ------------------ | ----------------------- | ---------------------------------- |
+| `update:fileList`  | `(files: UploadFile[])` | `v-model:fileList` 对应的更新事件 |
+| `change`           | `(info: unknown)`       | 对应 antd `a-upload` 的 `change` 事件 |
+
+---
+
+## YUploadDraggable
+
+**文件位置**
+
+- 组件文件：`src/components/YUploadDraggable.vue`
+- 全局注册名：`YUploadDraggable`
+
+**用途与特点**
+
+- 在 `YUpload` 的基础上增加已上传图片的 **拖拽排序** 能力，内部使用 `vuedraggable`。
+- `YUploadDraggable` 只负责展示与排序，真正的上传逻辑仍由内部的 `YUpload` 处理。
+- 上传按钮会作为一个卡片出现在已上传图片后面，始终占据“最后一格”，并与图片一起自动换行。
+
+**典型用法**
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { UploadFile } from 'ant-design-vue'
+
+const files = ref<UploadFile[]>([])
+</script>
+
+<template>
+  <YUploadDraggable v-model:fileList="files" action="/upload.do" :max-count="5" />
+</template>
+```
+
+**Props**
+
+| 名称               | 类型           | 默认值      | 说明                                              |
+| ------------------ | -------------- | ----------- | ------------------------------------------------- |
+| `v-model:fileList` | `UploadFile[]` | `[]`        | 当前文件列表（顺序会随拖拽实时更新）             |
+| `disabled`         | `boolean`      | `false`     | 是否禁用拖拽与上传                                |
+| `max-count`        | `number`       | `Infinity`  | 最多上传文件数量，达到上限后“+”按钮自动隐藏      |
+| 其它               | -              | -           | 其它属性（如 `action`）透传给内部 `YUpload`/`a-upload` |
+
+**行为说明**
+
+- 拖拽已上传图片可以调整顺序，外层拿到的 `fileList` 顺序会同步变化。
+- 新上传的图片会按 antd 上传顺序追加到列表中，“+ 上传”按钮始终出现在最后一格。
+
+---
+
+## 统一注意事项
+
+- 日期相关组件依赖 `dayjs` 作为日期类型，请在使用时按项目约定统一使用 `Dayjs` 类型而不是原生 `Date`。
+- 项目入口 `src/main.ts` 中已通过 `ConfigProvider` 使用 `zh_CN` locale，日期组件均默认显示为中文。
+- 如需局部覆盖样式，建议在 `src/styles/common.less` 中添加规则，优先使用特定作用域（例如 `#YunDuanH5` 下的选择器）避免影响第三方组件的默认行为。
