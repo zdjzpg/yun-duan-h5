@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { demoRoutes } from './modules/demo'
+import { theaterVenueRoutes } from './modules/theaterVenues'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -8,15 +10,14 @@ const router = createRouter({
       redirect: '/test',
     },
     ...demoRoutes,
+    ...theaterVenueRoutes,
   ],
 })
-// 路由守卫
-router.beforeEach((to, from) => {
-  // 设置页面标题
+
+router.beforeEach((to) => {
   const title = (to.meta.title as string) || 'Vue3 App'
   document.title = title
-  debugger
-  // 权限验证
+
   const token = localStorage.getItem('token')
 
   if (to.meta.requiresAuth && !token) {
