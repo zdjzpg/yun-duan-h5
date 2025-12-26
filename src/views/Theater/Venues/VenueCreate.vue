@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import message from 'ant-design-vue/es/message'
 import { useRouter } from 'vue-router'
 import { createVenue, type CreateVenueRequest } from '@/api/theaterVenue'
+import type { TheaterData } from '@/components/theater/seat-map-editor/types.simplified'
 import FormPageLayout from '@/components/layouts/FormPageLayout.vue'
 import VenueForm, { type VenueFormValues } from './VenueForm.vue'
 
@@ -26,7 +27,7 @@ const handleSubmit = async (values: VenueFormValues) => {
         capacityType: 'free_seating',
         totalCapacity: values.totalCapacity || 0,
       }
-    } else {
+    } else if (values.capacityType === 'zone_capacity') {
       payload = {
         name: values.name,
         type: values.type,
@@ -40,6 +41,37 @@ const handleSubmit = async (values: VenueFormValues) => {
           sort: index + 1,
         })),
       }
+    } else {
+      const precise = (values as any).preciseSeats as TheaterData | undefined
+      if (!precise || !precise.zones || !precise.seats) {
+        throw new Error('请先配置座位图')
+      }
+
+      payload = {
+        name: values.name,
+        type: values.type,
+        scenicId: values.scenicId,
+        address: values.address,
+        description: values.description,
+        capacityType: 'precise_seat',
+        zones: precise.zones.map((zone, index) => ({
+          name: zone.name,
+          shortName: zone.shortName,
+          color: zone.color,
+          floor: precise.floors.find((f) => f.id === zone.floorId)?.name,
+          rows: zone as any as number | undefined,
+          seatsPerRow: undefined,
+        })),
+        seats: precise.seats.map((seat) => ({
+          zoneId: seat.zoneId || '',
+          rowLabel: seat.rowLabel,
+          seatLabel: seat.seatLabel,
+          status: seat.status,
+          label: seat.label,
+          x: seat.x,
+          y: seat.y,
+        })),
+      } as CreateVenueRequest
     }
 
     await createVenue(payload)

@@ -15,12 +15,17 @@ declare module 'vue' {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function watch<T = any>(
     source: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     cb: (value: T, oldValue: T) => void,
     options?: any,
   ): void
 
   export function onMounted(fn: () => void): void
+  export function onBeforeUnmount(fn: () => void): void
+  export function onUnmounted(fn: () => void): void
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export function createVNode(...args: any[]): any
 
   // 给 shims-vue.d.ts 用的组件类型，占位即可
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,4 +36,3 @@ declare module 'vue' {
   const Vue: any
   export default Vue
 }
-

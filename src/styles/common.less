@@ -1,4 +1,49 @@
 //ant-design样式向云端兼容
+/* Pospal Design Color System */
+:root {
+  /* 主色（蓝色系，B5 为主色） */
+  --color-b1: #e6f9ff;
+  --color-b2: #7ad9ff;
+  --color-b3: #4fc2f7;
+  --color-b4: #26a6eb;
+  --color-b5: #0088dd;
+  --color-b6: #006bb8;
+  --color-b7: #005091;
+  --color-b8: #00376b;
+
+  /* 中性色 */
+  --color-n1: #fafafa;
+  --color-n2: #f5f5f5;
+  --color-n3: #ededed;
+  --color-n4: #dedede;
+  --color-n5: #bfbfbf;
+  --color-n6: #8c8c8c;
+  --color-n7: #595959;
+  --color-n8: #262626;
+  --color-black: #000000;
+  --color-white: #ffffff;
+
+  /* 成功色（绿色） */
+  --color-g1: #e9f7ea;
+  --color-g2: #97dea3;
+  --color-g3: #6dd181;
+  --color-g4: #47c464;
+  --color-g5: #25b84c;
+  --color-g6: #16913b;
+  --color-g7: #0b6b2b;
+  --color-g8: #03451b;
+
+  /* 紫色（用于 JSON 图标） */
+  --color-p1: #f9f0ff;
+  --color-p2: #dcb1fc;
+  --color-p3: #bc81f0;
+  --color-p4: #9d56e3;
+  --color-p5: #7d2fd6;
+  --color-p6: #5d1eb0;
+  --color-p7: #41118a;
+  --color-p8: #290763;
+}
+
 #YunDuanH5 {
   font-family:
     Helvetica, Tahoma, Arial, 'Hiragino Sans GB', 'Hiragino Sans GB W3', 'Microsoft YaHei', STXihei,
@@ -347,4 +392,151 @@
 // 让包含 YUploadDraggable 的表单项顶部不再多出一块空白
 #YunDuanH5 .ant-form-item-control:has(.y-upload-draggable) {
   margin-top: -16px;
+}
+.ant-modal .ant-modal-content {
+  border-radius: 0;
+}
+
+/* ========================================
+   座位图编辑器 - 全屏 Modal 布局
+   wrapClassName="seat-map-editor-modal-fullscreen"
+   ======================================== */
+
+.seat-map-editor-modal-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
+.seat-map-editor-modal-fullscreen .ant-modal {
+  top: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.seat-map-editor-modal-fullscreen .ant-modal-content {
+  height: 100vh !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+}
+
+.seat-map-editor-modal-fullscreen .ant-modal-header {
+  padding: 16px 16px !important;
+  margin-bottom: 0 !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.seat-map-editor-modal-fullscreen .ant-modal-body {
+  flex: 1 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.seat-map-editor-modal-fullscreen .ant-modal-footer {
+  margin-top: 0 !important;
+  padding: 16px 16px !important;
+}
+
+/* ========================================
+   座位图编辑器 - 悬浮滚动条 & 面板布局
+   ======================================== */
+
+.seat-map-editor-overlay-scrollbar {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.seat-map-editor-overlay-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  position: absolute;
+}
+
+.seat-map-editor-overlay-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.seat-map-editor-overlay-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.seat-map-editor-overlay-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.seat-map-editor-overlay-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.seat-map-editor-overlay-scrollbar .ant-layout-sider-children {
+  overflow: visible !important;
+}
+
+.seat-map-editor-panel-scrollbar {
+  height: 100%;
+  padding-left: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  padding-right: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.seat-map-editor-panel-content {
+  padding-right: 16px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  word-break: break-word;
+}
+
+.seat-map-editor-panel-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.seat-map-editor-panel-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.seat-map-editor-panel-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.seat-map-editor-panel-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.seat-map-editor-panel-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.seat-map-editor-panel-content .ant-slider {
+  max-width: 100% !important;
+}
+
+.seat-map-editor-panel-content .ant-slider-mark {
+  max-width: 100% !important;
+}
+
+.seat-map-editor-panel-content .ant-slider-mark-text {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }

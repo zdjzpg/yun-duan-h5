@@ -1,44 +1,19 @@
 import { get, post, del, patch } from '@/services/request'
+import type {
+  Venue as DomainVenue,
+  VenueZone as DomainVenueZone,
+  VenueCapacityType,
+  VenueType,
+  VenueStatus,
+  VenueSeatStatus,
+  SeatLabel,
+} from '@/types/theater'
 
-export type VenueCapacityType = 'free_seating' | 'zone_capacity' | 'precise_seat'
+export type { VenueCapacityType, VenueType, VenueStatus }
 
-export type VenueType = 'indoor_theater' | 'outdoor_scene' | 'multifunctional' | 'other'
+export interface VenueZone extends DomainVenueZone {}
 
-export type VenueStatus = 'active' | 'inactive'
-
-export interface VenueZone {
-  id: string
-  venueId: string
-  name: string
-  shortName?: string
-  color?: string
-  floor?: string
-  floorId?: string
-  capacity?: number
-  sort?: number
-  rows?: number
-  seatsPerRow?: number
-  createdAt: string
-  updatedAt: string
-}
-
-export interface Venue {
-  id: string
-  merchantId: string
-  scenicId?: string
-  name: string
-  type?: VenueType
-  address?: string
-  description?: string
-  capacityType: VenueCapacityType
-  totalCapacity: number
-  status: VenueStatus
-  isLocked?: boolean
-  referencedShowCount?: number
-  zones?: VenueZone[]
-  createdAt: string
-  updatedAt: string
-}
+export interface Venue extends DomainVenue {}
 
 export interface VenueListRequest {
   page?: number
@@ -77,8 +52,31 @@ export interface CreateVenueZoneCapacityRequest extends CreateVenueBaseRequest {
   }>
 }
 
-// 精确座位模式在 H5 先不支持创建，仅为兼容类型预留
-export type CreateVenueRequest = CreateVenueFreeSeatRequest | CreateVenueZoneCapacityRequest
+export interface CreateVenuePreciseSeatRequest extends CreateVenueBaseRequest {
+  capacityType: 'precise_seat'
+  zones: Array<{
+    name: string
+    shortName?: string
+    color?: string
+    floor?: string
+    rows?: number
+    seatsPerRow?: number
+  }>
+  seats: Array<{
+    zoneId: string
+    rowLabel: string
+    seatLabel: string
+    status: VenueSeatStatus
+    label?: SeatLabel
+    x: number
+    y: number
+  }>
+}
+
+export type CreateVenueRequest =
+  | CreateVenueFreeSeatRequest
+  | CreateVenueZoneCapacityRequest
+  | CreateVenuePreciseSeatRequest
 
 export interface CreateVenueResponse {
   id: string
@@ -122,4 +120,3 @@ export async function updateVenueStatus(id: string, status: VenueStatus): Promis
 export async function deleteVenue(id: string): Promise<DeleteVenueResponse> {
   return del<DeleteVenueResponse>(`/theater/venues/${id}`)
 }
-

@@ -6,7 +6,7 @@ import MockAdapter from 'axios-mock-adapter'
 import type { AxiosInstance } from 'axios'
 import type MockAdapterType from 'axios-mock-adapter'
 
-// 剧场业务 Mock（完整逻辑与 a 项目一致）
+// 剧场业务 Mock
 import {
   setupVenueListMock,
   setupCreateVenueMock,
@@ -37,10 +37,7 @@ export type SetupMockOptions = {
 /**
  * 为指定 axios 实例挂载剧场相关 Mock
  */
-export function setupMockAdapter(
-  axiosInstance: AxiosInstance,
-  options: SetupMockOptions = {},
-) {
+export function setupMockAdapter(axiosInstance: AxiosInstance, options: SetupMockOptions = {}) {
   const { delay = 300, enable = true } = options
 
   if (!enable) {
@@ -94,4 +91,3 @@ export function restoreMock(mock: MockAdapterType | null) {
     console.log('[Mock] restored')
   }
 }
-

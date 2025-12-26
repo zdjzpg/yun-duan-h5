@@ -51,7 +51,7 @@ const emitRangeChange = (next: [Dayjs | null, Dayjs | null]) => {
 
 const handleStartChange = (val: Dayjs | null) => {
   const [, end] = rangeValue.value
-  let nextStart = val
+  const nextStart = val
   let nextEnd = end
 
   if (val && end && val.isAfter(end, 'day')) {
@@ -65,7 +65,7 @@ const handleStartChange = (val: Dayjs | null) => {
 const handleEndChange = (val: Dayjs | null) => {
   const [start] = rangeValue.value
   let nextStart = start
-  let nextEnd = val
+  const nextEnd = val
 
   if (start && val && val.isBefore(start, 'day')) {
     nextStart = val

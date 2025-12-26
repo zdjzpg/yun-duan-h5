@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import {
-  type VenueCapacityType,
-  type VenueType,
-} from '@/api/theaterVenue'
+import message from 'ant-design-vue/es/message'
+import type { VenueCapacityType, VenueType } from '@/api/theaterVenue'
+import type { TheaterData } from '@/components/theater/seat-map-editor/types.simplified'
+import SeatMapEditorModal from '@/components/theater/seat-map-editor/SeatMapEditorModal.vue'
 
 export interface VenueFormValues {
   name: string
@@ -19,6 +19,7 @@ export interface VenueFormValues {
     capacity: number
     sort?: number
   }>
+  preciseSeats?: TheaterData
 }
 
 const props = defineProps<{
@@ -41,10 +42,12 @@ const formState = ref<VenueFormValues>({
   capacityType: 'free_seating',
   totalCapacity: undefined,
   zones: [],
+  preciseSeats: undefined,
 })
 
 const zones = ref<VenueFormValues['zones']>([])
 const capacityType = ref<VenueCapacityType>('free_seating')
+const preciseSeats = ref<TheaterData | undefined>()
 
 watch(
   () => props.initialValues,
@@ -60,6 +63,7 @@ watch(
       sort: z.sort ?? index + 1,
     }))
     capacityType.value = formState.value.capacityType
+    preciseSeats.value = (val as any).preciseSeats
   },
   { immediate: true },
 )
@@ -71,15 +75,18 @@ onMounted(() => {
       sort: z.sort ?? index + 1,
     }))
     capacityType.value = formState.value.capacityType
+    preciseSeats.value = (props.initialValues as any).preciseSeats
   }
 })
 
-watch(
-  capacityType,
-  (val) => {
-    formState.value.capacityType = val
-  },
-)
+watch(capacityType, (val) => {
+  formState.value.capacityType = val
+})
+
+const handleSeatMapChange = (data: TheaterData) => {
+  preciseSeats.value = data
+  ;(formState.value as any).preciseSeats = data
+}
 
 const handleAddZone = () => {
   const current = zones.value || []
@@ -121,28 +128,46 @@ const handleSubmit = async () => {
   if (!formRef.value) {
     return
   }
-  await formRef.value.validate()
+
+  await (formRef.value as any).validate()
 
   if (formState.value.capacityType === 'zone_capacity') {
     const current = zones.value || []
     if (!current.length) {
-      throw new Error('请至少添加一个座区')
+      message.error('请至少添加一个座区')
+      return
     }
     const hasEmptyName = current.some((zone: any) => !zone.name || !zone.name.trim())
     if (hasEmptyName) {
-      throw new Error('请填写所有座区的名称')
+      message.error('请填写所有座区的名称')
+      return
     }
     const hasInvalidCapacity = current.some(
       (zone: any) => !zone.capacity || zone.capacity <= 0,
     )
     if (hasInvalidCapacity) {
-      throw new Error('请填写所有座区的容量，且必须大于 0')
+      message.error('请填写所有座区的容量，且容量必须大于 0')
+      return
+    }
+  }
+
+  if (formState.value.capacityType === 'precise_seat') {
+    const data = preciseSeats.value as TheaterData | undefined
+    if (!data || !Array.isArray(data.floors) || data.floors.length === 0) {
+      message.error('请至少添加一个楼层')
+      return
+    }
+
+    if (!Array.isArray(data.seats) || data.seats.length === 0) {
+      message.error('请至少添加一个座位')
+      return
     }
   }
 
   emit('submit', {
     ...formState.value,
     zones: zones.value,
+    preciseSeats: preciseSeats.value as any,
   })
 }
 
@@ -159,19 +184,29 @@ defineExpose<{
     :model="formState"
     layout="vertical"
   >
+    <!-- 基础信息 -->
     <div style="margin-bottom: 24px">
-      <a-typography-title :level="5" style="margin-bottom: 16px">基础信息</a-typography-title>
+      <a-typography-title :level="5" style="margin-bottom: 16px">
+        基础信息
+      </a-typography-title>
 
       <div class="venue-form__two-columns">
         <a-form-item
           label="场馆名称"
           name="name"
-          :rules="[{ required: true, message: '请输入' }]"
+          :rules="[{ required: true, message: '请输入场馆名称' }]"
         >
-          <a-input v-model:value="formState.name" placeholder="请输入" :maxlength="50" />
+          <a-input
+            v-model:value="formState.name"
+            placeholder="请输入场馆名称"
+            :maxlength="50"
+          />
         </a-form-item>
 
-        <a-form-item label="场馆类型" name="type">
+        <a-form-item
+          label="场馆类型"
+          name="type"
+        >
           <a-select
             v-model:value="formState.type"
             placeholder="请选择"
@@ -185,11 +220,21 @@ defineExpose<{
         </a-form-item>
       </div>
 
-      <a-form-item label="场馆地址" name="address">
-        <a-input v-model:value="formState.address" placeholder="请输入" :maxlength="200" />
+      <a-form-item
+        label="场馆地址"
+        name="address"
+      >
+        <a-input
+          v-model:value="formState.address"
+          placeholder="请输入场馆地址"
+          :maxlength="200"
+        />
       </a-form-item>
 
-      <a-form-item label="场馆简介" name="description">
+      <a-form-item
+        label="场馆简介"
+        name="description"
+      >
         <a-textarea
           v-model:value="formState.description"
           placeholder="简要描述场馆的特点、设施、适用场景等"
@@ -200,20 +245,28 @@ defineExpose<{
       </a-form-item>
     </div>
 
+    <!-- 容量配置 -->
     <div style="margin-bottom: 24px">
-      <a-typography-title :level="5" style="margin-bottom: 16px">容量配置</a-typography-title>
+      <a-typography-title :level="5" style="margin-bottom: 16px">
+        容量配置
+      </a-typography-title>
 
       <a-form-item
         label="容量类型"
         name="capacityType"
         :rules="[{ required: true, message: '请选择容量类型' }]"
       >
-        <a-radio-group v-model:value="capacityType" :disabled="props.isEdit">
+        <a-radio-group
+          v-model:value="capacityType"
+          :disabled="props.isEdit"
+        >
           <a-radio value="free_seating">自由站席</a-radio>
           <a-radio value="zone_capacity">按座区数量</a-radio>
+          <a-radio value="precise_seat">精确座位</a-radio>
         </a-radio-group>
       </a-form-item>
 
+      <!-- 自由站席模式 -->
       <a-form-item
         v-if="capacityType === 'free_seating'"
         label="总容量"
@@ -225,7 +278,7 @@ defineExpose<{
       >
         <a-input-number
           v-model:value="formState.totalCapacity"
-          placeholder="请输入"
+          placeholder="请输入总容量"
           :min="1"
           :max="999999"
           style="width: 100%"
@@ -234,6 +287,7 @@ defineExpose<{
         </a-input-number>
       </a-form-item>
 
+      <!-- 按座区数量模式 -->
       <div v-else-if="capacityType === 'zone_capacity'">
         <div class="venue-form__zone-header">
           <a-space>
@@ -241,7 +295,9 @@ defineExpose<{
               已添加 {{ zones?.length || 0 }} 个座区
             </a-typography-text>
             <template v-if="zones && zones.length">
-              <a-typography-text type="secondary">，总容量：</a-typography-text>
+              <a-typography-text type="secondary">
+                ，总容量：
+              </a-typography-text>
               <a-typography-text strong>
                 {{
                   (zones || []).reduce(
@@ -253,7 +309,10 @@ defineExpose<{
               </a-typography-text>
             </template>
           </a-space>
-          <a-button type="dashed" @click="handleAddZone">
+          <a-button
+            type="dashed"
+            @click="handleAddZone"
+          >
             添加座区
           </a-button>
         </div>
@@ -267,10 +326,13 @@ defineExpose<{
         >
           <a-table-column
             key="name"
-            title="* 座区名称"
-            data-index="name"
+            :data-index="'name'"
             :width="'40%'"
           >
+            <template #title>
+              <span style="color: #ff4d4f">*</span>
+              <span style="margin-left: 4px">座区名称</span>
+            </template>
             <template #default="{ text, index }">
               <a-input
                 :value="text"
@@ -283,10 +345,13 @@ defineExpose<{
 
           <a-table-column
             key="capacity"
-            title="* 容量（人）"
-            data-index="capacity"
+            :data-index="'capacity'"
             :width="'40%'"
           >
+            <template #title>
+              <span style="color: #ff4d4f">*</span>
+              <span style="margin-left: 4px">容量（人）</span>
+            </template>
             <template #default="{ text, index }">
               <a-input-number
                 :value="text"
@@ -312,7 +377,12 @@ defineExpose<{
                 cancel-text="取消"
                 @confirm="() => handleDeleteZone(index)"
               >
-                <a-button type="link" size="small">删除</a-button>
+                <a-button
+                  type="link"
+                  size="small"
+                >
+                  删除
+                </a-button>
               </a-popconfirm>
             </template>
           </a-table-column>
@@ -321,6 +391,14 @@ defineExpose<{
         <a-empty
           v-else
           description="暂无座区，请点击上方“添加座区”按钮添加"
+        />
+      </div>
+
+      <!-- 精确座位模式 -->
+      <div v-else-if="capacityType === 'precise_seat'">
+        <SeatMapEditorModal
+          :initial-data="preciseSeats"
+          @change="handleSeatMapChange"
         />
       </div>
     </div>
