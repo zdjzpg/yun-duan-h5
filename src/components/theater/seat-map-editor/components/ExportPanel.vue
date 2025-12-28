@@ -9,7 +9,7 @@ import {
   SaveOutlined,
   InfoCircleOutlined,
 } from '@ant-design/icons-vue'
-import type { TheaterData, Floor } from '../types.simplified'
+import type { TheaterData, Floor, Seat } from '../types.simplified'
 import {
   exportAsSVG,
   exportToExcel,
@@ -41,6 +41,10 @@ const pdfColorMode = ref<'color' | 'grayscale'>('color')
 
 const currentFloor = computed<Floor | undefined>(() =>
   props.theaterData.floors.find((f: Floor) => f.id === props.currentFloorId),
+)
+
+const floorSeatsCount = computed<number>(() =>
+  props.theaterData.seats.filter((s: Seat) => s.floorId === props.currentFloorId).length,
 )
 
 const getCanvas = (): HTMLCanvasElement | null => {
@@ -192,8 +196,40 @@ const handleExportPDF = async () => {
 
 <template>
   <div>
+    <!-- 当前导出信息，与 a 项目对齐 -->
     <a-card
-      title="导出座位图"
+      size="small"
+      style="margin-bottom: 16px"
+    >
+      <a-space
+        direction="vertical"
+        :size="4"
+        style="width: 100%"
+      >
+        <div>
+          <a-typography-text type="secondary">剧场：</a-typography-text>
+          <a-typography-text strong>
+            {{ props.theaterData.name }}
+          </a-typography-text>
+        </div>
+        <div>
+          <a-typography-text type="secondary">楼层：</a-typography-text>
+          <a-typography-text strong>
+            {{ currentFloor?.name || '-' }}
+          </a-typography-text>
+        </div>
+        <div>
+          <a-typography-text type="secondary">座位：</a-typography-text>
+          <a-typography-text strong>
+            {{ floorSeatsCount }} 个（总计 {{ props.theaterData.seats.length }} 个）
+          </a-typography-text>
+        </div>
+      </a-space>
+    </a-card>
+
+    <!-- 快速导出，与 a 项目结构对齐 -->
+    <a-card
+      title="快速导出"
       :bordered="false"
       style="margin-bottom: 16px"
     >

@@ -74,7 +74,7 @@ const hasSeats = computed(() => (props.seats || []).length > 0)
         :options="[
           { label: '💺 座位', value: 'seat' },
           { label: '🎭 舞台', value: 'stage' },
-          { label: '🏷�?座区', value: 'zone' },
+          { label: '🏷️ 座区', value: 'zone' },
         ]"
         block
       />
@@ -85,8 +85,9 @@ const hasSeats = computed(() => (props.seats || []).length > 0)
         <SeatEditPanel
           :selected-seats="selectedSeats"
           :zones="zones || []"
-          @update-status="(status: string, reason?: string) =>
-            emit('updateSeatStatus', status, reason)"
+          @update-status="
+            (status: string, reason?: string) => emit('updateSeatStatus', status, reason)
+          "
           @delete-seats="() => emit('deleteSeats')"
           @create-zone="() => emit('createZone')"
           @assign-to-zone="(zoneId: string) => emit('assignToZone', zoneId)"
@@ -97,8 +98,7 @@ const hasSeats = computed(() => (props.seats || []).length > 0)
         <StageEditPanel
           :selected-stage="selectedStage"
           :stage="stage"
-          @update-stage="(id: string, updates: Partial<Stage>) =>
-            emit('updateStage', id, updates)"
+          @update-stage="(id: string, updates: Partial<Stage>) => emit('updateStage', id, updates)"
           @delete-stage="(id: string) => emit('deleteStage', id)"
           @add-stage="() => emit('addStage')"
         />
@@ -112,8 +112,9 @@ const hasSeats = computed(() => (props.seats || []).length > 0)
           :zones="zones"
           :seats="seats"
           :selected-seat-ids="selectedSeats.map((s: Seat) => s.id)"
-          @update-zone="(zoneId: string, updates: Partial<Zone>) =>
-            emit('updateZone', zoneId, updates)"
+          @update-zone="
+            (zoneId: string, updates: Partial<Zone>) => emit('updateZone', zoneId, updates)
+          "
           @delete-zone="(zoneId: string) => emit('deleteZone', zoneId)"
           @assign-seats-to-zone="(zoneId: string) => emit('assignToZone', zoneId)"
         />
@@ -124,4 +125,3 @@ const hasSeats = computed(() => (props.seats || []).length > 0)
     </div>
   </div>
 </template>
-

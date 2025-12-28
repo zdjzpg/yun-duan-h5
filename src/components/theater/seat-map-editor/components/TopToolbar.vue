@@ -56,14 +56,7 @@ const zoomOptions = [
 </script>
 
 <template>
-  <div
-    style="
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      height: 100%;
-    "
-  >
+  <div style="display: flex; align-items: center; gap: 16px; height: 100%">
     <!-- 左侧：剧场名称 -->
     <div style="flex: 1; display: flex; justify-content: flex-start">
       <a-typography-text strong style="font-size: 16px">
@@ -76,10 +69,7 @@ const zoomOptions = [
       <a-space size="small">
         <!-- 生成座位 -->
         <a-tooltip title="快速生成网格座位">
-          <a-button
-            type="primary"
-            @click="emit('batchGenerate')"
-          >
+          <a-button type="primary" @click="emit('batchGenerate')">
             <template #icon>
               <PlusOutlined />
             </template>
@@ -104,32 +94,21 @@ const zoomOptions = [
           </a-button>
         </a-tooltip>
 
-        <a-divider
-          type="vertical"
-          :style="{ margin: 0, height: '24px' }"
-        />
+        <a-divider type="vertical" :style="{ margin: 0, height: '24px' }" />
 
         <!-- 座位编号开关 -->
         <a-tooltip :title="props.showSeatLabels ? '隐藏座位编号' : '显示座位编号'">
           <a-switch
-            size="small"
             :checked="props.showSeatLabels"
             @change="(checked: boolean) => emit('toggleSeatLabels', checked)"
           />
         </a-tooltip>
 
-        <a-divider
-          type="vertical"
-          :style="{ margin: 0, height: '24px' }"
-        />
+        <a-divider type="vertical" :style="{ margin: 0, height: '24px' }" />
 
         <!-- 缩小 -->
         <a-tooltip title="缩小">
-          <a-button
-            size="small"
-            :disabled="props.zoomLevel <= 50"
-            @click="emit('zoomOut')"
-          >
+          <a-button size="small" :disabled="props.zoomLevel <= 50" @click="emit('zoomOut')">
             <template #icon>
               <ZoomOutOutlined />
             </template>
@@ -147,11 +126,7 @@ const zoomOptions = [
 
         <!-- 放大 -->
         <a-tooltip title="放大">
-          <a-button
-            size="small"
-            :disabled="props.zoomLevel >= 200"
-            @click="emit('zoomIn')"
-          >
+          <a-button size="small" :disabled="props.zoomLevel >= 200" @click="emit('zoomIn')">
             <template #icon>
               <ZoomInOutlined />
             </template>
@@ -165,10 +140,7 @@ const zoomOptions = [
       <a-space size="small">
         <!-- 撤销 -->
         <a-tooltip title="撤销 (Ctrl+Z)">
-          <a-button
-            :disabled="!props.canUndo"
-            @click="emit('undo')"
-          >
+          <a-button :disabled="!props.canUndo" @click="emit('undo')">
             <template #icon>
               <UndoOutlined />
             </template>
@@ -178,10 +150,7 @@ const zoomOptions = [
 
         <!-- 重做 -->
         <a-tooltip title="重做 (Ctrl+Shift+Z)">
-          <a-button
-            :disabled="!props.canRedo"
-            @click="emit('redo')"
-          >
+          <a-button :disabled="!props.canRedo" @click="emit('redo')">
             <template #icon>
               <RedoOutlined />
             </template>
@@ -207,11 +176,7 @@ const zoomOptions = [
 
         <!-- 全屏切换 -->
         <a-tooltip
-          :title="
-            props.isFullscreen
-              ? '退出全屏 (Ctrl+\\\\ 或 Esc)'
-              : '全屏模式 (Ctrl+\\\\)'
-          "
+          :title="props.isFullscreen ? '退出全屏 (Ctrl+\\\\ 或 Esc)' : '全屏模式 (Ctrl+\\\\)'"
         >
           <a-button
             :type="props.isFullscreen ? 'primary' : 'default'"
@@ -237,4 +202,3 @@ const zoomOptions = [
     </div>
   </div>
 </template>
-

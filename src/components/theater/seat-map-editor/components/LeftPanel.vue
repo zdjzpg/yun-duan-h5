@@ -34,39 +34,22 @@ const handleFloorClick = (floorId: string) => {
           margin-bottom: 12px;
         "
       >
-        <a-typography-title
-          :level="5"
-          style="margin: 0"
-        >
-          楼层
-        </a-typography-title>
+        <a-typography-title :level="5" style="margin: 0"> 楼层 </a-typography-title>
         <a-space size="small">
           <a-tooltip title="新建楼层 (Ctrl+Shift+N)">
-            <a-button
-              type="text"
-              size="small"
-              @click="emit('newFloor')"
-            >
+            <a-button type="text" size="small" @click="emit('newFloor')">
               <PlusOutlined />
             </a-button>
           </a-tooltip>
           <a-tooltip title="管理楼层">
-            <a-button
-              type="text"
-              size="small"
-              @click="emit('manageFloors')"
-            >
+            <a-button type="text" size="small" @click="emit('manageFloors')">
               <SettingOutlined />
             </a-button>
           </a-tooltip>
         </a-space>
       </div>
 
-      <a-space
-        direction="vertical"
-        style="width: 100%"
-        :size="4"
-      >
+      <a-space direction="vertical" style="width: 100%" :size="4">
         <div
           v-for="floor in floors"
           :key="floor.id"
@@ -76,10 +59,7 @@ const handleFloorClick = (floorId: string) => {
             borderRadius: '6px',
             cursor: 'pointer',
             background: floor.id === activeFloorId ? '#e6f7ff' : 'transparent',
-            border:
-              floor.id === activeFloorId
-                ? '1px solid #91d5ff'
-                : '1px solid transparent',
+            border: floor.id === activeFloorId ? '1px solid #91d5ff' : '1px solid transparent',
             transition: 'all 0.2s',
             display: 'flex',
             justifyContent: 'space-between',
@@ -106,11 +86,7 @@ const handleFloorClick = (floorId: string) => {
         </div>
       </a-space>
 
-      <a-typography-text
-        v-if="floors.length === 0"
-        type="secondary"
-        style="font-size: 12px"
-      >
+      <a-typography-text v-if="floors.length === 0" type="secondary" style="font-size: 12px">
         暂无楼层，请新建
       </a-typography-text>
     </div>
@@ -118,42 +94,19 @@ const handleFloorClick = (floorId: string) => {
     <a-card
       v-if="floors.find((floor: Floor) => floor.id === activeFloorId)"
       size="small"
-      style="
-        margin-top: 16px;
-        background: #fafafa;
-        border: 1px solid #f0f0f0;
-      "
+      style="margin-top: 16px; background: #fafafa; border: 1px solid #f0f0f0"
     >
       <div style="margin-bottom: 8px">
-        <a-typography-text
-          strong
-          style="font-size: 13px"
-        >
-          当前楼层
-        </a-typography-text>
+        <a-typography-text strong style="font-size: 13px"> 当前楼层 </a-typography-text>
       </div>
-      <a-space
-        direction="vertical"
-        style="width: 100%"
-        :size="8"
-      >
+      <a-space direction="vertical" style="width: 100%" :size="8">
         <div>
-          <a-typography-text
-            type="secondary"
-            style="font-size: 12px"
-          >
-            名称�?          </a-typography-text>
+          <a-typography-text type="secondary" style="font-size: 12px"> 名称: </a-typography-text>
           <a-typography-text strong style="font-size: 12px">
             {{ floors.find((floor: Floor) => floor.id === activeFloorId)?.name }}
           </a-typography-text>
         </div>
-        <div
-          style="
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-          "
-        >
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
           <a-statistic
             title="座位"
             :value="seats.filter((seat: Seat) => seat.floorId === activeFloorId).length"
@@ -170,4 +123,3 @@ const handleFloorClick = (floorId: string) => {
     </a-card>
   </div>
 </template>
-

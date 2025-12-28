@@ -57,11 +57,27 @@
   [class^='ant-col'],
   [class*=' ant-col'],
   [class^='ant-typography'],
-  [class*=' ant-typography'] {
+  [class*=' ant-typography'],
+  .ant-table-wrapper .ant-table {
     font-family:
       Helvetica, Tahoma, Arial, 'Hiragino Sans GB', 'Hiragino Sans GB W3', 'Microsoft YaHei',
       STXihei, STHeiti, Heiti, SimSun, sans-serif;
   }
+  .ant-table-tbody > tr > td {
+    font-weight: 400;
+    font-size: 14px;
+    color: #555;
+  }
+  .ant-table-wrapper .ant-table-thead > tr > th {
+    font-weight: 600;
+    font-size: 14px;
+    color: #555;
+  }
+  .ant-table-wrapper .ant-table-tbody > tr.ant-table-row:hover > td,
+  .ant-table-wrapper .ant-table-tbody > tr > td.ant-table-cell-row-hover {
+    background: #e6f9ff;
+  }
+  a,
   .ant-typography,
   .ant-typography a {
     color: #08d;
@@ -185,6 +201,65 @@
       font-size: 12px;
       line-height: 20px;
     }
+  }
+
+  /* 全局分页样式：方形按钮 + 紧凑边框（应用于所有 ant-pagination） */
+
+  .ant-pagination .ant-pagination-item,
+  .ant-pagination .ant-pagination-prev,
+  .ant-pagination .ant-pagination-next {
+    min-width: 32px;
+    height: 32px;
+    margin: 0;
+    border-radius: 0;
+    border: 1px solid #d9d9d9;
+    line-height: 32px;
+    background-color: #fff;
+  }
+
+  /* 相邻项去掉中间重复描边，只保留外轮廓 */
+  .ant-pagination li + li {
+    border-left: none;
+  }
+
+  .ant-pagination .ant-pagination-item a {
+    color: #595959;
+  }
+
+  .ant-pagination .ant-pagination-item-active {
+    background-color: #f0f0f0;
+    border-color: #d9d9d9;
+  }
+
+  .ant-pagination .ant-pagination-item-active a {
+    color: #555;
+  }
+
+  /* 去掉内部默认圆角和描边，由外层 li 控制 */
+  .ant-pagination .ant-pagination-item a,
+  .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+  .ant-pagination .ant-pagination-next .ant-pagination-item-link {
+    border-radius: 0;
+    border: none;
+    height: 32px;
+    line-height: 32px;
+  }
+  .ant-pagination .ant-pagination-prev {
+    border-right: none;
+  }
+  .ant-pagination .ant-pagination-next {
+    border-left: none;
+  }
+  .ant-pagination .ant-pagination-prev,
+  .ant-pagination .ant-pagination-next {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+  .ant-pagination .ant-pagination-next .ant-pagination-item-link {
+    color: #595959;
   }
 }
 .ant-select-selector {
@@ -396,7 +471,14 @@
 .ant-modal .ant-modal-content {
   border-radius: 0;
 }
-
+.ant-input-affix-wrapper {
+  height: 32px;
+  border-radius: 2px;
+}
+.ant-btn-dashed:not(:disabled):hover {
+  color: #0088dd;
+  border-color: #0088dd;
+}
 /* ========================================
    座位图编辑器 - 全屏 Modal 布局
    wrapClassName="seat-map-editor-modal-fullscreen"

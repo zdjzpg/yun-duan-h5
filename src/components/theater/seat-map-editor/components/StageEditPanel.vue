@@ -198,7 +198,7 @@ const handleDelete = () => {
                 word-break: break-word;
               "
             >
-              尺寸会自动调整为 10 的倍数，与网格对齐。舞台固定在画布上方居中�?
+              尺寸会自动调整为 10 的倍数，与网格对齐。舞台固定在画布上方居中
             </div>
           </div>
         </a-space>

@@ -70,8 +70,8 @@ const mockVenues: Venue[] = [
         rows: 5,
         seatsPerRow: 20,
         order: 1,  // ✅ 新增：显示顺序
-        createdAt: "2025-01-01T00:00:00Z",
-        updatedAt: "2025-01-01T00:00:00Z",
+        createdAt: "2025-01-01",
+        updatedAt: "2025-01-01",
       },
       {
         id: "zone-002",
@@ -84,8 +84,8 @@ const mockVenues: Venue[] = [
         rows: 15,
         seatsPerRow: 20,
         order: 2,  // ✅ 新增：显示顺序
-        createdAt: "2025-01-01T00:00:00Z",
-        updatedAt: "2025-01-01T00:00:00Z",
+        createdAt: "2025-01-01",
+        updatedAt: "2025-01-01",
       },
       {
         id: "zone-003",
@@ -98,8 +98,8 @@ const mockVenues: Venue[] = [
         rows: 20,
         seatsPerRow: 25,
         order: 3,  // ✅ 新增：显示顺序
-        createdAt: "2025-01-01T00:00:00Z",
-        updatedAt: "2025-01-01T00:00:00Z",
+        createdAt: "2025-01-01",
+        updatedAt: "2025-01-01",
       },
     ],
     seats: generateSeatsForVenue001(),
@@ -118,8 +118,8 @@ const mockVenues: Venue[] = [
         color: "#dedede",  // ✅ 使用品牌色 n4（简约中性）
       },
     },
-    createdAt: "2025-01-01T00:00:00Z",
-    updatedAt: "2025-12-10T14:30:00Z",
+    createdAt: "2025-01-01",
+    updatedAt: "2025-12-10",
   },
   {
     id: "venue-002",
@@ -138,8 +138,8 @@ const mockVenues: Venue[] = [
         name: "内场 A 区",
         capacity: 500,
         sort: 1,
-        createdAt: "2025-01-15T00:00:00Z",
-        updatedAt: "2025-01-15T00:00:00Z",
+        createdAt: "2025-01-15",
+        updatedAt: "2025-01-15",
       },
       {
         id: "zone-005",
@@ -147,8 +147,8 @@ const mockVenues: Venue[] = [
         name: "看台 B 区",
         capacity: 800,
         sort: 2,
-        createdAt: "2025-01-15T00:00:00Z",
-        updatedAt: "2025-01-15T00:00:00Z",
+        createdAt: "2025-01-15",
+        updatedAt: "2025-01-15",
       },
       {
         id: "zone-006",
@@ -156,12 +156,12 @@ const mockVenues: Venue[] = [
         name: "看台 C 区",
         capacity: 700,
         sort: 3,
-        createdAt: "2025-01-15T00:00:00Z",
-        updatedAt: "2025-01-15T00:00:00Z",
+        createdAt: "2025-01-15",
+        updatedAt: "2025-01-15",
       },
     ],
-    createdAt: "2025-01-15T00:00:00Z",
-    updatedAt: "2025-12-09T10:00:00Z",
+    createdAt: "2025-01-15",
+    updatedAt: "2025-12-09",
   },
   {
     id: "venue-003",
@@ -173,8 +173,8 @@ const mockVenues: Venue[] = [
     capacityType: "free_seating",
     totalCapacity: 300,
     status: "active",
-    createdAt: "2025-02-01T00:00:00Z",
-    updatedAt: "2025-12-08T16:20:00Z",
+    createdAt: "2025-02-01",
+    updatedAt: "2025-12-08",
   },
   {
     id: "venue-004",
@@ -185,8 +185,8 @@ const mockVenues: Venue[] = [
     capacityType: "free_seating",
     totalCapacity: 1500,
     status: "inactive",
-    createdAt: "2025-03-01T00:00:00Z",
-    updatedAt: "2025-11-20T09:00:00Z",
+    createdAt: "2025-03-01",
+    updatedAt: "2025-11-20",
   },
   {
     id: "venue-005",
@@ -222,8 +222,8 @@ const mockVenues: Venue[] = [
         floorId: "floor-002",
         rows: 3,
         seatsPerRow: 8,
-        createdAt: "2025-03-15T00:00:00Z",
-        updatedAt: "2025-03-15T00:00:00Z",
+        createdAt: "2025-03-15",
+        updatedAt: "2025-03-15",
       },
       {
         id: "zone-008",
@@ -235,8 +235,8 @@ const mockVenues: Venue[] = [
         floorId: "floor-001",
         rows: 20,
         seatsPerRow: 30,
-        createdAt: "2025-03-15T00:00:00Z",
-        updatedAt: "2025-03-15T00:00:00Z",
+        createdAt: "2025-03-15",
+        updatedAt: "2025-03-15",
       },
       {
         id: "zone-009",
@@ -248,8 +248,8 @@ const mockVenues: Venue[] = [
         floorId: "floor-002",
         rows: 10,
         seatsPerRow: 20,
-        createdAt: "2025-03-15T00:00:00Z",
-        updatedAt: "2025-03-15T00:00:00Z",
+        createdAt: "2025-03-15",
+        updatedAt: "2025-03-15",
       },
     ],
     seats: generateSeatsForVenue005(),
@@ -268,8 +268,8 @@ const mockVenues: Venue[] = [
         color: "#2C3E50",
       },
     },
-    createdAt: "2025-03-15T00:00:00Z",
-    updatedAt: "2025-12-18T10:00:00Z",
+    createdAt: "2025-03-15",
+    updatedAt: "2025-12-18",
   },
 ];
 
@@ -278,7 +278,7 @@ const mockVenues: Venue[] = [
  */
 function generateSeatsForVenue001(): VenueSeat[] {
   const seats: VenueSeat[] = [];
-  const baseTime = "2025-01-01T00:00:00Z";
+  const baseTime = "2025-01-01";
   
   // ✅ 座位配置（与编辑器保持一致）
   const SEAT_SIZE = 30;           // 座位大小（与 SEAT_CONFIG.SIZE 一致）
@@ -402,7 +402,7 @@ function generateSeatsForVenue001(): VenueSeat[] {
  */
 function generateSeatsForVenue005(): VenueSeat[] {
   const seats: VenueSeat[] = [];
-  const baseTime = "2025-03-15T00:00:00Z";
+  const baseTime = "2025-03-15";
   
   // ✅ 座位配置（与编辑器保持一致）
   const SEAT_SIZE = 30;
@@ -528,9 +528,9 @@ const mockShows: Show[] = [
     producer: "景区文化演艺公司",
     status: "on_sale",
     sessionCount: 12,
-    nextSessionTime: "2025-12-15T19:30:00Z",
-    createdAt: "2025-11-01T00:00:00Z",
-    updatedAt: "2025-12-10T15:00:00Z",
+    nextSessionTime: "2025-12-15 19:30:00",
+    createdAt: "2025-11-01",
+    updatedAt: "2025-12-10",
   },
   {
     id: "show-002",
@@ -547,9 +547,9 @@ const mockShows: Show[] = [
     producer: "景区文化演艺公司",
     status: "on_sale",
     sessionCount: 8,
-    nextSessionTime: "2025-12-14T20:00:00Z",
-    createdAt: "2025-10-15T00:00:00Z",
-    updatedAt: "2025-12-09T11:30:00Z",
+    nextSessionTime: "2025-12-14 20:00:00",
+    createdAt: "2025-10-15",
+    updatedAt: "2025-12-09",
   },
   {
     id: "show-003",
@@ -566,8 +566,8 @@ const mockShows: Show[] = [
     producer: "市交响乐团",
     status: "draft",
     sessionCount: 0,
-    createdAt: "2025-12-01T00:00:00Z",
-    updatedAt: "2025-12-05T10:00:00Z",
+    createdAt: "2025-12-01",
+    updatedAt: "2025-12-05",
   },
   {
     id: "show-004",
@@ -584,9 +584,9 @@ const mockShows: Show[] = [
     producer: "国家话剧院",
     status: "off_sale",
     sessionCount: 5,
-    nextSessionTime: "2025-12-20T19:00:00Z",
-    createdAt: "2025-09-01T00:00:00Z",
-    updatedAt: "2025-12-01T14:00:00Z",
+    nextSessionTime: "2025-12-20 19:00:00",
+    createdAt: "2025-09-01",
+    updatedAt: "2025-12-01",
   },
   {
     id: "show-005",
@@ -601,8 +601,8 @@ const mockShows: Show[] = [
     subtitle: "迎接新年，音乐相伴",
     status: "finished",
     sessionCount: 2,
-    createdAt: "2024-11-01T00:00:00Z",
-    updatedAt: "2025-01-02T00:00:00Z",
+    createdAt: "2024-11-01",
+    updatedAt: "2025-01-02",
   },
   {
     id: "show-006",
@@ -619,9 +619,9 @@ const mockShows: Show[] = [
     producer: "国际交响乐团",
     status: "on_sale",
     sessionCount: 6,
-    nextSessionTime: "2025-12-18T19:30:00Z",
-    createdAt: "2025-11-10T00:00:00Z",
-    updatedAt: "2025-12-15T16:00:00Z",
+    nextSessionTime: "2025-12-18 19:30:00",
+    createdAt: "2025-11-10",
+    updatedAt: "2025-12-15",
   },
 ];
 
@@ -636,8 +636,8 @@ const mockSessions: Record<string, ShowSession[]> = {
       startTime: "19:30",
       durationMinutes: 90,
       openTime: "19:00",
-      createdAt: "2025-11-01T00:00:00Z",
-      updatedAt: "2025-11-01T00:00:00Z",
+      createdAt: "2025-11-01",
+      updatedAt: "2025-11-01",
     },
     {
       id: "session-002",
@@ -647,8 +647,8 @@ const mockSessions: Record<string, ShowSession[]> = {
       startTime: "19:30",
       durationMinutes: 90,
       openTime: "19:00",
-      createdAt: "2025-11-01T00:00:00Z",
-      updatedAt: "2025-11-01T00:00:00Z",
+      createdAt: "2025-11-01",
+      updatedAt: "2025-11-01",
     },
     {
       id: "session-003",
@@ -658,8 +658,8 @@ const mockSessions: Record<string, ShowSession[]> = {
       startTime: "19:30",
       durationMinutes: 90,
       openTime: "19:00",
-      createdAt: "2025-11-01T00:00:00Z",
-      updatedAt: "2025-11-01T00:00:00Z",
+      createdAt: "2025-11-01",
+      updatedAt: "2025-11-01",
     },
   ],
   "show-002": [
@@ -671,8 +671,8 @@ const mockSessions: Record<string, ShowSession[]> = {
       startTime: "20:00",
       durationMinutes: 60,
       openTime: "19:30",
-      createdAt: "2025-10-15T00:00:00Z",
-      updatedAt: "2025-10-15T00:00:00Z",
+      createdAt: "2025-10-15",
+      updatedAt: "2025-10-15",
     },
     {
       id: "session-005",
@@ -682,8 +682,8 @@ const mockSessions: Record<string, ShowSession[]> = {
       startTime: "20:00",
       durationMinutes: 60,
       openTime: "19:30",
-      createdAt: "2025-10-15T00:00:00Z",
-      updatedAt: "2025-10-15T00:00:00Z",
+      createdAt: "2025-10-15",
+      updatedAt: "2025-10-15",
     },
   ],
 };
@@ -699,8 +699,8 @@ const mockPriceTiers: Record<string, ShowPriceTier[]> = {
       zoneIds: ["zone-001"],
       color: "#FFD700",
       remark: "最佳观演位置",
-      createdAt: "2025-11-01T00:00:00Z",
-      updatedAt: "2025-11-01T00:00:00Z",
+      createdAt: "2025-11-01",
+      updatedAt: "2025-11-01",
     },
     {
       id: "tier-002",
@@ -709,8 +709,8 @@ const mockPriceTiers: Record<string, ShowPriceTier[]> = {
       price: 480,
       zoneIds: ["zone-002"],
       color: "#FF6B6B",
-      createdAt: "2025-11-01T00:00:00Z",
-      updatedAt: "2025-11-01T00:00:00Z",
+      createdAt: "2025-11-01",
+      updatedAt: "2025-11-01",
     },
     {
       id: "tier-003",
@@ -719,8 +719,8 @@ const mockPriceTiers: Record<string, ShowPriceTier[]> = {
       price: 280,
       zoneIds: ["zone-003"],
       color: "#4ECDC4",
-      createdAt: "2025-11-01T00:00:00Z",
-      updatedAt: "2025-11-01T00:00:00Z",
+      createdAt: "2025-11-01",
+      updatedAt: "2025-11-01",
     },
   ],
   "show-002": [
@@ -731,8 +731,8 @@ const mockPriceTiers: Record<string, ShowPriceTier[]> = {
       price: 380,
       zoneIds: ["zone-004"],
       color: "#FF6B6B",
-      createdAt: "2025-10-15T00:00:00Z",
-      updatedAt: "2025-10-15T00:00:00Z",
+      createdAt: "2025-10-15",
+      updatedAt: "2025-10-15",
     },
     {
       id: "tier-005",
@@ -741,8 +741,8 @@ const mockPriceTiers: Record<string, ShowPriceTier[]> = {
       price: 180,
       zoneIds: ["zone-005", "zone-006"],
       color: "#4ECDC4",
-      createdAt: "2025-10-15T00:00:00Z",
-      updatedAt: "2025-10-15T00:00:00Z",
+      createdAt: "2025-10-15",
+      updatedAt: "2025-10-15",
     },
   ],
 };
@@ -867,8 +867,8 @@ export function setupCreateVenueMock(mock: MockAdapter) {
             : (request as any).seats?.filter((s: any) => s.status === "available")
                 .length || 0,
       status: "active",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString().split("T")[0],
+      updatedAt: new Date().toISOString().split("T")[0],
     };
 
     mockVenues.push(newVenue);
@@ -949,7 +949,7 @@ export function setupUpdateVenueMock(mock: MockAdapter) {
     mockVenues[venueIndex] = {
       ...mockVenues[venueIndex],
       ...request,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString().split("T")[0],
     };
 
     const response: ApiResponse<VenueDetailResponse> = {
@@ -973,7 +973,7 @@ export function setupUpdateVenueStatusMock(mock: MockAdapter) {
 
     if (venueIndex !== -1) {
       mockVenues[venueIndex].status = request.status;
-      mockVenues[venueIndex].updatedAt = new Date().toISOString();
+      mockVenues[venueIndex].updatedAt = new Date().toISOString().split("T")[0];
 
       const response: ApiResponse<VenueDetailResponse> = {
         code: ApiResponseCode.SUCCESS,
@@ -1083,7 +1083,7 @@ export function setupVenueLockStatusMock(mock: MockAdapter) {
         lockReason,
         referencedShowCount,
         totalOrders,
-        lastCheckedAt: new Date().toISOString(),
+        lastCheckedAt: new Date().toISOString().split("T")[0],
       };
 
       console.log('✅ Mock 返回数据:', lockStatus);
@@ -1159,8 +1159,8 @@ export function setupCopyVenueMock(mock: MockAdapter) {
       name: finalVenueName,
       status: 'active' as const,
       isLocked: false, // ✅ 新场馆未锁定
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString().split("T")[0],
+      updatedAt: new Date().toISOString().split("T")[0],
     };
 
     // 如果是精确座位模且需要复制座位数据
@@ -1278,8 +1278,8 @@ export function setupCreateShowMock(mock: MockAdapter) {
       producer: request.producer,
       status: request.status,
       sessionCount: request.sessions?.length || 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString().split("T")[0],
+      updatedAt: new Date().toISOString().split("T")[0],
     };
 
     mockShows.push(newShow);
@@ -1294,8 +1294,8 @@ export function setupCreateShowMock(mock: MockAdapter) {
         startTime: session.startTime,
         durationMinutes: session.durationMinutes,
         openTime: session.openTime,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString().split("T")[0],
+        updatedAt: new Date().toISOString().split("T")[0],
       }));
     }
 
@@ -1309,8 +1309,8 @@ export function setupCreateShowMock(mock: MockAdapter) {
         zoneIds: tier.zoneIds,
         color: tier.color,
         remark: tier.remark,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString().split("T")[0],
+        updatedAt: new Date().toISOString().split("T")[0],
       }));
     }
 
@@ -1387,7 +1387,7 @@ export function setupUpdateShowMock(mock: MockAdapter) {
       mockShows[showIndex] = {
         ...mockShows[showIndex],
         ...request,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString().split("T")[0],
       };
 
       const response: ApiResponse<ShowDetailResponse> = {
@@ -1432,7 +1432,7 @@ export function setupUpdateShowStatusMock(mock: MockAdapter) {
 
     if (showIndex !== -1) {
       mockShows[showIndex].status = request.status;
-      mockShows[showIndex].updatedAt = new Date().toISOString();
+      mockShows[showIndex].updatedAt = new Date().toISOString().split("T")[0];
 
       const response: ApiResponse<ShowDetailResponse> = {
         code: ApiResponseCode.SUCCESS,
@@ -1525,8 +1525,8 @@ export function setupBatchCreateSessionsMock(mock: MockAdapter) {
           startTime: request.startTime,
           durationMinutes: request.durationMinutes,
           openTime: request.openTime,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: new Date().toISOString().split("T")[0],
+          updatedAt: new Date().toISOString().split("T")[0],
         };
         sessions.push(session);
       }
