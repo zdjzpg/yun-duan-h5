@@ -119,39 +119,21 @@ const handleDeleteZone = (zoneId: string) => {
 
 <template>
   <div style="display: flex; flex-direction: column">
-    <!-- 搜索与筛选（数量较多时显示） -->
-    <div
-      v-if="showSearchAndFilter"
-      style="width: 100%; margin-bottom: 12px"
-    >
-      <a-space
-        direction="vertical"
-        size="small"
-        style="width: 100%"
-      >
+    <!-- 搜索与筛选（座区数量较多时显示） -->
+    <div v-if="showSearchAndFilter" style="width: 100%; margin-bottom: 12px">
+      <a-space direction="vertical" size="small" style="width: 100%">
         <a-input
           v-model:value="searchText"
           placeholder="搜索座区名称..."
           allow-clear
           size="small"
         />
-        <a-select
-          v-model:value="seatCountFilter"
-          size="small"
-          style="width: 100%"
-        >
-          <a-select-option value="all">
-            全部座区
-          </a-select-option>
-          <a-select-option value="empty">
-            空座区（0 座）
-          </a-select-option>
-          <a-select-option value="small">
-            1-50 �?          </a-select-option>
-          <a-select-option value="medium">
-            51-200 �?          </a-select-option>
-          <a-select-option value="large">
-            200 座以�?          </a-select-option>
+        <a-select v-model:value="seatCountFilter" size="small" style="width: 100%">
+          <a-select-option value="all"> 全部座区 </a-select-option>
+          <a-select-option value="empty"> 空座区（0 座） </a-select-option>
+          <a-select-option value="small"> 1-50 座 </a-select-option>
+          <a-select-option value="medium"> 51-200 座 </a-select-option>
+          <a-select-option value="large"> 200 座以上 </a-select-option>
         </a-select>
       </a-space>
     </div>
@@ -159,10 +141,7 @@ const handleDeleteZone = (zoneId: string) => {
     <!-- 座区列表 -->
     <div style="overflow-y: auto; max-height: 400px">
       <template v-if="sortedZones.length === 0">
-        <a-empty
-          description="暂无座区"
-          style="padding: 24px 0"
-        />
+        <a-empty description="暂无座区" style="padding: 24px 0" />
         <div
           style="
             margin-top: 16px;
@@ -175,22 +154,25 @@ const handleDeleteZone = (zoneId: string) => {
             text-align: center;
           "
         >
-          选中座位后，在右侧面板或右键菜单中创建座区�?        </div>
+          💡 选中座位后，在右侧面板或右键菜单中创建座区。
+        </div>
       </template>
 
       <template v-else-if="filteredZones.length === 0">
-        <a-empty
-          description="未找到符合条件的座区"
-          style="padding: 24px 0"
-        />
+        <a-empty description="未找到符合条件的座区" style="padding: 24px 0">
+          <a-typography-text type="secondary" style="font-size: 12px">
+            <template v-if="searchText">
+              关键字“{{ searchText }}”无匹配结果
+            </template>
+            <template v-else-if="seatCountFilter !== 'all'">
+              当前筛选条件下无座区
+            </template>
+          </a-typography-text>
+        </a-empty>
       </template>
 
       <template v-else>
-        <a-space
-          direction="vertical"
-          size="small"
-          style="width: 100%"
-        >
+        <a-space direction="vertical" size="small" style="width: 100%">
           <a-card
             v-for="zone in filteredZones"
             :key="zone.id"
@@ -204,7 +186,12 @@ const handleDeleteZone = (zoneId: string) => {
             <div style="display: flex; align-items: center; gap: 8px">
               <div style="flex: 1">
                 <div
-                  style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 6px;
+                  "
                 >
                   <a-space :size="6">
                     <div
@@ -224,8 +211,7 @@ const handleDeleteZone = (zoneId: string) => {
                     :count="getZoneSeatCount(zone.id)"
                     :show-zero="true"
                     :number-style="{
-                      backgroundColor:
-                        getZoneSeatCount(zone.id) > 0 ? '#52c41a' : '#d9d9d9',
+                      backgroundColor: getZoneSeatCount(zone.id) > 0 ? '#52c41a' : '#d9d9d9',
                       fontSize: '11px',
                     }"
                   />
@@ -235,7 +221,7 @@ const handleDeleteZone = (zoneId: string) => {
                   <a-space size="small">
                     <a-tooltip
                       v-if="selectedSeatIds && selectedSeatIds.length"
-                      :title="`将选中�?${selectedSeatIds.length} 个座位分配到 ${zone.name}`"
+                      :title="`将选中的 ${selectedSeatIds.length} 个座位分配到 ${zone.name}`"
                     >
                       <a-button
                         type="text"

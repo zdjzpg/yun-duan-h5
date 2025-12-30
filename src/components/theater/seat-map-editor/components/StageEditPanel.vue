@@ -45,8 +45,7 @@ const handleDelete = () => {
 
 <template>
   <div>
-    <a-typography-title :level="5" style="margin-bottom: 12px"> 舞台设置 </a-typography-title>
-
+    <!-- 未选中舞台时的提示 -->
     <template v-if="!selectedStage">
       <div v-if="!stage">
         <a-empty description="暂无舞台" style="padding: 24px 0" />
@@ -62,7 +61,7 @@ const handleDelete = () => {
             text-align: center;
           "
         >
-          在画布顶部工具栏点击
+          💡 在画布顶部操作栏点击
           <strong style="color: #1890ff">添加舞台</strong>
           按钮
         </div>
@@ -72,6 +71,7 @@ const handleDelete = () => {
       </div>
     </template>
 
+    <!-- 选中舞台后的编辑面板 -->
     <template v-else>
       <!-- 舞台信息 -->
       <a-space direction="vertical" size="middle" style="width: 100%">
@@ -198,7 +198,7 @@ const handleDelete = () => {
                 word-break: break-word;
               "
             >
-              尺寸会自动调整为 10 的倍数，与网格对齐。舞台固定在画布上方居中
+              尺寸会自动调整为 10 的倍数，与网格对齐。舞台固定在画布上方居中。
             </div>
           </div>
         </a-space>

@@ -170,3 +170,54 @@ const stats = computed(() => {
   </a-modal>
 </template>
 
+<style>
+/* ========================================
+   座位图编辑器 - 全屏 Modal 布局
+   wrapClassName="seat-map-editor-modal-fullscreen"
+   ======================================== */
+
+.seat-map-editor-modal-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
+.seat-map-editor-modal-fullscreen .ant-modal {
+  top: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.seat-map-editor-modal-fullscreen .ant-modal-content {
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+}
+
+.seat-map-editor-modal-fullscreen .ant-modal-header {
+  padding: 16px 16px !important;
+  margin-bottom: 0 !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.seat-map-editor-modal-fullscreen .ant-modal-body {
+  flex: 1 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.seat-map-editor-modal-fullscreen .ant-modal-footer {
+  margin-top: 0 !important;
+  padding: 16px 16px !important;
+}
+</style>

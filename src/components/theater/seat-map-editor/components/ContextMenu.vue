@@ -22,7 +22,7 @@ import {
   AppstoreOutlined,
   CloseCircleOutlined,
 } from '@ant-design/icons-vue'
-import type { SelectedElement, Seat } from './types.simplified'
+import type { SelectedElement } from '../types.simplified'
 
 const props = defineProps<{
   selectedElement: SelectedElement
@@ -52,13 +52,31 @@ const emit = defineEmits<{
   (e: 'select-all'): void
 }>()
 
-const isSeatSelection = computed(
-  () =>
-    props.selectedElement &&
-    (props.selectedElement.type === 'seat' || props.selectedElement.type === 'seats'),
-)
+const isMac =
+  typeof window !== 'undefined' && /Mac|iPhone|iPad|iPod|Macintosh/.test(window.navigator.userAgent)
+
+const getShortcutHint = (key: string, modifier?: 'ctrl' | 'shift' | 'ctrl+shift' | 'alt') => {
+  const modKey = isMac ? '⌘' : 'Ctrl'
+  const shiftKey = isMac ? '⇧' : 'Shift'
+  const altKey = isMac ? '⌥' : 'Alt'
+
+  if (modifier === 'ctrl') {
+    return `${modKey}+${key.toUpperCase()}`
+  }
+  if (modifier === 'shift') {
+    return `${shiftKey}+${key.toUpperCase()}`
+  }
+  if (modifier === 'ctrl+shift') {
+    return `${modKey}+${shiftKey}+${key.toUpperCase()}`
+  }
+  if (modifier === 'alt') {
+    return `${altKey}+${key.toUpperCase()}`
+  }
+  return key.toUpperCase()
+}
 
 const seatCount = computed(() => props.selectedSeats?.length || 0)
+const isSingleSeat = computed(() => seatCount.value === 1)
 const isMultipleSeats = computed(() => seatCount.value > 1)
 
 const hasLocked = computed(() =>
@@ -72,9 +90,7 @@ const hasGroup = computed(() =>
   props.selectedSeats ? props.selectedSeats.some((s: any) => s.groupId) : false,
 )
 
-const canGroup = computed(
-  () => isMultipleSeats.value && !hasGroup.value,
-)
+const canGroup = computed(() => isMultipleSeats.value && !hasGroup.value)
 
 const canUngroup = computed(() =>
   props.selectedSeats ? props.selectedSeats.some((s: any) => !!s.groupId) : false,
@@ -103,98 +119,155 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
 
     <template #overlay>
       <a-menu>
-        <!-- 画布空白处：基础粘贴/全选 -->
+        <!-- 画布空白处：粘贴 / 全选 -->
         <template v-if="!selectedElement">
-          <a-menu-item
-            key="paste-here"
-            :disabled="!hasClipboard"
-            @click="emit('paste-here')"
-          >
-            <CopyOutlined />
-            <span style="margin-left: 8px">粘贴到这</span>
+          <a-menu-item key="paste-here" :disabled="!hasClipboard" @click="emit('paste-here')">
+            <template #icon>
+              <CopyOutlined />
+            </template>
+            <span>粘贴到这</span>
           </a-menu-item>
-          <a-menu-item
-            key="paste"
-            :disabled="!hasClipboard"
-            @click="emit('paste')"
-          >
-            <RedoOutlined />
-            <span style="margin-left: 8px">粘贴</span>
+          <a-menu-item key="paste" :disabled="!hasClipboard" @click="emit('paste')">
+            <template #icon>
+              <RedoOutlined />
+            </template>
+            <span>粘贴</span>
           </a-menu-item>
           <a-menu-divider />
-          <a-menu-item
-            key="select-all"
-            :disabled="!hasSeats"
-            @click="emit('select-all')"
-          >
-            <SelectOutlined />
-            <span style="margin-left: 8px">全选座位</span>
+          <a-menu-item key="select-all" :disabled="!hasSeats" @click="emit('select-all')">
+            <template #icon>
+              <SelectOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>全选座位</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('A', 'ctrl') }}
+              </span>
+            </div>
           </a-menu-item>
         </template>
 
         <!-- 舞台：只允许删除 -->
         <template v-else-if="selectedElement.type === 'stage'">
-          <a-menu-item
-            key="delete-stage"
-            danger
-            @click="emit('delete')"
-          >
-            <DeleteOutlined />
-            <span style="margin-left: 8px">删除舞台</span>
+          <a-menu-item key="delete-stage" danger @click="emit('delete')">
+            <template #icon>
+              <DeleteOutlined />
+            </template>
+            <span>删除舞台</span>
           </a-menu-item>
         </template>
 
         <!-- 座位选择：完整菜单 -->
         <template v-else>
-          <a-menu-item
-            key="copy"
-            @click="emit('copy')"
-          >
-            <CopyOutlined />
-            <span style="margin-left: 8px">复制</span>
+          <!-- 编辑属性 / 重新编号 -->
+          <a-menu-item key="edit" :disabled="!isSingleSeat" @click="emit('edit')">
+            <template #icon>
+              <EditOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>编辑属性</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('Enter') }}
+              </span>
+            </div>
           </a-menu-item>
 
-          <a-menu-item
-            key="cut"
-            @click="emit('cut')"
-          >
-            <ScissorOutlined />
-            <span style="margin-left: 8px">剪切</span>
-          </a-menu-item>
-
-          <a-menu-item
-            key="paste"
-            :disabled="!hasClipboard"
-            @click="emit('paste')"
-          >
-            <RedoOutlined />
-            <span style="margin-left: 8px">粘贴</span>
-          </a-menu-item>
-
-          <a-menu-item
-            key="paste-here"
-            :disabled="!hasClipboard"
-            @click="emit('paste-here')"
-          >
-            <CopyOutlined />
-            <span style="margin-left: 8px">粘贴到这</span>
-          </a-menu-item>
-
-          <a-menu-item
-            key="duplicate"
-            @click="emit('duplicate')"
-          >
-            <CopyOutlined />
-            <span style="margin-left: 8px">快速复制</span>
+          <a-menu-item key="renumber" :disabled="!isMultipleSeats" @click="emit('renumber')">
+            <template #icon>
+              <NumberOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>重新编号</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('R', 'ctrl') }}
+              </span>
+            </div>
           </a-menu-item>
 
           <a-menu-divider />
 
-          <!-- 对齐菜单，仅多选时出现 -->
-          <a-sub-menu
-            v-if="showAlignMenu"
-            key="align"
-          >
+          <!-- 座区相关 -->
+          <a-menu-item key="create-zone" @click="emit('create-zone')">
+            <template #icon>
+              <AppstoreAddOutlined />
+            </template>
+            <span>创建座区</span>
+          </a-menu-item>
+
+          <a-sub-menu v-if="zones && zones.length" key="assign-zone">
+            <template #title>
+              <span>
+                <AppstoreOutlined />
+                <span style="margin-left: 8px">分配座区</span>
+              </span>
+            </template>
+            <a-menu-item v-for="zone in zones" :key="zone.id" @click="emit('assign-zone', zone.id)">
+              <a-badge :color="zone.color" :text="zone.name" />
+            </a-menu-item>
+          </a-sub-menu>
+
+          <a-menu-item key="remove-zone" :disabled="!hasZoneAssigned" @click="emit('remove-zone')">
+            <template #icon>
+              <CloseCircleOutlined />
+            </template>
+            <span>从座区移除</span>
+          </a-menu-item>
+
+          <a-menu-divider />
+
+          <!-- 复制 / 剪切 / 粘贴 / 快速复制 -->
+          <a-menu-item key="copy" @click="emit('copy')">
+            <template #icon>
+              <CopyOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>复制</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('C', 'ctrl') }}
+              </span>
+            </div>
+          </a-menu-item>
+
+          <a-menu-item key="cut" @click="emit('cut')">
+            <template #icon>
+              <ScissorOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>剪切</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('X', 'ctrl') }}
+              </span>
+            </div>
+          </a-menu-item>
+
+          <a-menu-item key="paste" :disabled="!hasClipboard" @click="emit('paste')">
+            <template #icon>
+              <RedoOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>粘贴</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('V', 'ctrl') }}
+              </span>
+            </div>
+          </a-menu-item>
+
+          <a-menu-item key="duplicate" @click="emit('duplicate')">
+            <template #icon>
+              <CopyOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>快速复制</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('D', 'ctrl') }}
+              </span>
+            </div>
+          </a-menu-item>
+
+          <a-menu-divider />
+
+          <!-- 对齐（仅多选时显示） -->
+          <a-sub-menu v-if="showAlignMenu" key="align">
             <template #title>
               <span>
                 <AlignLeftOutlined />
@@ -202,163 +275,163 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
               </span>
             </template>
 
-            <a-menu-item
-              key="align-left"
-              @click="handleAlignClick('left')"
-            >
-              <AlignLeftOutlined />
-              <span style="margin-left: 8px">左对齐</span>
+            <a-menu-item key="align-left" @click="handleAlignClick('left')">
+              <template #icon>
+                <AlignLeftOutlined />
+              </template>
+              <div class="menu-label-with-shortcut">
+                <span>左对齐</span>
+                <span class="shortcut-text">
+                  {{ getShortcutHint('A', 'alt') }}
+                </span>
+              </div>
             </a-menu-item>
-            <a-menu-item
-              key="align-center"
-              @click="handleAlignClick('center')"
-            >
-              <AlignCenterOutlined />
-              <span style="margin-left: 8px">水平居中</span>
+            <a-menu-item key="align-center" @click="handleAlignClick('center')">
+              <template #icon>
+                <AlignCenterOutlined />
+              </template>
+              <div class="menu-label-with-shortcut">
+                <span>水平居中</span>
+                <span class="shortcut-text">
+                  {{ getShortcutHint('H', 'alt') }}
+                </span>
+              </div>
             </a-menu-item>
-            <a-menu-item
-              key="align-right"
-              @click="handleAlignClick('right')"
-            >
-              <AlignRightOutlined />
-              <span style="margin-left: 8px">右对齐</span>
+            <a-menu-item key="align-right" @click="handleAlignClick('right')">
+              <template #icon>
+                <AlignRightOutlined />
+              </template>
+              <div class="menu-label-with-shortcut">
+                <span>右对齐</span>
+                <span class="shortcut-text">
+                  {{ getShortcutHint('D', 'alt') }}
+                </span>
+              </div>
             </a-menu-item>
             <a-menu-divider />
-            <a-menu-item
-              key="align-top"
-              @click="handleAlignClick('top')"
-            >
-              <VerticalAlignTopOutlined />
-              <span style="margin-left: 8px">顶对齐</span>
+            <a-menu-item key="align-top" @click="handleAlignClick('top')">
+              <template #icon>
+                <VerticalAlignTopOutlined />
+              </template>
+              <div class="menu-label-with-shortcut">
+                <span>顶对齐</span>
+                <span class="shortcut-text">
+                  {{ getShortcutHint('W', 'alt') }}
+                </span>
+              </div>
             </a-menu-item>
-            <a-menu-item
-              key="align-middle"
-              @click="handleAlignClick('middle')"
-            >
-              <VerticalAlignMiddleOutlined />
-              <span style="margin-left: 8px">垂直居中</span>
+            <a-menu-item key="align-middle" @click="handleAlignClick('middle')">
+              <template #icon>
+                <VerticalAlignMiddleOutlined />
+              </template>
+              <div class="menu-label-with-shortcut">
+                <span>垂直居中</span>
+                <span class="shortcut-text">
+                  {{ getShortcutHint('V', 'alt') }}
+                </span>
+              </div>
             </a-menu-item>
-            <a-menu-item
-              key="align-bottom"
-              @click="handleAlignClick('bottom')"
-            >
-              <VerticalAlignBottomOutlined />
-              <span style="margin-left: 8px">底对齐</span>
+            <a-menu-item key="align-bottom" @click="handleAlignClick('bottom')">
+              <template #icon>
+                <VerticalAlignBottomOutlined />
+              </template>
+              <div class="menu-label-with-shortcut">
+                <span>底对齐</span>
+                <span class="shortcut-text">
+                  {{ getShortcutHint('S', 'alt') }}
+                </span>
+              </div>
             </a-menu-item>
           </a-sub-menu>
 
           <!-- 成组 / 取消成组 -->
-          <a-menu-item
-            key="group"
-            :disabled="!canGroup"
-            @click="emit('group')"
-          >
-            <GroupOutlined />
-            <span style="margin-left: 8px">成组</span>
+          <a-menu-item key="group" :disabled="!canGroup" @click="emit('group')">
+            <template #icon>
+              <GroupOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>成组</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('G', 'ctrl') }}
+              </span>
+            </div>
           </a-menu-item>
 
-          <a-menu-item
-            key="ungroup"
-            :disabled="!canUngroup"
-            @click="emit('ungroup')"
-          >
-            <UngroupOutlined />
-            <span style="margin-left: 8px">取消成组</span>
+          <a-menu-item key="ungroup" :disabled="!canUngroup" @click="emit('ungroup')">
+            <template #icon>
+              <UngroupOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>取消成组</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('G', 'ctrl+shift') }}
+              </span>
+            </div>
           </a-menu-item>
 
           <a-menu-divider />
 
           <!-- 锁定 / 解锁 -->
-          <a-menu-item
-            key="lock"
-            :disabled="!hasUnlocked"
-            @click="emit('lock')"
-          >
-            <LockOutlined />
-            <span style="margin-left: 8px">锁定</span>
-          </a-menu-item>
-
-          <a-menu-item
-            key="unlock"
-            :disabled="!hasLocked"
-            @click="emit('unlock')"
-          >
-            <UnlockOutlined />
-            <span style="margin-left: 8px">解锁</span>
-          </a-menu-item>
-
-          <a-menu-divider />
-
-          <!-- 座区相关 -->
-          <a-menu-item
-            key="create-zone"
-            @click="emit('create-zone')"
-          >
-            <AppstoreAddOutlined />
-            <span style="margin-left: 8px">基于选中创建座区</span>
-          </a-menu-item>
-
-          <a-sub-menu
-            v-if="zones && zones.length"
-            key="assign-zone"
-          >
-            <template #title>
-              <span>
-                <AppstoreOutlined />
-                <span style="margin-left: 8px">分配到座区</span>
-              </span>
+          <a-menu-item key="lock" :disabled="!hasUnlocked" @click="emit('lock')">
+            <template #icon>
+              <LockOutlined />
             </template>
-            <a-menu-item
-              v-for="zone in zones"
-              :key="zone.id"
-              @click="emit('assign-zone', zone.id)"
-            >
-              <a-badge
-                :color="zone.color"
-                :text="zone.name"
-              />
-            </a-menu-item>
-          </a-sub-menu>
+            <div class="menu-label-with-shortcut">
+              <span>锁定</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('L', 'ctrl') }}
+              </span>
+            </div>
+          </a-menu-item>
 
-          <a-menu-item
-            key="remove-zone"
-            :disabled="!hasZoneAssigned"
-            @click="emit('remove-zone')"
-          >
-            <CloseCircleOutlined />
-            <span style="margin-left: 8px">从座区移除</span>
+          <a-menu-item key="unlock" :disabled="!hasLocked" @click="emit('unlock')">
+            <template #icon>
+              <UnlockOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>解锁</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('L', 'ctrl+shift') }}
+              </span>
+            </div>
           </a-menu-item>
 
           <a-menu-divider />
 
-          <a-menu-item
-            key="edit"
-            @click="emit('edit')"
-          >
-            <EditOutlined />
-            <span style="margin-left: 8px">编辑属性</span>
-          </a-menu-item>
-
-          <a-menu-item
-            key="renumber"
-            @click="emit('renumber')"
-          >
-            <NumberOutlined />
-            <span style="margin-left: 8px">重新编号</span>
-          </a-menu-item>
-
-          <a-menu-divider />
-
-          <a-menu-item
-            key="delete"
-            danger
-            @click="emit('delete')"
-          >
-            <DeleteOutlined />
-            <span style="margin-left: 8px">删除座位</span>
+          <!-- 删除座位 -->
+          <a-menu-item key="delete" danger @click="emit('delete')">
+            <template #icon>
+              <DeleteOutlined />
+            </template>
+            <div class="menu-label-with-shortcut">
+              <span>删除座位</span>
+              <span class="shortcut-text">
+                {{ getShortcutHint('Delete') }}
+              </span>
+            </div>
           </a-menu-item>
         </template>
       </a-menu>
     </template>
   </a-dropdown>
 </template>
+
+<style scoped>
+.menu-label-with-shortcut {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.shortcut-text {
+  margin-left: 24px;
+  font-size: 12px;
+  color: #8c8c8c;
+  font-family:
+    SF Mono,
+    Monaco,
+    Consolas,
+    monospace;
+}
+</style>

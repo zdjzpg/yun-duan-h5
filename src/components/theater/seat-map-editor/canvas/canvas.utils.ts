@@ -200,7 +200,7 @@ function getSeatFillColor(seat: Seat): string {
     return hexToRgba(seat.zoneColor, 0.9)
   }
 
-  return '#FFFBE6'
+  return '#FFFFFF'
 }
 
 function getSeatBorderColor(seat: Seat): string {

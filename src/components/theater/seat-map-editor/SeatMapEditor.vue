@@ -193,7 +193,7 @@ onMounted(() => {
       : [
           {
             id: 'F1',
-            name: '一层',
+            name: '1F',
             level: 1,
           },
         ]

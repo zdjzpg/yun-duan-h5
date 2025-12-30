@@ -119,13 +119,8 @@ const handleAssignToZone = (zoneId: string) => {
   <div>
     <!-- 未选中座位 -->
     <div v-if="!hasSelection">
-      <a-typography-title :level="5" style="margin-bottom: 12px">
-        座位属性
-      </a-typography-title>
-      <a-empty
-        description="选中座位以编辑属性"
-        style="padding: 32px 0"
-      />
+      <a-typography-title :level="5" style="margin-bottom: 12px"> 座位属性 </a-typography-title>
+      <a-empty description="选中座位以编辑属性" style="padding: 32px 0" />
       <div
         style="
           margin-top: 16px;
@@ -145,55 +140,24 @@ const handleAssignToZone = (zoneId: string) => {
     <template v-else>
       <!-- 选中座位统计卡片 -->
       <div style="margin-bottom: 20px">
-        <a-typography-title :level="5" style="margin-bottom: 8px">
-          选中座位
-        </a-typography-title>
+        <a-typography-title :level="5" style="margin-bottom: 8px"> 选中座位 </a-typography-title>
 
-        <div
-          style="
-            background: #fafafa;
-            padding: 12px;
-            border-radius: 6px;
-          "
-        >
-          <div
-            style="
-              font-size: 16px;
-              font-weight: 600;
-              color: #262626;
-              margin-bottom: 8px;
-            "
-          >
+        <div style="background: #fafafa; padding: 12px; border-radius: 6px">
+          <div style="font-size: 16px; font-weight: 600; color: #262626; margin-bottom: 8px">
             {{ selectedSeats.length }} 个座位
           </div>
 
-          <div
-            style="
-              height: 1px;
-              background: #e8e8e8;
-              margin: 8px 0;
-            "
-          />
+          <div style="height: 1px; background: #e8e8e8; margin: 8px 0" />
 
-          <div
-            style="
-              font-size: 14px;
-              color: #595959;
-              line-height: 1.6;
-            "
-          >
-            <span v-if="statusStats.available > 0">
-              {{ statusStats.available }} 可用
-            </span>
+          <div style="font-size: 14px; color: #595959; line-height: 1.6">
+            <span v-if="statusStats.available > 0"> {{ statusStats.available }} 可用 </span>
             <span
               v-if="statusStats.available > 0 && statusStats.disabled > 0"
               style="margin: 0 6px; color: #d9d9d9"
             >
               ·
             </span>
-            <span v-if="statusStats.disabled > 0">
-              {{ statusStats.disabled }} 禁用
-            </span>
+            <span v-if="statusStats.disabled > 0"> {{ statusStats.disabled }} 禁用 </span>
           </div>
 
           <div
@@ -216,17 +180,12 @@ const handleAssignToZone = (zoneId: string) => {
               维护中 {{ disabledReasonStats.maintenance }}
             </span>
             <span
-              v-if="
-                disabledReasonStats.maintenance > 0 &&
-                disabledReasonStats.other > 0
-              "
+              v-if="disabledReasonStats.maintenance > 0 && disabledReasonStats.other > 0"
               style="margin: 0 6px; color: #d9d9d9"
             >
               ·
             </span>
-            <span v-if="disabledReasonStats.other > 0">
-              其他 {{ disabledReasonStats.other }}
-            </span>
+            <span v-if="disabledReasonStats.other > 0"> 其他 {{ disabledReasonStats.other }} </span>
           </div>
 
           <div
@@ -245,9 +204,7 @@ const handleAssignToZone = (zoneId: string) => {
 
       <!-- 座位状态 -->
       <div style="margin-bottom: 20px">
-        <a-typography-title :level="5" style="margin-bottom: 12px">
-          座位状态
-        </a-typography-title>
+        <a-typography-title :level="5" style="margin-bottom: 12px"> 座位状态 </a-typography-title>
         <a-space>
           <a-radio-group
             :value="currentStatus"
@@ -269,19 +226,9 @@ const handleAssignToZone = (zoneId: string) => {
 
       <!-- 座区操作 -->
       <div style="margin-bottom: 20px">
-        <a-typography-title :level="5" style="margin-bottom: 8px">
-          座区操作
-        </a-typography-title>
-        <a-space
-          direction="vertical"
-          :size="8"
-          style="width: 100%"
-        >
-          <a-button
-            type="primary"
-            block
-            @click="emit('create-zone')"
-          >
+        <a-typography-title :level="5" style="margin-bottom: 8px"> 座区操作 </a-typography-title>
+        <a-space direction="vertical" :size="8" style="width: 100%">
+          <a-button type="primary" block @click="emit('create-zone')">
             <template #icon>
               <AppstoreAddOutlined />
             </template>
@@ -306,14 +253,8 @@ const handleAssignToZone = (zoneId: string) => {
                 <DownOutlined />
               </a-button>
             </a-dropdown>
-            <a-tooltip
-              v-else
-              title="当前楼层暂无座区，请先创建座区"
-            >
-              <a-button
-                block
-                disabled
-              >
+            <a-tooltip v-else title="当前楼层暂无座区，请先创建座区">
+              <a-button block disabled>
                 分配到座区 ({{ selectedSeats.length }})
                 <DownOutlined />
               </a-button>
@@ -324,11 +265,7 @@ const handleAssignToZone = (zoneId: string) => {
 
       <a-divider />
 
-      <a-button
-        danger
-        block
-        @click="emit('delete-seats')"
-      >
+      <a-button danger block @click="emit('delete-seats')">
         <template #icon>
           <DeleteOutlined />
         </template>
@@ -347,21 +284,11 @@ const handleAssignToZone = (zoneId: string) => {
       width="400"
     >
       <div style="padding: 16px 0">
-        <a-typography-text
-          type="secondary"
-          style="display: block; margin-bottom: 16px"
-        >
+        <a-typography-text type="secondary" style="display: block; margin-bottom: 16px">
           请选择座位禁用的原因：
         </a-typography-text>
-        <a-radio-group
-          v-model:value="selectedDisabledReason"
-          style="width: 100%"
-        >
-          <a-space
-            direction="vertical"
-            size="small"
-            style="width: 100%"
-          >
+        <a-radio-group v-model:value="selectedDisabledReason" style="width: 100%">
+          <a-space direction="vertical" size="small" style="width: 100%">
             <a-radio
               v-for="option in DISABLED_REASON_OPTIONS"
               :key="option.value"
