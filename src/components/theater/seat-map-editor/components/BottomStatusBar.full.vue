@@ -13,6 +13,7 @@ const props = defineProps<{
   }
   currentFloorName?: string
   zoomLevel?: number
+  hoveredSeatStatusText?: string
 }>()
 
 const emit = defineEmits<{
@@ -78,6 +79,9 @@ const handleShowShortcuts = () => {
           <a-typography-text strong style="color: #ff4d4f">
             {{ statistics.unavailableSeats }}
           </a-typography-text>
+          <span v-if="hoveredSeatStatusText" style="margin-left: 4px; color: #8c8c8c">
+            （{{ hoveredSeatStatusText }}）
+          </span>
         </a-typography-text>
       </a-tooltip>
 
@@ -146,4 +150,3 @@ const handleShowShortcuts = () => {
     </a-tooltip>
   </div>
 </template>
-

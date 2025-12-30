@@ -95,6 +95,23 @@ const handleOk = async () => {
 const handleCancel = () => {
   emit('cancel')
 }
+
+watch(
+  () => formState.value.color,
+  (val) => {
+    if (val) {
+      selectedColor.value = val
+    }
+  },
+)
+
+const handleNativeColorChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const value = target.value
+  if (!value) return
+  selectedColor.value = value
+  formState.value.color = value
+}
 </script>
 
 <template>
@@ -106,12 +123,7 @@ const handleCancel = () => {
     @ok="handleOk"
     @cancel="handleCancel"
   >
-    <a-form
-      ref="formRef"
-      layout="vertical"
-      :model="formState"
-      style="margin-top: 16px"
-    >
+    <a-form ref="formRef" layout="vertical" :model="formState" style="margin-top: 16px">
       <a-form-item
         label="座区名称"
         name="name"
@@ -135,22 +147,12 @@ const handleCancel = () => {
         :rules="[{ max: 5, message: '简称不能超过 5 个字' }]"
         tooltip="用于在座位标签上显示，例如：V、A、B"
       >
-        <a-input
-          v-model:value="formState.shortName"
-          placeholder="如：V、A、B"
-          :maxlength="5"
-        />
+        <a-input v-model:value="formState.shortName" placeholder="如：V、A、B" :maxlength="5" />
       </a-form-item>
 
-      <a-form-item
-        label="座区颜色"
-        name="color"
-        tooltip="座位将在座区视图中显示为此颜色"
-      >
-        <a-space
-          direction="vertical"
-          style="width: 100%"
-        >
+      <a-form-item label="座区颜色" name="color" tooltip="座位将在座区视图中显示为此颜色">
+        <a-space direction="vertical" style="width: 100%">
+          <!-- 预设颜色块 -->
           <a-space wrap>
             <div
               v-for="color in ZONE_PRESET_COLORS"
@@ -172,6 +174,52 @@ const handleCancel = () => {
                 }
               "
             />
+          </a-space>
+
+          <!-- 自定义颜色行：靠左色块 + Hex 输入 + 提示文案，与 a 项目布局对齐 -->
+          <a-space align="center">
+            <a-input
+              v-model:value="formState.color"
+              style="width: 110px"
+              size="small"
+              placeholder="#26A6EB"
+            >
+              <template #prefix>
+                <span
+                  :style="{
+                    display: 'inline-block',
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '4px',
+                    marginRight: '4px',
+                    border: '1px solid #d9d9d9',
+                    backgroundColor: selectedColor,
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }"
+                >
+                  <!-- 直接覆盖一个透明的原生颜色选择器，点击色块即可弹出取色器 -->
+                  <input
+                    type="color"
+                    :value="selectedColor"
+                    style="
+                      position: absolute;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
+                      height: 100%;
+                      opacity: 0;
+                      cursor: pointer;
+                      border: none;
+                      padding: 0;
+                      margin: 0;
+                    "
+                    @input="handleNativeColorChange"
+                  />
+                </span>
+              </template>
+            </a-input>
+            <a-typography-text type="secondary"> 或选择自定义颜色 </a-typography-text>
           </a-space>
         </a-space>
       </a-form-item>

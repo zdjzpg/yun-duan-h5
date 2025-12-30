@@ -48,8 +48,7 @@ const handleCancel = () => {
     Modal.confirm({
       title: '有未保存的修改',
       icon: createVNode(ExclamationCircleOutlined),
-      content:
-        '座位图编辑器有未保存的修改，关闭后将丢失所有更改，确定要关闭吗？',
+      content: '座位图编辑器有未保存的修改，关闭后将丢失所有更改，确定要关闭吗？',
       okText: '确定关闭',
       okButtonProps: { danger: true } as any,
       cancelText: '取消',
@@ -79,9 +78,7 @@ const handleOk = () => {
         message.error(first.message)
       }
     } else if (errors.length > 1) {
-      const content = errors
-        .map((e, idx) => `${idx + 1}. ${e.message}`)
-        .join('\n')
+      const content = errors.map((e, idx) => `${idx + 1}. ${e.message}`).join('\n')
 
       Modal.error({
         title: '座位图数据校验失败',
@@ -110,9 +107,7 @@ const stats = computed(() => {
   if (!data || !Array.isArray(data?.seats)) return null
 
   const totalSeats = data.seats.length
-  const availableSeats = data.seats.filter(
-    (s: any) => s.status === 'available',
-  ).length
+  const availableSeats = data.seats.filter((s: any) => s.status === 'available').length
 
   return { totalSeats, availableSeats }
 })
@@ -135,8 +130,7 @@ const stats = computed(() => {
         v-if="showStats && stats && stats.totalSeats > 0"
         style="font-size: 12px; color: #8c8c8c; margin-top: 8px"
       >
-        已设置 {{ stats.totalSeats }} 个座位｜可卖
-        {{ stats.availableSeats }} 个
+        已设置 {{ stats.totalSeats }} 个座位｜可卖 {{ stats.availableSeats }} 个
       </div>
     </div>
   </a-button>
@@ -150,7 +144,8 @@ const stats = computed(() => {
     :style="{ top: 0, paddingBottom: 0, maxWidth: '100%' }"
     wrap-class-name="seat-map-editor-modal-fullscreen"
     :body-style="{
-      height: 'calc(100vh - 110px)',
+      // æ¯” A é¡¹ç›®å†?å¤šé¢„ç•™ä¸€ç‚¹ç©ºé—´ï¼Œé¿å… ant-modal-footer è¢«è¾¹æ¡†åº•éƒ¨ç•‚æˆª
+      height: 'calc(100vh - 120px)',
       padding: 0,
       overflow: 'hidden',
     }"
@@ -186,6 +181,7 @@ const stats = computed(() => {
   height: 100% !important;
   max-width: 100% !important;
   padding: 0 !important;
+  overflow: hidden !important;
 }
 
 .seat-map-editor-modal-fullscreen .ant-modal {

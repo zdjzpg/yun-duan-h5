@@ -21,6 +21,7 @@ import type { BatchGenerateConfig } from './types.simplified'
 import type { VenueSeatStatus, SeatDisabledReason } from '@/types/theater'
 import { useHistory } from './composables/useHistory'
 import type { CanvasViewport } from './canvas/canvas.utils'
+import { snapToGrid } from './canvas/canvas.utils'
 import message from 'ant-design-vue/es/message'
 import { useCanvasResize } from './composables/useCanvasResize'
 
@@ -137,6 +138,25 @@ const theaterDataForExport = computed<TheaterData>(() => {
     zones: zones.value.length ? zones.value : base?.zones || [],
     metadata: base?.metadata,
   }
+})
+
+const hoveredSeatId = ref<string | null>(null)
+const hoveredSeatStatusText = computed(() => {
+  if (!hoveredSeatId.value) return ''
+  const seat = seats.value.find((s: Seat) => s.id === hoveredSeatId.value)
+  if (!seat || seat.status !== 'disabled') return ''
+
+  if (seat.disabledReason === 'equipment') {
+    return '设备占用'
+  }
+  if (seat.disabledReason === 'maintenance') {
+    return '维护中'
+  }
+  if (seat.disabledReason === 'other') {
+    return '其他原因禁用'
+  }
+
+  return '场馆级禁用'
 })
 
 const canvasElement = computed<HTMLCanvasElement | null>(() => {
@@ -404,15 +424,17 @@ const handleDeleteStage = (stageId: string) => {
   }
 }
 
-const handleAssignSeatsToZone = (zoneId: string) => {
+const assignSeatsToZoneInternal = (seatIds: string[], zoneId: string) => {
   const zone = zones.value.find((z: Zone) => z.id === zoneId)
-  if (!zone) return
-  const ids = selectedSeatIds.value
-  if (!ids.length) return
+  if (!zone) {
+    message.error('座区不存在')
+    return
+  }
+
   setSeats(
     (prev) =>
-      prev.map((seat) =>
-        ids.includes(seat.id)
+      (prev as Seat[]).map((seat: Seat) =>
+        seatIds.includes(seat.id)
           ? {
               ...seat,
               zoneId: zone.id,
@@ -423,6 +445,31 @@ const handleAssignSeatsToZone = (zoneId: string) => {
       ),
     '分配座区',
   )
+
+  message.success(`已将 ${seatIds.length} 个座位分配到「${zone.name}」`)
+}
+
+const handleAssignSeatsToZone = (zoneId: string) => {
+  if (!selectedSeatIds.value.length) {
+    message.warning('请先选择座位')
+    return
+  }
+
+  const currentFloorSeatIds = selectedSeatIds.value.filter((seatId: string) => {
+    const seat = seats.value.find((s: Seat) => s.id === seatId)
+    return seat && seat.floorId === activeFloorId.value
+  })
+
+  if (!currentFloorSeatIds.length) {
+    message.warning('当前楼层没有选中的座位')
+    return
+  }
+
+  assignSeatsToZoneInternal(currentFloorSeatIds, zoneId)
+
+  // 与 a 项目一致：批量分配后清空选中
+  selectedSeatIds.value = []
+  selectedElement.value = null
 }
 
 const handleCreateZoneFromSeats = () => {
@@ -475,6 +522,23 @@ const handleUpdateZone = (zoneId: string, updates: Partial<Zone>) => {
         }
       : z,
   )
+
+  if (updates.name || updates.color) {
+    const zone = zones.value.find((z: Zone) => z.id === zoneId)
+    if (zone) {
+      setSeats((prev) =>
+        (prev as Seat[]).map((seat: Seat) =>
+          seat.zoneId === zoneId
+            ? {
+                ...seat,
+                zoneName: updates.name ?? seat.zoneName,
+                zoneColor: updates.color ?? seat.zoneColor,
+              }
+            : seat,
+        ),
+      )
+    }
+  }
 }
 
 const handleDeleteZone = (zoneId: string) => {
@@ -682,7 +746,18 @@ const renderFloorForExport = async (floorId: string) => {
   await new Promise((resolve) => setTimeout(resolve, 0))
 }
 
-const handleCanvasContextMenu = (worldX: number, worldY: number) => {
+const handleCanvasContextMenuFromDom = (event: MouseEvent) => {
+  const canvasEl = (canvasCompRef.value as any)?.getCanvas?.() as HTMLCanvasElement | null
+  if (!canvasEl) return
+
+  const rect = canvasEl.getBoundingClientRect()
+  const screenX = event.clientX - rect.left
+  const screenY = event.clientY - rect.top
+
+  const vp = viewport.value
+  const worldX = (screenX - vp.offsetX) / vp.scale
+  const worldY = (screenY - vp.offsetY) / vp.scale
+
   contextMenuPos.value = { x: worldX, y: worldY }
 }
 
@@ -732,8 +807,8 @@ const handlePasteHere = () => {
   }
   const minX = Math.min(...clipboard.value.map((s: Seat) => s.x))
   const minY = Math.min(...clipboard.value.map((s: Seat) => s.y))
-  const targetX = contextMenuPos.value.x
-  const targetY = contextMenuPos.value.y
+  const targetX = snapToGrid(contextMenuPos.value.x)
+  const targetY = snapToGrid(contextMenuPos.value.y)
   const offsetX = targetX - minX
   const offsetY = targetY - minY
   const hasGroup = clipboard.value.some((seat: Seat) => !!seat.groupId)
@@ -892,7 +967,13 @@ const handleSelectAll = () => {
 }
 
 const handleAssignToZoneFromMenu = (zoneId: string) => {
-  handleAssignSeatsToZone(zoneId)
+  if (!selectedSeatIds.value.length) {
+    message.warning('请先选择座位')
+    return
+  }
+
+  // 右键菜单分配座区沿用 React 逻辑：不限制楼层
+  assignSeatsToZoneInternal([...selectedSeatIds.value], zoneId)
 }
 
 const handleRemoveFromZone = () => {
@@ -1168,7 +1249,11 @@ onMounted(() => {
         @remove-zone="handleRemoveFromZone"
         @select-all="handleSelectAll"
       >
-        <div ref="canvasContainerRef" style="flex: 1; display: flex">
+        <div
+          ref="canvasContainerRef"
+          style="flex: 1; display: flex"
+          @contextmenu="handleCanvasContextMenuFromDom"
+        >
           <TheaterCanvasSimplified
             ref="canvasCompRef"
             :seats="currentFloorSeats"
@@ -1179,19 +1264,19 @@ onMounted(() => {
             :height="canvasHeight"
             :show-grid="true"
             :enable-snap="true"
-            :show-seat-labels="showSeatLabels"
-            :viewport="viewport"
-            @seat-select="handleSeatSelect"
-            @seat-move="handleSeatMove"
-            @seats-move="handleSeatsMove"
-            @stage-select="handleStageSelect"
-            @stage-move="handleStageMoveFromCanvas"
-            @viewport-change="handleViewportChange"
-            @seats-delete="handleSeatsDeleteFromCanvas"
-            @seats-copy="handleSeatsCopyFromCanvas"
-            @seats-paste="handleSeatsPasteFromCanvas"
-            @context-menu="handleCanvasContextMenu"
-          />
+          :show-seat-labels="showSeatLabels"
+          :viewport="viewport"
+          @seat-select="handleSeatSelect"
+          @seat-move="handleSeatMove"
+          @seats-move="handleSeatsMove"
+          @stage-select="handleStageSelect"
+          @stage-move="handleStageMoveFromCanvas"
+          @viewport-change="handleViewportChange"
+          @seats-delete="handleSeatsDeleteFromCanvas"
+          @seats-copy="handleSeatsCopyFromCanvas"
+          @seats-paste="handleSeatsPasteFromCanvas"
+          @seat-hover="(id: string | null) => (hoveredSeatId = id)"
+        />
         </div>
       </ContextMenu>
     </template>
@@ -1224,6 +1309,7 @@ onMounted(() => {
         :statistics="bottomStatistics"
         :current-floor-name="currentFloor?.name"
         :zoom-level="zoomLevel"
+        :hovered-seat-status-text="hoveredSeatStatusText"
         @show-shortcuts="shortcutsVisible = true"
       />
     </template>

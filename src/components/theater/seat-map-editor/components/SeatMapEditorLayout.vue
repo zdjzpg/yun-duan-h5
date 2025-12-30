@@ -14,9 +14,9 @@ const props = withDefaults(
 <template>
   <a-layout
     :style="{
-      // 与 A 项目保持一致：在 Modal 中使用 100% 高度，由外层 Modal bodyStyle 控制整体高度
+      // Modal 中预留约 60px 空间给底部 AntD 按钮条，确保 seat-map-editor-footer 不被遮挡
       height: props.isInModal ? '100%' : '100vh',
-      background: '#f5f5f5',
+      background: '#ffffff',
       display: 'flex',
       flexDirection: 'column',
     }"
@@ -26,8 +26,8 @@ const props = withDefaults(
         background: '#ffffff',
         padding: '0 24px',
         borderBottom: '1px solid #f0f0f0',
-        height: '64px',
-        lineHeight: '64px',
+        height: '54px',
+        lineHeight: '54px',
         position: props.isInModal ? 'static' : 'sticky',
         top: props.isInModal ? undefined : 0,
         zIndex: 100,
@@ -39,7 +39,7 @@ const props = withDefaults(
 
     <a-layout
       :style="{
-        background: '#f5f5f5',
+        background: '#ffffff',
         flex: 1,
         overflow: 'hidden',
         display: 'flex',
@@ -78,7 +78,7 @@ const props = withDefaults(
         <div
           :style="{
             flex: 1,
-            overflow: 'auto',
+            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
             height: '100%',

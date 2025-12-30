@@ -32,13 +32,17 @@ const initialValues: RenumberConfig = {
   seatIncrement: 1,
 }
 
+const formState = ref<RenumberConfig>({ ...initialValues })
+
 const handleOk = async () => {
   const form = formRef.value as any
   if (!form) return
   try {
-    const values = (await form.validateFields()) as RenumberConfig
-    emit('ok', values)
+    await form.validateFields()
+    const values = formState.value
+    emit('ok', { ...values })
     form.resetFields()
+    formState.value = { ...initialValues }
   } catch (error) {
     console.error('重新编号表单校验失败:', error)
   }
@@ -49,6 +53,7 @@ const handleCancel = () => {
   if (form) {
     form.resetFields()
   }
+  formState.value = { ...initialValues }
   emit('cancel')
 }
 </script>
@@ -57,7 +62,8 @@ const handleCancel = () => {
   <a-modal
     title="批量重新编号"
     :open="props.visible"
-    width="500"
+    :width="500"
+    wrap-class-name="seat-map-renumber-modal"
     centered
     @ok="handleOk"
     @cancel="handleCancel"
@@ -69,9 +75,9 @@ const handleCancel = () => {
       style="margin-bottom: 16px"
     />
 
-    <a-form ref="formRef" layout="vertical" :initial-values="initialValues">
+    <a-form ref="formRef" layout="vertical" :model="formState" :initial-values="initialValues">
       <a-form-item name="direction" label="编号方向" extra="选择座位编号的主要方向">
-        <a-radio-group>
+        <a-radio-group v-model:value="formState.direction">
           <a-space direction="vertical">
             <a-radio value="horizontal"> 水平优先（从左到右，从上到下） </a-radio>
             <a-radio value="vertical"> 垂直优先（从上到下，从左到右） </a-radio>
@@ -84,7 +90,13 @@ const handleCancel = () => {
         label="起始排号"
         :rules="[{ required: true, message: '请输入起始排号' }]"
       >
-        <a-input-number :min="1" :max="999" style="width: 100%" placeholder="请输入起始排号" />
+        <a-input-number
+          v-model:value="formState.startRowNumber"
+          :min="1"
+          :max="999"
+          style="width: 100%"
+          placeholder="请输入起始排号"
+        />
       </a-form-item>
 
       <a-form-item
@@ -92,7 +104,13 @@ const handleCancel = () => {
         label="起始座号"
         :rules="[{ required: true, message: '请输入起始座号' }]"
       >
-        <a-input-number :min="1" :max="999" style="width: 100%" placeholder="请输入起始座号" />
+        <a-input-number
+          v-model:value="formState.startSeatNumber"
+          :min="1"
+          :max="999"
+          style="width: 100%"
+          placeholder="请输入起始座号"
+        />
       </a-form-item>
 
       <a-form-item
@@ -101,7 +119,13 @@ const handleCancel = () => {
         extra="每一排的排号递增值"
         :rules="[{ required: true, message: '请输入排号递增值' }]"
       >
-        <a-input-number :min="1" :max="10" style="width: 100%" placeholder="请输入排号递增值" />
+        <a-input-number
+          v-model:value="formState.rowIncrement"
+          :min="1"
+          :max="10"
+          style="width: 100%"
+          placeholder="请输入排号递增值"
+        />
       </a-form-item>
 
       <a-form-item
@@ -110,8 +134,22 @@ const handleCancel = () => {
         extra="每一列的座号递增值"
         :rules="[{ required: true, message: '请输入座号递增值' }]"
       >
-        <a-input-number :min="1" :max="10" style="width: 100%" placeholder="请输入座号递增值" />
+        <a-input-number
+          v-model:value="formState.seatIncrement"
+          :min="1"
+          :max="10"
+          style="width: 100%"
+          placeholder="请输入座号递增值"
+        />
       </a-form-item>
     </a-form>
   </a-modal>
 </template>
+
+<style>
+/* 单独控制批量重新编号弹窗宽度，和 a 项目保持一致 */
+.seat-map-renumber-modal .ant-modal {
+  width: 500px !important;
+  max-width: 500px !important;
+}
+</style>

@@ -51,6 +51,7 @@ const emit = defineEmits<{
   (e: 'seats-copy', ids: string[]): void
   (e: 'seats-paste'): void
   (e: 'context-menu', worldX: number, worldY: number): void
+  (e: 'seat-hover', seatId: string | null): void
 }>()
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
@@ -80,6 +81,13 @@ const { dragState, selectionBox, hoveredSeatId, hoveredStageId } =
     onSeatsPaste: () => emit('seats-paste'),
     onContextMenu: (x, y) => emit('context-menu', x, y),
   })
+
+watch(
+  () => hoveredSeatId.value,
+  (id) => {
+    emit('seat-hover', id || null)
+  },
+)
 
 const renderCanvas = () => {
   const canvas = canvasRef.value
