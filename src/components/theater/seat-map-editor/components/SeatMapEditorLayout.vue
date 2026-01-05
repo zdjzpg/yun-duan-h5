@@ -3,10 +3,13 @@ const props = withDefaults(
   defineProps<{
     isInModal?: boolean
     isFullscreen?: boolean
+    /** 左侧面板宽度：场馆模式 240，票档配置可设置为 500，与 a 项目对齐 */
+    leftSiderWidth?: number
   }>(),
   {
     isInModal: false,
     isFullscreen: false,
+    leftSiderWidth: 240,
   },
 )
 </script>
@@ -47,7 +50,7 @@ const props = withDefaults(
     >
       <a-layout-sider
         v-if="!props.isFullscreen"
-        :width="240"
+        :width="props.leftSiderWidth"
         :style="{
           background: '#ffffff',
           borderRight: '1px solid #f0f0f0',

@@ -17,6 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const formRef = ref()
+const colorInputRef = ref<HTMLInputElement | null>(null)
 const selectedColor = ref<string>(ZONE_PRESET_COLORS[0])
 
 const formState = ref({
@@ -112,6 +113,10 @@ const handleNativeColorChange = (event: Event) => {
   selectedColor.value = value
   formState.value.color = value
 }
+
+const openNativeColorPicker = () => {
+  colorInputRef.value?.click()
+}
 </script>
 
 <template>
@@ -197,9 +202,11 @@ const handleNativeColorChange = (event: Event) => {
                     position: 'relative',
                     overflow: 'hidden',
                   }"
+                  @click="openNativeColorPicker"
                 >
                   <!-- 直接覆盖一个透明的原生颜色选择器，点击色块即可弹出取色器 -->
                   <input
+                    ref="colorInputRef"
                     type="color"
                     :value="selectedColor"
                     style="

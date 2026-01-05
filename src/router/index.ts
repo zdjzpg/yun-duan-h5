@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { demoRoutes } from './modules/demo'
 import { theaterVenueRoutes } from './modules/theaterVenues'
+import { theaterShowRoutes } from './modules/theaterShows'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,8 +9,8 @@ const router = createRouter({
       path: '/',
       redirect: '/test',
     },
-    ...demoRoutes,
     ...theaterVenueRoutes,
+    ...theaterShowRoutes,
   ],
 })
 

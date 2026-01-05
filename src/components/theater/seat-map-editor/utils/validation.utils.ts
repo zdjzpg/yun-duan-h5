@@ -13,6 +13,8 @@ export type ValidationErrorType =
   | 'duplicate_seat' // 座位重复
   | 'missing_stage' // 缺少舞台
   | 'no_seats' // 没有座位
+  | 'no_price_tiers' // 没有票档（演出模式）
+  | 'price_tier_no_price' // 票档未设置价格（演出模式）
 
 /**
  * 校验错误
@@ -41,7 +43,7 @@ export type ValidationResult = {
 }
 
 /**
- * 校验座位图数据
+ * 校验座位图数据（场馆编辑器模式）
  *
  * - 必须存在舞台
  * - 必须至少有 1 个座位
@@ -127,3 +129,61 @@ export function validateTheaterData(data: TheaterData): ValidationResult {
     errors,
   }
 }
+
+/**
+ * 演出模式票档配置校验
+ *
+ * - 不校验舞台和座位，只针对 priceTiers
+ * - 要求至少有一个票档，且所有票档 price > 0
+ */
+export function validateShowPriceTiers(data: TheaterData): ValidationResult {
+  const errors: ValidationError[] = []
+
+  // 至少一个票档
+  if (!data.priceTiers || data.priceTiers.length === 0) {
+    errors.push({
+      type: 'no_price_tiers',
+      message: '演出至少需要配置一个票档',
+    })
+
+    return {
+      success: false,
+      errors,
+    }
+  }
+
+  // 所有票档必须设置价格（> 0）
+  const invalidTiers = data.priceTiers.filter((pt) => !pt.price || pt.price <= 0)
+
+  if (invalidTiers.length > 0) {
+    if (invalidTiers.length === 1) {
+      const [tier] = invalidTiers
+      if (tier) {
+        errors.push({
+          type: 'price_tier_no_price',
+          message: `票档「${tier.name}」未设置价格，请设置票档价格后再保存`,
+          meta: {
+            priceTierId: tier.id,
+            priceTierName: tier.name,
+          },
+        })
+      }
+    } else {
+      const names = invalidTiers.map((pt) => `「${pt.name}」`).join('、')
+      errors.push({
+        type: 'price_tier_no_price',
+        message: `以下票档未设置价格：${names}，请设置所有票档价格后再保存`,
+        meta: {
+          priceTierIds: invalidTiers.map((pt) => pt.id),
+          priceTierNames: invalidTiers.map((pt) => pt.name),
+        },
+      })
+    }
+  }
+
+  return {
+    success: errors.length === 0,
+    errors,
+  }
+}
+
