@@ -12,6 +12,24 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id) return
+          const normalizedId = id.replace(/\\+/g, '/')
+          if (normalizedId.includes('node_modules')) {
+            return 'vendor'
+          }
+
+          const viewMatch = normalizedId.match(/\/src\/views\/([^/]+)/)
+          if (viewMatch?.[1]) {
+            return viewMatch[1].toLowerCase()
+          }
+        },
+      },
+    },
+  },
   server: {
     // 允许外网访问与临时隧道主机名
     host: true,

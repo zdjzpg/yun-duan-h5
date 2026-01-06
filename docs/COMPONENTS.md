@@ -1,20 +1,17 @@
-# 自封装组件说明（YSwitch / YDatePicker / YDatePickerRange / YUpload / YUploadDraggable）
+# 自封装组件说明（YSwitch  / YUpload / YUploadDraggable）
 
 本文档说明当前项目中自封装的通用组件的用途与用法：
 
 - `YSwitch`：启用/禁用双段开关
-- `YDatePicker`：带自定义底部工具条的日期选择器
-- `YDatePickerRange`：由两个 `YDatePicker` 组合的日期区间选择器
 - `YUpload`：图片填满卡片、右上角删除按钮的上传组件
 - `YUploadDraggable`：在 `YUpload` 基础上增加拖拽排序能力的上传组件
+- `TableColumnSetting` + `useTableColumnSetting`：表格列自定义弹窗及其配套 Hook
 
 所有组件均已在 `src/main.ts` 中通过 `app.component` 全局注册，可在任意 `.vue` 文件中直接使用。
 
 ## 使用约定（重要）
 
 - 业务代码中，如需开关组件，请优先使用自封装的 `YSwitch`，不要直接使用 Ant Design Vue 的 `a-switch`。
-- 业务代码中，如需日期选择器，请优先使用 `YDatePicker`，不要直接使用 `a-date-picker`。
-- 业务代码中，如需日期区间选择器，请优先使用 `YDatePickerRange`，不要直接使用 `a-range-picker`。
 - 业务代码中，如需图片上传组件，请优先使用 `YUpload` / `YUploadDraggable`，不要直接使用 `a-upload`。
 
 > 目的：统一交互与视觉样式，避免重复封装；后续新增页面如有相同功能，请直接复用以上组件。
@@ -62,105 +59,6 @@ const enabled = ref(false)
 | `changeAndNotify`  | `(item: object)`     | 旧用法：变更并通知外层表单/配置模块   |
 
 ---
-
-## YDatePicker
-
-**文件位置**
-
-- 组件文件：`src/components/YDatePicker.vue`
-- 全局注册名：`YDatePicker`
-
-**用途与特点**
-
-- 基于 `a-date-picker` 封装。
-- 默认使用中文 locale（由外层 `ConfigProvider` 提供）。
-- 去掉 Ant Design Vue 默认的底部“今天”按钮（`show-today=false`）。
-- 自定义底部工具条：**关闭 / 清空 / 现在时间**。
-- 点击底部按钮不会触发组件默认的关闭行为（使用 `@click.stop`）。
-
-**典型用法**
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-import dayjs, { type Dayjs } from 'dayjs'
-
-const date = ref<Dayjs | null>(dayjs())
-</script>
-
-<template>
-  <YDatePicker v-model:value="date" style="width: 216px" />
-</template>
-```
-
-**Props**
-
-| 名称            | 类型            | 默认值 | 说明         |
-| --------------- | --------------- | ------ | ------------ |
-| `v-model:value` | `Dayjs \| null` | `null` | 当前选中日期 |
-
-> 说明：除 `value` 以外，传递给 `YDatePicker` 的其它属性（如 `format`、`picker`、`disabledDate` 等）会通过 `v-bind="$attrs"` 原样透传给内部的 `a-date-picker`。
-
-**事件**
-
-| 事件名          | 参数                                      | 说明                                      |
-| --------------- | ----------------------------------------- | ----------------------------------------- |
-| `update:value`  | `(value: Dayjs \| null)`                  | `v-model:value` 对应的更新事件            |
-| `change`        | `(value: Dayjs \| null, dateStr: string)` | 与 `a-date-picker` 的 `change` 事件签名一致 |
-
----
-
-## YDatePickerRange
-
-**文件位置**
-
-- 组件文件：`src/components/YDatePickerRange.vue`
-- 全局注册名：`YDatePickerRange`
-
-**用途与特点**
-
-- 使用 **两个** `YDatePicker` 组合实现日期区间选择，UI 布局为：`开始日期 至 结束日期`。
-- 数值类型与 `a-range-picker` 类似：`[start, end]`，两端都是 `Dayjs \| null`。
-- 自动保持 `start <= end`：
-  - 当修改开始日期且大于结束日期时，自动把结束日期同步为开始日期。
-  - 当修改结束日期且小于开始日期时，自动把开始日期同步为结束日期。
-- 内部每个单项都具备 `YDatePicker` 的自定义底部按钮（关闭 / 清空 / 现在时间）。
-
-**典型用法**
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue'
-import dayjs, { type Dayjs } from 'dayjs'
-
-const range = ref<[Dayjs | null, Dayjs | null] | null>([
-  dayjs('2025-10-17'),
-  dayjs('2025-10-30'),
-])
-</script>
-
-<template>
-  <YDatePickerRange v-model:value="range" style="width: 216px" />
-</template>
-```
-
-**Props**
-
-| 名称            | 类型                                     | 默认值        | 说明                              |
-| --------------- | ---------------------------------------- | ------------- | --------------------------------- |
-| `v-model:value` | `[Dayjs \| null, Dayjs \| null] \| null` | `null`        | 区间值 `[start, end]`             |
-| `separator`     | `string`                                 | `'至'`        | 中间分隔符文案                    |
-| `disabled`      | `boolean`                                | `false`       | 是否禁用两个日期框                |
-| `format`        | `string`                                 | `'YYYY-MM-DD'`| `change` 事件里输出的日期字符串格式 |
-
-> 说明：传给 `YDatePickerRange` 的其它属性（如 `picker="month"`、`format`、`disabledDate` 等）会通过 `v-bind="$attrs"` 同时透传给左右两个 `YDatePicker`。
-
-**事件**
-
-| 事件名          | 参数                                                                          | 说明                                     |
-| --------------- | ----------------------------------------------------------------------------- | ---------------------------------------- |
-| `update:value`  | `(value: [Dayjs \| null, Dayjs \| null] \| null)`                             | `v-model:value` 更新事件                 |
-| `change`        | `(value: [Dayjs \| null, Dayjs \| null] \| null, dateStrs: [string, string])` | 区间变化时触发，包含格式化后的字符串     |
 
 ---
 
@@ -252,6 +150,67 @@ const files = ref<UploadFile[]>([])
 
 - 拖拽已上传图片可以调整顺序，外层拿到的 `fileList` 顺序会同步变化。
 - 新上传的图片会按 antd 上传顺序追加到列表中，“+ 上传”按钮始终出现在最后一格。
+
+---
+
+## TableColumnSetting + useTableColumnSetting
+
+**文件位置**
+
+- 组件文件：`src/components/table/TableColumnSetting.vue`
+- Hook：`src/hooks/useTableColumnSetting.ts`
+- 示例页：`/demo/table-column-setting`
+
+**能力概览**
+
+- `useTableColumnSetting` 封装列可见性的勾选、默认隐藏列、强制显示列与 `localStorage` 的持久化逻辑，可直接复用现有 antd `columns` 配置。
+- `TableColumnSetting` 以表格式弹窗展示所有可配置列，提供勾选、重置、保存动作，复用后可以保持多个列表一致的交互体验。
+
+**典型用法**
+
+```vue
+<script setup lang="ts">
+import { useTableColumnSetting, type ColumnSettingColumn } from '@/hooks/useTableColumnSetting'
+import TableColumnSetting from '@/components/table/TableColumnSetting.vue'
+
+const columns: ColumnSettingColumn[] = [
+  { title: '序号', key: '__index__', enableSetting: false, width: 72 },
+  { title: '名称', dataIndex: 'name', key: 'name' },
+  { title: '状态', dataIndex: 'status', key: 'status' },
+  { title: '备注', dataIndex: 'remark', key: 'remark', defaultHidden: true },
+]
+
+const {
+  visibleColumns,
+  columnSettingItems,
+  checkedKeys,
+  updateCheckedKeys,
+  resetColumns,
+} = useTableColumnSetting({ columns, storageKey: 'member-table-columns' })
+</script>
+
+<template>
+  <a-table :columns="visibleColumns" :data-source="list">
+    <template #headerCell="{ column }">
+      <template v-if="column.key === '__index__'">
+        序号
+        <TableColumnSetting
+          :columns="columnSettingItems"
+          :checked-keys="checkedKeys"
+          @confirm="updateCheckedKeys"
+          @reset="resetColumns"
+        />
+      </template>
+    </template>
+  </a-table>
+</template>
+```
+
+**注意事项**
+
+- 每张表请使用唯一的 `storageKey`，避免不同表格互相覆盖勾选结果。
+- 当可配置列数量为奇数时组件会自动补齐占位列，确保弹窗左右对齐，无需手工调整。
+- 若需要修改弹窗样式，可局部覆盖 `table-column-setting__...` 类名实现风格定制。
 
 ---
 
