@@ -153,8 +153,11 @@ const props = withDefaults(
 
 .seat-map-editor-overlay-scrollbar .ant-layout-sider-children {
   overflow: visible !important;
-}
 
+}
+.seat-map-editor-modal-fullscreen .ant-layout{
+      height: calc(100vh - 115px)!important;
+}
 .seat-map-editor-panel-scrollbar {
   height: 100%;
   padding-left: 16px;

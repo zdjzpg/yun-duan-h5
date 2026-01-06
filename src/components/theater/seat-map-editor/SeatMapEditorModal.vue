@@ -144,8 +144,7 @@ const stats = computed(() => {
     :style="{ top: 0, paddingBottom: 0, maxWidth: '100%' }"
     wrap-class-name="seat-map-editor-modal-fullscreen"
     :body-style="{
-      // æ¯” A é¡¹ç›®å†?å¤šé¢„ç•™ä¸€ç‚¹ç©ºé—´ï¼Œé¿å… ant-modal-footer è¢«è¾¹æ¡†åº•éƒ¨ç•‚æˆª
-      height: 'calc(100vh - 120px)',
+      height: 'calc(100vh - 116px)',
       padding: 0,
       overflow: 'hidden',
     }"
@@ -207,7 +206,6 @@ const stats = computed(() => {
 }
 
 .seat-map-editor-modal-fullscreen .ant-modal-body {
-  flex: 1 !important;
   padding: 0 !important;
   overflow: hidden !important;
 }
