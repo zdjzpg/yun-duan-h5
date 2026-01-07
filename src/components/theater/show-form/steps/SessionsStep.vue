@@ -23,7 +23,7 @@ const editingConfig = ref<SessionConfig | undefined>(undefined)
 
 const totalSessionCount = computed(() =>
   (sessionConfigs.value || []).reduce(
-    (sum, config) => sum + (config.sessions?.length || 0),
+    (sum: number, config: SessionConfig) => sum + (config.sessions?.length || 0),
     0,
   ),
 )
@@ -48,29 +48,24 @@ const handleDelete = (index: number) => {
   sessionConfigs.value = next
 }
 
-const getDateRangeText = (sessions: any[]) => {
+const getDateRangeText = (sessions: { date?: string }[]) => {
   if (!sessions || !sessions.length) return '-'
 
   const dates = sessions
     .map((s) => dayjs(s.date))
     .sort((a, b) => a.valueOf() - b.valueOf())
-  const first = dates[0].format('YYYY-MM-DD')
-  const last = dates[dates.length - 1].format('YYYY-MM-DD')
+  const first = dates[0]?.format('YYYY-MM-DD')
+  const last = dates[dates.length - 1]?.format('YYYY-MM-DD')
+  if (!first || !last) return '-'
 
   return first === last ? first : `${first} ~ ${last}`
 }
 
-const getStartTimesText = (sessions: any[]) => {
+const getStartTimesText = (sessions: { startTime?: string }[]) => {
   if (!sessions || !sessions.length) return '-'
 
-  const unique = Array.from(
-    new Set(
-      sessions
-        .map((s) => s.startTime)
-        .filter((t: string | undefined) => !!t)
-        .map((t: string) => t),
-    ),
-  ).sort()
+  const times = sessions.map((s) => s.startTime)
+  const unique = Array.from(new Set(times.filter((t): t is string => !!t))).sort()
 
   if (!unique.length) return '-'
   if (unique.length > 3) {
@@ -79,7 +74,7 @@ const getStartTimesText = (sessions: any[]) => {
   return unique.join(', ')
 }
 
-const getDurationText = (sessions: any[]) => {
+const getDurationText = (sessions: { durationMinutes?: number }[]) => {
   if (!sessions || !sessions.length) return '-'
 
   const durations = Array.from(
@@ -130,7 +125,7 @@ const handleModalCancel = () => {
     <a-table
       v-if="sessionConfigs.length"
       :data-source="
-        sessionConfigs.map((config, index) => ({
+        sessionConfigs.map((config: SessionConfig, index: number) => ({
           ...config,
           key: index,
           index,

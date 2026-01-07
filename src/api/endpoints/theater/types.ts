@@ -450,15 +450,21 @@ export type UpdateShowRequest = Partial<CreateShowRequest> & {
 export type ShowDetailResponse = {
   /** 演出基础信息 */
   show: Show;
-  
+
   /** 场次列表 */
   sessions: ShowSession[];
-  
+
   /** 票档列表 */
   priceTiers: ShowPriceTier[];
-  
+
   /** 销售规则 */
   salesRule: ShowSalesRule;
+
+  /**
+   * 座位-票档映射（座位 ID -> 票档 ID）
+   * 原有数据字段，这里补充到类型定义中便于表单编辑使用。
+   */
+  seatPriceTierMapping?: Record<string, string>;
 };
 
 /**

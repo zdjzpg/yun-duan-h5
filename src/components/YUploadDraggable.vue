@@ -33,7 +33,7 @@ const wrapperRef = ref<HTMLElement | null>(null)
 
 // å½“å­˜åœ¨ status === 'done' çš„æ–‡ä»¶æ—¶ï¼Œè¡¨ç¤ºå·²æœ‰å›¾ç‰‡ä¸Šä¼ å®Œæ¯•ï¼Œæœ‰æ„ä¹‰å¼€å?¨æ‹–æ‹½æŽ’åº
 const hasDraggableItems = computed(() =>
-  innerFileList.value.some((file) => file.status === 'done'),
+  innerFileList.value.some((file: UploadFile) => file.status === 'done'),
 )
 
 watch(

@@ -3,6 +3,7 @@
  */
 
 import type { VenueSeatStatus, SeatLabel, SeatDisabledReason } from '@/types/theater'
+import type { PriceTier as ApiPriceTier } from '@/api/endpoints/show/types'
 
 export type Seat = {
   id: string
@@ -21,6 +22,26 @@ export type Seat = {
   label?: SeatLabel
   groupId?: string
   locked?: boolean
+  /**
+   * ä»…ç”¨äºŽæ¼”å‡ºçº§åº§ä½é…ç½®ï¼šæ˜¯å¦å·²å”®å‡º
+   */
+  isSold?: boolean
+  /**
+   * ä»…ç”¨äºŽæ¼”å‡ºçº§åº§ä½é…ç½®ï¼šæ¼”å‡ºçº§ç¦ç”¨æ ‡è®?
+   */
+  isShowDisabled?: boolean
+}
+
+/**
+ * åº§ä½å›¾ç¼–è¾‘å™¨ä¸­ä½¿ç”¨çš„ç®€åŒ–ç‰ˆç¥¨æ¡£ç±»åž‹ï¼ŒåŸºäºŽåŽç«¯ PriceTier æ•°æ®ã€‚
+ */
+export type PriceTier = Pick<ApiPriceTier, 'id' | 'showId' | 'name' | 'price' | 'color' | 'remark'> & {
+  /** ç»‘å®šçš„å±‚çš„ IDï¼Œå¯é€‰ */
+  floorId?: string
+  /** ç»‘å®šçš„åŒºåŸŸ IDï¼Œå¯é€‰ */
+  zoneId?: string
+  /** æ˜¾ç¤ºé¡ºåº? */
+  order?: number
 }
 
 export type Floor = {
@@ -56,10 +77,14 @@ export type Zone = {
 export type TheaterData = {
   id: string
   name: string
+  /** å¯¹åº”çš„åœºé¦† IDï¼Œå¯é€‰ */
+  venueId?: string
   floors: Floor[]
   seats: Seat[]
   stage?: Stage
   zones?: Zone[]
+  /** åœ¨æ¼”å‡ºçŽ¯å¢ƒä¸­ï¼Œç”¨äºŽåº§ä½ç®€åŒ–å¼¥æ•£çš„ç¥¨æ¡£é…ç½® */
+  priceTiers?: PriceTier[]
   metadata?: {
     createdAt: string
     updatedAt?: string

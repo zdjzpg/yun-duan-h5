@@ -94,8 +94,8 @@ const handleFinish = async () => {
             },
           ]) || []
 
-    const flattenedSessions = sessionConfigs.flatMap((config) =>
-      (config.sessions || []).map((session) => ({
+      const flattenedSessions = sessionConfigs.flatMap((config) =>
+        (config.sessions || []).map((session: any) => ({
         date: session.date || '',
         startTime: session.startTime || '',
         durationMinutes: session.durationMinutes,
