@@ -1,14 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { theaterVenueRoutes } from './modules/theaterVenues'
 import { theaterShowRoutes } from './modules/theaterShows'
+import { demoRoutes } from './modules/demo'
+import TableColumnSettingDemo from '@/views/Demo/TableColumnSettingDemo.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/test',
+      redirect: '/demo/table-column-setting',
     },
+    {
+      path: '/demo/table-column-setting',
+      name: 'TableColumnSettingDemo',
+      component: TableColumnSettingDemo,
+      meta: { title: '表头自定义 Demo' },
+    },
+    ...demoRoutes,
     ...theaterVenueRoutes,
     ...theaterShowRoutes,
   ],

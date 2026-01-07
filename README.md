@@ -4,7 +4,7 @@ This template should help get you started developing with Vue 3 in Vite.
 
 ## 项目约定（组件使用）
 
-- 业务代码中涉及开关、日期选择、日期区间、上传等场景时，请优先使用自封装组件 `YSwitch`、`YDatePicker`、`YDatePickerRange`、`YUpload` / `YUploadDraggable`，不要直接使用 Ant Design Vue 的 `a-switch`、`a-date-picker`、`a-range-picker`、`a-upload`。
+- 业务代码中涉及开关、日期选择、日期区间、上传等场景时，请优先使用自封装组件 `YSwitch`、`YUpload` / `YUploadDraggable`，不要直接使用 Ant Design Vue 的 `a-switch`、`a-date-picker`、`a-range-picker`、`a-upload`。
 - 详细说明与用法见 `docs/COMPONENTS.md`。
 
 ## Recommended IDE Setup

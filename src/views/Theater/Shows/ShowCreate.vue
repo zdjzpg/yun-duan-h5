@@ -16,8 +16,7 @@ const submitting = ref(false)
 const venueOptions = ref<Array<{ label: string; value: string }>>([])
 
 const initialValues = ref<Partial<ShowFormData>>({
-  sessions: [],
-  priceTiers: [],
+  // 新建时默认无场次配置，全部由第二步完成
   salesRule: {
     saleStartType: 'immediate',
     saleEndType: 'before_show',
@@ -76,11 +75,43 @@ const handleFinish = async () => {
   try {
     submitting.value = true
 
-    const values = showFormRef.value.getValues()
+    const values = showFormRef.value.getValues() as ShowFormData & {
+      sessionConfigs?: import('@/components/theater/show-form/types').SessionConfig[]
+    }
+
+    const sessionConfigs =
+      (values.sessionConfigs && values.sessionConfigs.length
+        ? values.sessionConfigs
+        : [
+            {
+              venueId: values.basicInfo.venueId,
+              venueName: undefined,
+              venueCapacityType: undefined,
+              priceTiers: (values.priceTiers || []) as any,
+              seatPriceTierMapping: values.seatPriceTierMapping,
+              seatDisabledStates: undefined,
+              sessions: (values.sessions || []) as any,
+            },
+          ]) || []
+
+    const flattenedSessions = sessionConfigs.flatMap((config) =>
+      (config.sessions || []).map((session) => ({
+        date: session.date || '',
+        startTime: session.startTime || '',
+        durationMinutes: session.durationMinutes,
+        openTime: session.openTime || undefined,
+      })),
+    )
+
+    const primaryVenueId = sessionConfigs[0]?.venueId || values.basicInfo.venueId
+
+    const flattenedPriceTiers = (sessionConfigs[0]?.priceTiers ||
+      values.priceTiers ||
+      []) as ShowFormData['priceTiers']
 
     const payload: CreateShowRequest = {
       name: values.basicInfo.name.trim(),
-      venueId: values.basicInfo.venueId,
+      venueId: primaryVenueId,
       type: values.basicInfo.type,
       suitableAudience: values.basicInfo.suitableAudience,
       coverImage: values.basicInfo.coverImage,
@@ -88,13 +119,13 @@ const handleFinish = async () => {
       description: values.basicInfo.description?.trim() || undefined,
       producer: values.basicInfo.producer?.trim() || undefined,
       status: values.basicInfo.status,
-      sessions: (values.sessions || []).map((session: ShowFormData['sessions'][number]) => ({
-        date: session.date || '',
-        startTime: session.startTime || '',
-        durationMinutes: session.durationMinutes,
-        openTime: session.openTime || undefined,
-      })),
-      priceTiers: (values.priceTiers || []).map((tier: ShowFormData['priceTiers'][number]) => ({
+      detailsIntro: values.details?.intro?.trim() || undefined,
+      detailsBookingRule: values.details?.bookingRule?.trim() || undefined,
+      detailsRefundRule: values.details?.refundRule?.trim() || undefined,
+      detailsSafetyNotice: values.details?.safetyNotice?.trim() || undefined,
+      detailImages: values.details?.detailImages,
+      sessions: flattenedSessions,
+      priceTiers: flattenedPriceTiers.map((tier) => ({
         name: tier.name.trim(),
         price: tier.price,
         zoneIds: tier.zoneIds,
@@ -134,7 +165,7 @@ const handleCancel = () => {
 <template>
   <FormPageLayout>
     <template #default>
-      <div style="max-width: 960px">
+      <div>
         <ShowForm
           ref="showFormRef"
           :initial-values="initialValues"
@@ -149,19 +180,10 @@ const handleCancel = () => {
       <a-button @click="handleCancel">取消</a-button>
       <div style="display: flex; gap: 12px">
         <a-button v-if="currentStep > 0" @click="handlePrev">上一步</a-button>
-        <a-button
-          v-if="currentStep < FORM_STEPS.length - 1"
-          type="primary"
-          @click="handleNext"
-        >
+        <a-button v-if="currentStep < FORM_STEPS.length - 1" type="primary" @click="handleNext">
           下一步
         </a-button>
-        <a-button
-          v-else
-          type="primary"
-          :loading="submitting"
-          @click="handleFinish"
-        >
+        <a-button v-else type="primary" :loading="submitting" @click="handleFinish">
           创建
         </a-button>
       </div>

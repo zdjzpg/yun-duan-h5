@@ -10,12 +10,6 @@ import JSZip from 'jszip'
 import { jsPDF } from 'jspdf'
 import type { TheaterData } from '../types.simplified'
 
-const sanitizeAscii = (text: string | undefined | null, fallback = ''): string => {
-  if (!text) return fallback
-  const ascii = String(text).replace(/[^\x20-\x7e]/g, '')
-  return ascii || fallback
-}
-
 const downloadFile = (url: string, filename: string): void => {
   const link = document.createElement('a')
   link.href = url
@@ -151,12 +145,10 @@ export const exportCurrentFloorAsPDF = async (
 
     pdf.setFontSize(20)
     pdf.setTextColor(0, 0, 0)
-    const title = `${sanitizeAscii(theaterData.name, 'Theater')} - Seat Map`
-    pdf.text(title, pageWidth / 2, margin + 5, { align: 'center' })
+    pdf.text(`${theaterData.name} - 座位图`, pageWidth / 2, margin + 5, { align: 'center' })
 
     pdf.setFontSize(14)
-    const subtitle = sanitizeAscii(floor?.name, 'Floor')
-    pdf.text(subtitle, pageWidth / 2, margin + 12, { align: 'center' })
+    pdf.text(`${floor?.name || ''}`, pageWidth / 2, margin + 12, { align: 'center' })
 
     pdf.setDrawColor(200, 200, 200)
     pdf.setLineWidth(0.5)
@@ -186,16 +178,16 @@ export const exportCurrentFloorAsPDF = async (
 
     pdf.setFontSize(10)
     pdf.setTextColor(100, 100, 100)
-    const statsText = `Total: ${floorSeats.length} | Available: ${availableSeats.length}`
-    const dateText = new Date().toISOString().slice(0, 19).replace('T', ' ')
     pdf.text(
-      `${statsText} | Exported at: ${dateText}`,
+      `座位：${floorSeats.length} | 可用：${
+        availableSeats.length
+      } | 导出时间：${new Date().toLocaleString('zh-CN')}`,
       pageWidth / 2,
       pageHeight - margin + 5,
       { align: 'center' },
     )
 
-    pdf.text('Page 1', pageWidth - margin, pageHeight - margin + 5, { align: 'right' })
+    pdf.text(`第 1 页`, pageWidth - margin, pageHeight - margin + 5, { align: 'right' })
 
     const filename = `${theaterData.name}-${floor?.name || '座位图'}`
     pdf.save(`${filename}.pdf`)
@@ -273,13 +265,15 @@ export const exportAllFloorsAsPDF = async (
 
       pdf.setFontSize(20)
       pdf.setTextColor(0, 0, 0)
-      const title = `${sanitizeAscii(theaterData.name, 'Theater')} - Seat Map`
-      pdf.text(title, pageWidth / 2, margin + 5, { align: 'center' })
+      pdf.text(`${theaterData.name} - 座位图`, pageWidth / 2, margin + 5, { align: 'center' })
 
       pdf.setFontSize(14)
-      const floorLabel = sanitizeAscii(floor.name, `Floor ${i + 1}`)
-      const subtitle = `${floorLabel} (${i + 1}/${theaterData.floors.length})`
-      pdf.text(subtitle, pageWidth / 2, margin + 12, { align: 'center' })
+      pdf.text(
+        `${floor.name} (${i + 1}/${theaterData.floors.length})`,
+        pageWidth / 2,
+        margin + 12,
+        { align: 'center' },
+      )
 
       pdf.setDrawColor(200, 200, 200)
       pdf.setLineWidth(0.5)
@@ -289,17 +283,17 @@ export const exportAllFloorsAsPDF = async (
 
       pdf.setFontSize(10)
       pdf.setTextColor(100, 100, 100)
-      const statsText = `Total: ${floorSeats.length} | Available: ${availableSeats.length}`
-      const dateText = new Date().toISOString().slice(0, 19).replace('T', ' ')
       pdf.text(
-        `${statsText} | Exported at: ${dateText}`,
+        `座位：${floorSeats.length} | 可用：${
+          availableSeats.length
+        } | 导出时间：${new Date().toLocaleString('zh-CN')}`,
         pageWidth / 2,
         pageHeight - margin + 5,
         { align: 'center' },
       )
 
       pdf.text(
-        `Page ${i + 1} of ${theaterData.floors.length}`,
+        `第 ${i + 1} 页，共 ${theaterData.floors.length} 页`,
         pageWidth - margin,
         pageHeight - margin + 5,
         { align: 'right' },

@@ -199,8 +199,8 @@ const modifierKey = computed(() => (isMac.value ? 'Command' : 'Ctrl'))
       <!-- 座区 Tab -->
       <template v-else>
         <ZoneListPanel
-          v-if="currentFloorId && zones && seats"
-          :venue-id="venueId || ''"
+          v-if="venueId && currentFloorId && zones && seats"
+          :venue-id="venueId"
           :current-floor-id="currentFloorId"
           :zones="zones"
           :seats="seats"

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import Modal from 'ant-design-vue/es/modal'
 import { PlusCircleOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import type { Zone, Seat } from '../types.simplified'
 import ZoneConfigModal from '../modals/ZoneConfigModal.vue'
 import { ZONE_SEARCH_THRESHOLD } from '../utils/constants'
-import draggable from 'vuedraggable'
 
 const props = defineProps<{
   venueId: string
@@ -36,9 +35,13 @@ const sortedZones = computed(() =>
 )
 
 const getZoneSeatCount = (zoneId: string): number =>
-  props.seats.filter((s: Seat) => s.zoneId === zoneId && s.floorId === props.currentFloorId).length
+  props.seats.filter(
+    (s: Seat) => s.zoneId === zoneId && s.floorId === props.currentFloorId,
+  ).length
 
-const showSearchAndFilter = computed(() => currentFloorZones.value.length >= ZONE_SEARCH_THRESHOLD)
+const showSearchAndFilter = computed(
+  () => currentFloorZones.value.length >= ZONE_SEARCH_THRESHOLD,
+)
 
 const filteredZones = computed(() => {
   const keyword = searchText.value.trim().toLowerCase()
@@ -112,25 +115,6 @@ const handleDeleteZone = (zoneId: string) => {
     emit('deleteZone', zoneId)
   }
 }
-
-const draggableZones = ref<Zone[]>([])
-
-watch(
-  filteredZones,
-  (zones) => {
-    draggableZones.value = zones.slice()
-  },
-  { immediate: true },
-)
-
-const handleDragEnd = () => {
-  draggableZones.value.forEach((zone: Zone, index: number) => {
-    const targetOrder = index + 1
-    if (zone.order !== targetOrder) {
-      emit('updateZone', zone.id, { order: targetOrder })
-    }
-  })
-}
 </script>
 
 <template>
@@ -177,120 +161,113 @@ const handleDragEnd = () => {
       <template v-else-if="filteredZones.length === 0">
         <a-empty description="未找到符合条件的座区" style="padding: 24px 0">
           <a-typography-text type="secondary" style="font-size: 12px">
-            <template v-if="searchText"> 关键字“{{ searchText }}”无匹配结果 </template>
-            <template v-else-if="seatCountFilter !== 'all'"> 当前筛选条件下无座区 </template>
+            <template v-if="searchText">
+              关键字“{{ searchText }}”无匹配结果
+            </template>
+            <template v-else-if="seatCountFilter !== 'all'">
+              当前筛选条件下无座区
+            </template>
           </a-typography-text>
         </a-empty>
       </template>
 
       <template v-else>
-        <draggable
-          v-model="draggableZones"
-          item-key="id"
-          handle=".zone-item-handle"
-          @end="handleDragEnd"
-        >
-          <template #item="{ element: zone }">
-            <div :key="zone.id" style="cursor: move; margin-bottom: 8px">
-              <a-card
-                size="small"
-                :bordered="true"
-                :style="{
-                  borderLeft: `4px solid ${zone.color || '#ff4d4f'}`,
-                }"
-                :body-style="{ padding: '8px 12px' }"
-              >
-                <div style="display: flex; align-items: center; gap: 8px">
-                  <span class="zone-item-handle" style="cursor: grab; color: #8c8c8c">⋮⋮</span>
-                  <div style="flex: 1">
+        <a-space direction="vertical" size="small" style="width: 100%">
+          <a-card
+            v-for="zone in filteredZones"
+            :key="zone.id"
+            size="small"
+            :bordered="true"
+            :style="{
+              borderLeft: `4px solid ${zone.color || '#ff4d4f'}`,
+            }"
+            :body-style="{ padding: '8px 12px' }"
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <div style="flex: 1">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 6px;
+                  "
+                >
+                  <a-space :size="6">
                     <div
-                      style="
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-bottom: 6px;
-                      "
-                    >
-                      <a-space :size="6">
-                        <div
-                          :style="{
-                            width: '12px',
-                            height: '12px',
-                            backgroundColor: zone.color || '#ff4d4f',
-                            borderRadius: '2px',
-                            border: '1px solid rgba(0,0,0,0.1)',
-                          }"
-                        />
-                        <a-typography-text strong style="font-size: 13px">
-                          {{ zone.name }}
-                        </a-typography-text>
-                      </a-space>
-                      <a-badge
-                        :count="getZoneSeatCount(zone.id)"
-                        :show-zero="true"
-                        :number-style="{
-                          backgroundColor: getZoneSeatCount(zone.id) > 0 ? '#52c41a' : '#d9d9d9',
-                          fontSize: '11px',
-                        }"
-                      />
-                    </div>
-
-                    <div style="display: flex; justify-content: flex-end">
-                      <a-space size="small">
-                        <a-tooltip
-                          :title="
-                            selectedSeatIds && selectedSeatIds.length
-                              ? `将选中的 ${selectedSeatIds.length} 个座位分配到 ${zone.name}`
-                              : '请先在画布上选择座位'
-                          "
-                        >
-                          <a-button
-                            type="text"
-                            size="small"
-                            :disabled="!selectedSeatIds || !selectedSeatIds.length"
-                            @click="emit('assignSeatsToZone', zone.id)"
-                            style="font-size: 12px"
-                          >
-                            <template #icon>
-                              <PlusCircleOutlined />
-                            </template>
-                          </a-button>
-                        </a-tooltip>
-
-                        <a-tooltip title="编辑座区">
-                          <a-button
-                            type="text"
-                            size="small"
-                            style="font-size: 12px"
-                            @click="openEditModal(zone)"
-                          >
-                            <template #icon>
-                              <EditOutlined />
-                            </template>
-                          </a-button>
-                        </a-tooltip>
-
-                        <a-tooltip title="删除座区">
-                          <a-button
-                            type="text"
-                            size="small"
-                            danger
-                            style="font-size: 12px"
-                            @click="handleDeleteZone(zone.id)"
-                          >
-                            <template #icon>
-                              <DeleteOutlined />
-                            </template>
-                          </a-button>
-                        </a-tooltip>
-                      </a-space>
-                    </div>
-                  </div>
+                      :style="{
+                        width: '12px',
+                        height: '12px',
+                        backgroundColor: zone.color || '#ff4d4f',
+                        borderRadius: '2px',
+                        border: '1px solid rgba(0,0,0,0.1)',
+                      }"
+                    />
+                    <a-typography-text strong style="font-size: 13px">
+                      {{ zone.name }}
+                    </a-typography-text>
+                  </a-space>
+                  <a-badge
+                    :count="getZoneSeatCount(zone.id)"
+                    :show-zero="true"
+                    :number-style="{
+                      backgroundColor: getZoneSeatCount(zone.id) > 0 ? '#52c41a' : '#d9d9d9',
+                      fontSize: '11px',
+                    }"
+                  />
                 </div>
-              </a-card>
+
+                <div style="display: flex; justify-content: flex-end">
+                  <a-space size="small">
+                    <a-tooltip
+                      v-if="selectedSeatIds && selectedSeatIds.length"
+                      :title="`将选中的 ${selectedSeatIds.length} 个座位分配到 ${zone.name}`"
+                    >
+                      <a-button
+                        type="text"
+                        size="small"
+                        :disabled="!selectedSeatIds || !selectedSeatIds.length"
+                        @click="emit('assignSeatsToZone', zone.id)"
+                        style="font-size: 12px"
+                      >
+                        <template #icon>
+                          <PlusCircleOutlined />
+                        </template>
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="编辑座区">
+                      <a-button
+                        type="text"
+                        size="small"
+                        style="font-size: 12px"
+                        @click="openEditModal(zone)"
+                      >
+                        <template #icon>
+                          <EditOutlined />
+                        </template>
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="删除座区">
+                      <a-button
+                        type="text"
+                        size="small"
+                        danger
+                        style="font-size: 12px"
+                        @click="handleDeleteZone(zone.id)"
+                      >
+                        <template #icon>
+                          <DeleteOutlined />
+                        </template>
+                      </a-button>
+                    </a-tooltip>
+                  </a-space>
+                </div>
+              </div>
             </div>
-          </template>
-        </draggable>
+          </a-card>
+        </a-space>
       </template>
     </div>
 
@@ -305,3 +282,4 @@ const handleDragEnd = () => {
     />
   </div>
 </template>
+

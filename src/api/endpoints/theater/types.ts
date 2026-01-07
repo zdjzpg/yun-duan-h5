@@ -343,6 +343,21 @@ export type CreateShowRequest = {
   /** 主办方 */
   producer?: string;
   
+  /** 演出详情 - 演出介绍文本 */
+  detailsIntro?: string;
+  
+  /** 演出详情 - 预订规则文本 */
+  detailsBookingRule?: string;
+  
+  /** 演出详情 - 退改规则文本 */
+  detailsRefundRule?: string;
+  
+  /** 演出详情 - 安全须知文本 */
+  detailsSafetyNotice?: string;
+  
+  /** 演出详情 - 详情图片 URL 列表 */
+  detailImages?: string[];
+  
   /** 演出状态 */
   status: ShowStatus;
   

@@ -53,29 +53,24 @@ const emit = defineEmits<{
 }>()
 
 const isMac =
-  typeof window !== 'undefined' && /Mac|iPhone|iPad|iPod|Macintosh/.test(
-    window.navigator.userAgent,
-  )
+  typeof window !== 'undefined' && /Mac|iPhone|iPad|iPod|Macintosh/.test(window.navigator.userAgent)
 
-const getShortcutHint = (
-  key: string,
-  modifier?: 'ctrl' | 'shift' | 'ctrl+shift' | 'alt',
-) => {
-  const ctrlLabel = isMac ? '⌘' : 'Ctrl'
-  const shiftLabel = isMac ? '⇧' : 'Shift'
-  const altLabel = isMac ? '⌥' : 'Alt'
+const getShortcutHint = (key: string, modifier?: 'ctrl' | 'shift' | 'ctrl+shift' | 'alt') => {
+  const modKey = isMac ? '⌘' : 'Ctrl'
+  const shiftKey = isMac ? '⇧' : 'Shift'
+  const altKey = isMac ? '⌥' : 'Alt'
 
   if (modifier === 'ctrl') {
-    return `${ctrlLabel}+${key.toUpperCase()}`
+    return `${modKey}+${key.toUpperCase()}`
   }
   if (modifier === 'shift') {
-    return `${shiftLabel}+${key.toUpperCase()}`
+    return `${shiftKey}+${key.toUpperCase()}`
   }
   if (modifier === 'ctrl+shift') {
-    return `${ctrlLabel}+${shiftLabel}+${key.toUpperCase()}`
+    return `${modKey}+${shiftKey}+${key.toUpperCase()}`
   }
   if (modifier === 'alt') {
-    return `${altLabel}+${key.toUpperCase()}`
+    return `${altKey}+${key.toUpperCase()}`
   }
   return key.toUpperCase()
 }
@@ -116,7 +111,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
   <a-dropdown
     :trigger="['contextmenu']"
     overlayClassName="seat-context-menu"
-    :overlayStyle="{ minWidth: '280px' }"
+    :overlayStyle="{ minWidth: '220px' }"
   >
     <div style="display: contents">
       <slot />
@@ -124,24 +119,22 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
 
     <template #overlay>
       <a-menu>
-        <!-- 画布空白处：粘贴到这 / 全选 -->
+        <!-- 画布空白处：粘贴 / 全选 -->
         <template v-if="!selectedElement">
-          <a-menu-item
-            key="paste-here"
-            :disabled="!hasClipboard"
-            @click="emit('paste-here')"
-          >
+          <a-menu-item key="paste-here" :disabled="!hasClipboard" @click="emit('paste-here')">
             <template #icon>
               <CopyOutlined />
             </template>
             <span>粘贴到这</span>
           </a-menu-item>
+          <a-menu-item key="paste" :disabled="!hasClipboard" @click="emit('paste')">
+            <template #icon>
+              <RedoOutlined />
+            </template>
+            <span>粘贴</span>
+          </a-menu-item>
           <a-menu-divider />
-          <a-menu-item
-            key="select-all"
-            :disabled="!hasSeats"
-            @click="emit('select-all')"
-          >
+          <a-menu-item key="select-all" :disabled="!hasSeats" @click="emit('select-all')">
             <template #icon>
               <SelectOutlined />
             </template>
@@ -156,11 +149,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
 
         <!-- 舞台：只允许删除 -->
         <template v-else-if="selectedElement.type === 'stage'">
-          <a-menu-item
-            key="delete-stage"
-            danger
-            @click="emit('delete')"
-          >
+          <a-menu-item key="delete-stage" danger @click="emit('delete')">
             <template #icon>
               <DeleteOutlined />
             </template>
@@ -171,11 +160,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
         <!-- 座位选择：完整菜单 -->
         <template v-else>
           <!-- 编辑属性 / 重新编号 -->
-          <a-menu-item
-            key="edit"
-            :disabled="!isSingleSeat"
-            @click="emit('edit')"
-          >
+          <a-menu-item key="edit" :disabled="!isSingleSeat" @click="emit('edit')">
             <template #icon>
               <EditOutlined />
             </template>
@@ -187,11 +172,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
             </div>
           </a-menu-item>
 
-          <a-menu-item
-            key="renumber"
-            :disabled="!isMultipleSeats"
-            @click="emit('renumber')"
-          >
+          <a-menu-item key="renumber" :disabled="!isMultipleSeats" @click="emit('renumber')">
             <template #icon>
               <NumberOutlined />
             </template>
@@ -206,43 +187,26 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
           <a-menu-divider />
 
           <!-- 座区相关 -->
-          <a-menu-item
-            key="create-zone"
-            @click="emit('create-zone')"
-          >
+          <a-menu-item key="create-zone" @click="emit('create-zone')">
             <template #icon>
               <AppstoreAddOutlined />
             </template>
             <span>创建座区</span>
           </a-menu-item>
 
-          <a-sub-menu
-            v-if="zones && zones.length"
-            key="assign-zone"
-          >
+          <a-sub-menu v-if="zones && zones.length" key="assign-zone">
             <template #title>
               <span>
                 <AppstoreOutlined />
                 <span style="margin-left: 8px">分配座区</span>
               </span>
             </template>
-            <a-menu-item
-              v-for="zone in zones"
-              :key="zone.id"
-              @click="emit('assign-zone', zone.id)"
-            >
-              <a-badge
-                :color="zone.color"
-                :text="zone.name"
-              />
+            <a-menu-item v-for="zone in zones" :key="zone.id" @click="emit('assign-zone', zone.id)">
+              <a-badge :color="zone.color" :text="zone.name" />
             </a-menu-item>
           </a-sub-menu>
 
-          <a-menu-item
-            key="remove-zone"
-            :disabled="!hasZoneAssigned"
-            @click="emit('remove-zone')"
-          >
+          <a-menu-item key="remove-zone" :disabled="!hasZoneAssigned" @click="emit('remove-zone')">
             <template #icon>
               <CloseCircleOutlined />
             </template>
@@ -252,10 +216,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
           <a-menu-divider />
 
           <!-- 复制 / 剪切 / 粘贴 / 快速复制 -->
-          <a-menu-item
-            key="copy"
-            @click="emit('copy')"
-          >
+          <a-menu-item key="copy" @click="emit('copy')">
             <template #icon>
               <CopyOutlined />
             </template>
@@ -267,10 +228,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
             </div>
           </a-menu-item>
 
-          <a-menu-item
-            key="cut"
-            @click="emit('cut')"
-          >
+          <a-menu-item key="cut" @click="emit('cut')">
             <template #icon>
               <ScissorOutlined />
             </template>
@@ -282,11 +240,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
             </div>
           </a-menu-item>
 
-          <a-menu-item
-            key="paste"
-            :disabled="!hasClipboard"
-            @click="emit('paste')"
-          >
+          <a-menu-item key="paste" :disabled="!hasClipboard" @click="emit('paste')">
             <template #icon>
               <RedoOutlined />
             </template>
@@ -298,10 +252,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
             </div>
           </a-menu-item>
 
-          <a-menu-item
-            key="duplicate"
-            @click="emit('duplicate')"
-          >
+          <a-menu-item key="duplicate" @click="emit('duplicate')">
             <template #icon>
               <CopyOutlined />
             </template>
@@ -316,10 +267,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
           <a-menu-divider />
 
           <!-- 对齐（仅多选时显示） -->
-          <a-sub-menu
-            v-if="showAlignMenu"
-            key="align"
-          >
+          <a-sub-menu v-if="showAlignMenu" key="align">
             <template #title>
               <span>
                 <AlignLeftOutlined />
@@ -327,10 +275,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
               </span>
             </template>
 
-            <a-menu-item
-              key="align-left"
-              @click="handleAlignClick('left')"
-            >
+            <a-menu-item key="align-left" @click="handleAlignClick('left')">
               <template #icon>
                 <AlignLeftOutlined />
               </template>
@@ -341,10 +286,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
                 </span>
               </div>
             </a-menu-item>
-            <a-menu-item
-              key="align-center"
-              @click="handleAlignClick('center')"
-            >
+            <a-menu-item key="align-center" @click="handleAlignClick('center')">
               <template #icon>
                 <AlignCenterOutlined />
               </template>
@@ -355,10 +297,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
                 </span>
               </div>
             </a-menu-item>
-            <a-menu-item
-              key="align-right"
-              @click="handleAlignClick('right')"
-            >
+            <a-menu-item key="align-right" @click="handleAlignClick('right')">
               <template #icon>
                 <AlignRightOutlined />
               </template>
@@ -370,10 +309,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
               </div>
             </a-menu-item>
             <a-menu-divider />
-            <a-menu-item
-              key="align-top"
-              @click="handleAlignClick('top')"
-            >
+            <a-menu-item key="align-top" @click="handleAlignClick('top')">
               <template #icon>
                 <VerticalAlignTopOutlined />
               </template>
@@ -384,10 +320,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
                 </span>
               </div>
             </a-menu-item>
-            <a-menu-item
-              key="align-middle"
-              @click="handleAlignClick('middle')"
-            >
+            <a-menu-item key="align-middle" @click="handleAlignClick('middle')">
               <template #icon>
                 <VerticalAlignMiddleOutlined />
               </template>
@@ -398,10 +331,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
                 </span>
               </div>
             </a-menu-item>
-            <a-menu-item
-              key="align-bottom"
-              @click="handleAlignClick('bottom')"
-            >
+            <a-menu-item key="align-bottom" @click="handleAlignClick('bottom')">
               <template #icon>
                 <VerticalAlignBottomOutlined />
               </template>
@@ -415,11 +345,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
           </a-sub-menu>
 
           <!-- 成组 / 取消成组 -->
-          <a-menu-item
-            key="group"
-            :disabled="!canGroup"
-            @click="emit('group')"
-          >
+          <a-menu-item key="group" :disabled="!canGroup" @click="emit('group')">
             <template #icon>
               <GroupOutlined />
             </template>
@@ -431,11 +357,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
             </div>
           </a-menu-item>
 
-          <a-menu-item
-            key="ungroup"
-            :disabled="!canUngroup"
-            @click="emit('ungroup')"
-          >
+          <a-menu-item key="ungroup" :disabled="!canUngroup" @click="emit('ungroup')">
             <template #icon>
               <UngroupOutlined />
             </template>
@@ -450,11 +372,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
           <a-menu-divider />
 
           <!-- 锁定 / 解锁 -->
-          <a-menu-item
-            key="lock"
-            :disabled="!hasUnlocked"
-            @click="emit('lock')"
-          >
+          <a-menu-item key="lock" :disabled="!hasUnlocked" @click="emit('lock')">
             <template #icon>
               <LockOutlined />
             </template>
@@ -466,11 +384,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
             </div>
           </a-menu-item>
 
-          <a-menu-item
-            key="unlock"
-            :disabled="!hasLocked"
-            @click="emit('unlock')"
-          >
+          <a-menu-item key="unlock" :disabled="!hasLocked" @click="emit('unlock')">
             <template #icon>
               <UnlockOutlined />
             </template>
@@ -485,11 +399,7 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
           <a-menu-divider />
 
           <!-- 删除座位 -->
-          <a-menu-item
-            key="delete"
-            danger
-            @click="emit('delete')"
-          >
+          <a-menu-item key="delete" danger @click="emit('delete')">
             <template #icon>
               <DeleteOutlined />
             </template>
@@ -525,4 +435,3 @@ const handleAlignClick = (type: 'left' | 'center' | 'right' | 'top' | 'middle' |
     monospace;
 }
 </style>
-

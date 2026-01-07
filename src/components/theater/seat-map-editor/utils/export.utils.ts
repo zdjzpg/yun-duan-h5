@@ -12,12 +12,6 @@
 
 import type { TheaterData, Seat, Stage, Floor } from '../types.simplified'
 
-const sanitizeAscii = (text: string | undefined | null, fallback = ''): string => {
-  if (!text) return fallback
-  const ascii = String(text).replace(/[^\x20-\x7e]/g, '')
-  return ascii || fallback
-}
-
 export const exportAsPNG = (canvas: HTMLCanvasElement, filename: string = '座位图'): void => {
   try {
     const dataUrl = canvas.toDataURL('image/png', 1.0)
@@ -270,14 +264,12 @@ export const exportAsPDF = async (
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(20)
     pdf.setTextColor(0, 0, 0)
-    const title = `${sanitizeAscii(theaterData.name, 'Theater')} - Seat Map`
-    pdf.text(title, pageWidth / 2, currentY + 5, { align: 'center' })
+    pdf.text(`${theaterData.name} - 座位图`, pageWidth / 2, currentY + 5, { align: 'center' })
 
     currentY += 10
     pdf.setFontSize(14)
     pdf.setFont('helvetica', 'normal')
-    const subtitle = sanitizeAscii(floor.name, 'Floor')
-    pdf.text(subtitle, pageWidth / 2, currentY + 5, { align: 'center' })
+    pdf.text(`${floor.name}`, pageWidth / 2, currentY + 5, { align: 'center' })
 
     currentY += 8
     pdf.setDrawColor(200, 200, 200)
@@ -290,22 +282,22 @@ export const exportAsPDF = async (
       pdf.setFontSize(10)
       pdf.setTextColor(80, 80, 80)
 
-      pdf.text('Legend:', margin, currentY)
+      pdf.text('图例：', margin, currentY)
 
       pdf.setFillColor(24, 144, 255)
       pdf.setDrawColor(9, 109, 217)
       pdf.circle(margin + 20, currentY - 3, 2.5, 'FD')
-      pdf.text('Available seat', margin + 26, currentY)
+      pdf.text('可用座位', margin + 26, currentY)
 
       pdf.setFillColor(217, 217, 217)
       pdf.setDrawColor(140, 140, 140)
-      pdf.circle(margin + 70, currentY - 3, 2.5, 'FD')
-      pdf.text('Unavailable seat', margin + 76, currentY)
+      pdf.circle(margin + 60, currentY - 3, 2.5, 'FD')
+      pdf.text('不可用座位', margin + 66, currentY)
 
       pdf.setFillColor(250, 140, 22)
       pdf.setDrawColor(212, 107, 8)
-      pdf.rect(margin + 120, currentY - 7, 8, 4, 'FD')
-      pdf.text('Stage', margin + 132, currentY)
+      pdf.rect(margin + 110, currentY - 7, 8, 4, 'FD')
+      pdf.text('舞台', margin + 120, currentY)
 
       currentY += 10
     }
@@ -362,17 +354,15 @@ export const exportAsPDF = async (
       pdf.setFont('helvetica', 'normal')
       pdf.setTextColor(100, 100, 100)
 
-      const statsText = `Total: ${seats.length} | Available: ${availableCount} | Disabled: ${
+      const statsText = `总座位数: ${seats.length} | 可用座位: ${availableCount} | 不可用座位: ${
         seats.length - availableCount
       }`
       pdf.text(statsText, margin, pageHeight - 10)
 
-      const dateText = new Date().toISOString().slice(0, 19).replace('T', ' ')
-      pdf.text(`Exported at: ${dateText}`, pageWidth - margin, pageHeight - 10, {
-        align: 'right',
-      })
+      const dateText = `导出时间: ${new Date().toLocaleString('zh-CN')}`
+      pdf.text(dateText, pageWidth - margin, pageHeight - 10, { align: 'right' })
 
-      pdf.text('Page 1', pageWidth / 2, pageHeight - 10, { align: 'center' })
+      pdf.text('第 1 页', pageWidth / 2, pageHeight - 10, { align: 'center' })
     }
 
     const filename = `${theaterData.name}-${floor.name || '座位图'}`

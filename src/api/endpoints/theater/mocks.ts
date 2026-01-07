@@ -1349,13 +1349,7 @@ export function setupShowDetailMock(mock: MockAdapter) {
         data: {
           show,
           sessions: mockSessions[show.id] || [],
-          // 夜游山水实景演出（show-001）默认只展示 A 区票档，方便与 a 项目当前效果对齐
-          priceTiers:
-            show.id === "show-001"
-              ? (mockPriceTiers[show.id] || []).filter((tier) =>
-                  tier.zoneIds?.includes("zone-002"),
-                )
-              : mockPriceTiers[show.id] || [],
+          priceTiers: mockPriceTiers[show.id] || [],
           salesRule: mockSalesRules[show.id] || {
             showId: show.id,
             saleStartType: "immediate",

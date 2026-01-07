@@ -118,7 +118,7 @@ const stats = computed(() => {
     :type="buttonType"
     block
     size="large"
-    style="height: 120px; font-size: 16px"
+    class="seat-map-editor-trigger-button"
     @click="open"
   >
     <template #icon>
@@ -126,10 +126,7 @@ const stats = computed(() => {
     </template>
     <div>
       <div>{{ buttonText }}</div>
-      <div
-        v-if="showStats && stats && stats.totalSeats > 0"
-        style="font-size: 12px; color: #8c8c8c; margin-top: 8px"
-      >
+      <div v-if="showStats && stats && stats.totalSeats > 0" class="seat-map-editor-stats">
         已设置 {{ stats.totalSeats }} 个座位｜可卖 {{ stats.availableSeats }} 个
       </div>
     </div>
@@ -141,13 +138,7 @@ const stats = computed(() => {
     :keyboard="false"
     :mask-closable="false"
     width="100%"
-    :style="{ top: 0, paddingBottom: 0, maxWidth: '100%' }"
     wrap-class-name="seat-map-editor-modal-fullscreen"
-    :body-style="{
-      height: 'calc(100vh - 116px)',
-      padding: 0,
-      overflow: 'hidden',
-    }"
     ok-text="完成"
     cancel-text="取消"
     destroy-on-close
@@ -180,9 +171,13 @@ const stats = computed(() => {
   height: 100% !important;
   max-width: 100% !important;
   padding: 0 !important;
+}
+.seat-map-editor-modal-fullscreen .ant-spin-container > .ant-layout {
+  height: calc(100vh - 117px) !important;
+}
+.seat-map-editor-modal-fullscreen .ant-layout-content > div {
   overflow: hidden !important;
 }
-
 .seat-map-editor-modal-fullscreen .ant-modal {
   top: 0 !important;
   margin: 0 !important;
@@ -206,12 +201,25 @@ const stats = computed(() => {
 }
 
 .seat-map-editor-modal-fullscreen .ant-modal-body {
+  flex: 1 !important;
   padding: 0 !important;
   overflow: hidden !important;
+  height: calc(100vh - 110px) !important;
 }
 
 .seat-map-editor-modal-fullscreen .ant-modal-footer {
   margin-top: 0 !important;
   padding: 16px 16px !important;
+}
+
+.seat-map-editor-trigger-button {
+  height: 120px !important;
+  font-size: 16px;
+}
+
+.seat-map-editor-stats {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 8px;
 }
 </style>

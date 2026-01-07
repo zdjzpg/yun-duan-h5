@@ -3,13 +3,10 @@ const props = withDefaults(
   defineProps<{
     isInModal?: boolean
     isFullscreen?: boolean
-    /** 左侧面板宽度：场馆模式 240，票档配置可设置为 500，与 a 项目对齐 */
-    leftSiderWidth?: number
   }>(),
   {
     isInModal: false,
     isFullscreen: false,
-    leftSiderWidth: 240,
   },
 )
 </script>
@@ -17,9 +14,9 @@ const props = withDefaults(
 <template>
   <a-layout
     :style="{
-      // Modal 中预留约 60px 空间给底部 AntD 按钮条，确保 seat-map-editor-footer 不被遮挡
+      // 与 A 项目保持一致：在 Modal 中使用 100% 高度，由外层 Modal bodyStyle 控制整体高度
       height: props.isInModal ? '100%' : '100vh',
-      background: '#ffffff',
+      background: '#f5f5f5',
       display: 'flex',
       flexDirection: 'column',
     }"
@@ -29,8 +26,8 @@ const props = withDefaults(
         background: '#ffffff',
         padding: '0 24px',
         borderBottom: '1px solid #f0f0f0',
-        height: '54px',
-        lineHeight: '54px',
+        height: '64px',
+        lineHeight: '64px',
         position: props.isInModal ? 'static' : 'sticky',
         top: props.isInModal ? undefined : 0,
         zIndex: 100,
@@ -42,7 +39,7 @@ const props = withDefaults(
 
     <a-layout
       :style="{
-        background: '#ffffff',
+        background: '#f5f5f5',
         flex: 1,
         overflow: 'hidden',
         display: 'flex',
@@ -50,7 +47,7 @@ const props = withDefaults(
     >
       <a-layout-sider
         v-if="!props.isFullscreen"
-        :width="props.leftSiderWidth"
+        :width="240"
         :style="{
           background: '#ffffff',
           borderRight: '1px solid #f0f0f0',
@@ -81,7 +78,7 @@ const props = withDefaults(
         <div
           :style="{
             flex: 1,
-            overflow: 'hidden',
+            overflow: 'auto',
             display: 'flex',
             flexDirection: 'column',
             height: '100%',
@@ -153,11 +150,8 @@ const props = withDefaults(
 
 .seat-map-editor-overlay-scrollbar .ant-layout-sider-children {
   overflow: visible !important;
+}
 
-}
-.seat-map-editor-modal-fullscreen .ant-layout{
-      height: calc(100vh - 115px)!important;
-}
 .seat-map-editor-panel-scrollbar {
   height: 100%;
   padding-left: 16px;

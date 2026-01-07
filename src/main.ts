@@ -24,8 +24,6 @@ import Antd, {
 import 'ant-design-vue/dist/reset.css'
 import './styles/main.less'
 import YSwitch from './components/YSwitch.vue'
-import YDatePicker from './components/YDatePicker.vue'
-import YDatePickerRange from './components/YDatePickerRange.vue'
 import YUpload from './components/YUpload.vue'
 import YUploadDraggable from './components/YUploadDraggable.vue'
 import App from './App.vue'
@@ -58,8 +56,6 @@ app
   .use(List)
 
 app.component('YSwitch', YSwitch)
-app.component('YDatePicker', YDatePicker)
-app.component('YDatePickerRange', YDatePickerRange)
 app.component('YUpload', YUpload)
 app.component('YUploadDraggable', YUploadDraggable)
 app.mount('#YunDuanH5')

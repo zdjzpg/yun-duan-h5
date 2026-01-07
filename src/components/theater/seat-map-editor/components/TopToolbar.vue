@@ -21,14 +21,12 @@ const props = withDefaults(
     isFullscreen?: boolean
     showSeatLabels: boolean
     zoomLevel: number
-    isShowMode?: boolean
   }>(),
   {
     theaterName: '座位图编辑器',
     canUndo: false,
     canRedo: false,
     isFullscreen: false,
-    isShowMode: false,
   },
 )
 
@@ -62,15 +60,15 @@ const zoomOptions = [
     <!-- 左侧：剧场名称 -->
     <div style="flex: 1; display: flex; justify-content: flex-start">
       <a-typography-text strong style="font-size: 16px">
-        🎫{{ props.theaterName }}
+        🏛️ {{ props.theaterName }}
       </a-typography-text>
     </div>
 
     <!-- 中间：画布工具栏 -->
     <div style="flex: 0 0 auto; display: flex; justify-content: center">
       <a-space size="small">
-        <!-- 生成座位（仅场馆模式显示） -->
-        <a-tooltip v-if="!props.isShowMode" title="快速生成网格座位">
+        <!-- 生成座位 -->
+        <a-tooltip title="快速生成网格座位">
           <a-button type="primary" @click="emit('batchGenerate')">
             <template #icon>
               <PlusOutlined />
@@ -79,8 +77,8 @@ const zoomOptions = [
           </a-button>
         </a-tooltip>
 
-        <!-- 添加舞台（仅场馆模式显示） -->
-        <a-tooltip v-if="!props.isShowMode" title="在画布中添加舞台">
+        <!-- 添加舞台 -->
+        <a-tooltip title="在画布中添加舞台">
           <a-button
             :style="{
               background: '#722ED1',
@@ -96,11 +94,7 @@ const zoomOptions = [
           </a-button>
         </a-tooltip>
 
-        <a-divider
-          v-if="!props.isShowMode"
-          type="vertical"
-          :style="{ margin: 0, height: '24px' }"
-        />
+        <a-divider type="vertical" :style="{ margin: 0, height: '24px' }" />
 
         <!-- 座位编号开关 -->
         <a-tooltip :title="props.showSeatLabels ? '隐藏座位编号' : '显示座位编号'">
@@ -164,8 +158,8 @@ const zoomOptions = [
           </a-button>
         </a-tooltip>
 
-        <!-- 导入（仅场馆模式显示） -->
-        <a-button v-if="!props.isShowMode" @click="emit('import')">
+        <!-- 导入 -->
+        <a-button @click="emit('import')">
           <template #icon>
             <ImportOutlined />
           </template>
@@ -196,7 +190,7 @@ const zoomOptions = [
         </a-tooltip>
 
         <!-- 快捷键 -->
-        <a-tooltip title="快捷键说明(?)">
+        <a-tooltip title="快捷键说明 (?)">
           <a-button @click="emit('showShortcuts')">
             <template #icon>
               <QuestionCircleOutlined />

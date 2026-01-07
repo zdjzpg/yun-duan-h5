@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import draggable from 'vuedraggable'
 import type { UploadFile } from 'ant-design-vue'
 import YUpload from './YUpload.vue'
@@ -8,12 +8,18 @@ interface Props {
   fileList?: UploadFile[]
   disabled?: boolean
   maxCount?: number
+  /** 是否在第一个图片卡片上展示“封面”标记 */
+  showCoverBadge?: boolean
+  /** 自定义封面标记文案 */
+  coverBadgeText?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   fileList: () => [],
   disabled: false,
   maxCount: Infinity,
+  showCoverBadge: false,
+  coverBadgeText: '封面',
 })
 
 const emit = defineEmits<{
@@ -21,8 +27,14 @@ const emit = defineEmits<{
   (e: 'change', info: unknown): void
 }>()
 
-const innerFileList = ref<UploadFile[]>([...props.fileList])
+const innerFileList = ref<UploadFile[]>([...(props.fileList ?? [])])
 const fakePercents = ref<Record<string, number>>({})
+const wrapperRef = ref<HTMLElement | null>(null)
+
+// å½“å­˜åœ¨ status === 'done' çš„æ–‡ä»¶æ—¶ï¼Œè¡¨ç¤ºå·²æœ‰å›¾ç‰‡ä¸Šä¼ å®Œæ¯•ï¼Œæœ‰æ„ä¹‰å¼€å?¨æ‹–æ‹½æŽ’åº
+const hasDraggableItems = computed(() =>
+  innerFileList.value.some((file) => file.status === 'done'),
+)
 
 watch(
   () => props.fileList,
@@ -46,9 +58,7 @@ const handleUploadChange = (info: unknown) => {
 
 const handleRemove = (file: UploadFile) => {
   if (props.disabled) return
-  innerFileList.value = innerFileList.value.filter(
-    (item: UploadFile) => item.uid !== file.uid,
-  )
+  innerFileList.value = innerFileList.value.filter((item: UploadFile) => item.uid !== file.uid)
 }
 
 const getDisplayPercent = (file: UploadFile) => {
@@ -63,11 +73,33 @@ const getDisplayPercent = (file: UploadFile) => {
   }
   return fakePercents.value[uid]
 }
+
+onMounted(() => {
+  const el = wrapperRef.value
+  if (!el) return
+  const controlContent = el.closest('.ant-form-item-control-input-content') as HTMLElement | null
+  if (!controlContent) return
+  controlContent.style.paddingTop = '0px'
+  controlContent.style.paddingBottom = '0px'
+})
 </script>
 
 <template>
-  <div class="y-upload-draggable">
+  <div ref="wrapperRef" class="y-upload-draggable">
+    <!-- 文件列表为空时，直接用 YUpload，行为与单独使用 YUpload 保持一致 -->
+    <YUpload
+      v-if="!hasDraggableItems"
+      v-model:fileList="innerFileList"
+      :disabled="disabled"
+      :max-count="maxCount"
+      :show-upload-list="false"
+      v-bind="$attrs"
+      @change="handleUploadChange"
+    />
+
+    <!-- 有文件时才启用拖拽排序 -->
     <draggable
+      v-else
       v-model="innerFileList"
       item-key="uid"
       class="y-upload-draggable-list"
@@ -75,8 +107,14 @@ const getDisplayPercent = (file: UploadFile) => {
       :disabled="disabled"
     >
       <!-- 已上传文件：支持拖拽和删除 -->
-      <template #item="{ element }">
+      <template #item="{ element, index }">
         <div class="y-upload-card">
+          <div v-if="props.showCoverBadge && index === 0" class="y-upload-cover-badge">
+            <span class="y-upload-cover-star">*</span>
+            <span class="y-upload-cover-text">
+              {{ props.coverBadgeText }}
+            </span>
+          </div>
           <template v-if="element.url || element.thumbUrl">
             <img :src="element.url || element.thumbUrl" alt="" />
           </template>
@@ -155,6 +193,40 @@ const getDisplayPercent = (file: UploadFile) => {
   object-fit: cover;
   display: block;
 }
+.y-upload-draggable :deep(.ant-upload-wrapper.ant-upload-picture-card-wrapper) {
+  line-height: 0; // 去掉多余行高
+}
+
+.y-upload-draggable :deep(.ant-upload.ant-upload-select-picture-card) {
+  width: 80px;
+  height: 80px;
+  margin: 0; // 避免额外上下间距
+  padding: 0;
+}
+.y-upload-cover-badge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: fit-content;
+  box-sizing: border-box;
+  padding: 0 8px;
+  height: 22px;
+  line-height: 22px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  background-color: #bfbfbf;
+  z-index: 120;
+}
+
+.y-upload-cover-star {
+  color: #f5222d;
+  margin-right: 4px;
+}
+
+.y-upload-cover-text {
+  color: #ffffff;
+}
 
 .y-upload-placeholder {
   width: 100%;
@@ -191,5 +263,13 @@ const getDisplayPercent = (file: UploadFile) => {
 
 .y-upload-draggable-ghost {
   opacity: 0.5;
+}
+</style>
+
+<style lang="less">
+/* 只在 form-item 的控件区域里包含 YUploadDraggable 时，把这行的上下 padding 关掉，避免高度被撑到 96px */
+.ant-form-item-control-input-content:has(> .y-upload-draggable) {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 </style>

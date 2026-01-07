@@ -4,13 +4,18 @@ import { useRoute, useRouter } from 'vue-router'
 import message from 'ant-design-vue/es/message'
 import FormPageLayout from '@/components/layouts/FormPageLayout.vue'
 import ShowForm from '@/components/theater/show-form/ShowForm.vue'
-import { FORM_STEPS, type ShowFormData } from '@/components/theater/show-form/types'
 import {
-  fetchShowDetail,
-  updateShow,
-  type UpdateShowRequest,
-} from '@/api/show'
-import { fetchVenues, type VenueListRequest, type Venue } from '@/api/theaterVenue'
+  FORM_STEPS,
+  type ShowFormData,
+  type SessionConfig,
+} from '@/components/theater/show-form/types'
+import { fetchShowDetail, updateShow, type UpdateShowRequest } from '@/api/show'
+import {
+  fetchVenues,
+  fetchVenueDetail,
+  type VenueListRequest,
+  type Venue,
+} from '@/api/theaterVenue'
 
 const route = useRoute()
 const router = useRouter()
@@ -48,6 +53,33 @@ const loadDetail = async () => {
     const res = await fetchShowDetail(showId)
     const show = res.show
 
+    let venueCapacityType: SessionConfig['venueCapacityType'] = undefined
+    if (show.venueId) {
+      try {
+        const venueDetail = await fetchVenueDetail(show.venueId)
+        venueCapacityType = venueDetail.capacityType as SessionConfig['venueCapacityType']
+      } catch (err) {
+        console.warn('获取场馆详情失败，仅用于显示容量类型，不影响编辑', err)
+      }
+    }
+
+    const sessions = (res.sessions || []).map((session) => ({
+      date: session.date,
+      startTime: session.startTime,
+      durationMinutes: session.durationMinutes,
+      openTime: session.openTime,
+    }))
+
+    const priceTiers = (res.priceTiers || []).map((tier) => ({
+      name: tier.name,
+      price: tier.price,
+      zoneIds: tier.zoneIds,
+      color: tier.color,
+      remark: tier.remark,
+    }))
+
+    // 保持与 a 项一致：编辑旧数据时不预先生成 sessionConfigs，
+    // 仅填充旧字段 sessions / priceTiers，由表单内部在提交时兼容处理。
     initialValues.value = {
       basicInfo: {
         name: show.name,
@@ -60,19 +92,9 @@ const loadDetail = async () => {
         producer: show.producer,
         status: show.status,
       },
-      sessions: (res.sessions || []).map((session) => ({
-        date: session.date,
-        startTime: session.startTime,
-        durationMinutes: session.durationMinutes,
-        openTime: session.openTime,
-      })),
-      priceTiers: (res.priceTiers || []).map((tier) => ({
-        name: tier.name,
-        price: tier.price,
-        zoneIds: tier.zoneIds,
-        color: tier.color,
-        remark: tier.remark,
-      })),
+      sessions,
+      priceTiers,
+      seatPriceTierMapping: res.seatPriceTierMapping,
       salesRule: res.salesRule || {
         saleStartType: 'immediate',
         saleEndType: 'before_show',
@@ -81,6 +103,13 @@ const loadDetail = async () => {
         refundDeadlineType: 'before_show',
         refundDeadlineHoursBeforeShow: 24,
         maxPurchasePerOrder: 10,
+      },
+      details: {
+        intro: show.detailsIntro,
+        bookingRule: show.detailsBookingRule,
+        refundRule: show.detailsRefundRule,
+        safetyNotice: show.detailsSafetyNotice,
+        detailImages: show.detailImages,
       },
     }
   } catch (err) {
@@ -119,12 +148,44 @@ const handleFinish = async () => {
 
   try {
     submitting.value = true
-    const values = showFormRef.value.getValues()
+    const values = showFormRef.value.getValues() as ShowFormData & {
+      sessionConfigs?: import('@/components/theater/show-form/types').SessionConfig[]
+    }
+
+    const sessionConfigs =
+      (values.sessionConfigs && values.sessionConfigs.length
+        ? values.sessionConfigs
+        : [
+            {
+              venueId: values.basicInfo.venueId,
+              venueName: undefined,
+              venueCapacityType: undefined,
+              priceTiers: (values.priceTiers || []) as any,
+              seatPriceTierMapping: values.seatPriceTierMapping,
+              seatDisabledStates: undefined,
+              sessions: (values.sessions || []) as any,
+            },
+          ]) || []
+
+    const flattenedSessions = sessionConfigs.flatMap((config) =>
+      (config.sessions || []).map((session) => ({
+        date: session.date || '',
+        startTime: session.startTime || '',
+        durationMinutes: session.durationMinutes,
+        openTime: session.openTime || undefined,
+      })),
+    )
+
+    const primaryVenueId = sessionConfigs[0]?.venueId || values.basicInfo.venueId
+
+    const flattenedPriceTiers = (sessionConfigs[0]?.priceTiers ||
+      values.priceTiers ||
+      []) as ShowFormData['priceTiers']
 
     const payload: UpdateShowRequest = {
       id: showId,
       name: values.basicInfo.name.trim(),
-      venueId: values.basicInfo.venueId,
+      venueId: primaryVenueId,
       type: values.basicInfo.type,
       suitableAudience: values.basicInfo.suitableAudience,
       coverImage: values.basicInfo.coverImage,
@@ -132,13 +193,13 @@ const handleFinish = async () => {
       description: values.basicInfo.description?.trim() || undefined,
       producer: values.basicInfo.producer?.trim() || undefined,
       status: values.basicInfo.status,
-      sessions: (values.sessions || []).map((session: ShowFormData['sessions'][number]) => ({
-        date: session.date || '',
-        startTime: session.startTime || '',
-        durationMinutes: session.durationMinutes,
-        openTime: session.openTime || undefined,
-      })),
-      priceTiers: (values.priceTiers || []).map((tier: ShowFormData['priceTiers'][number]) => ({
+      detailsIntro: values.details?.intro?.trim() || undefined,
+      detailsBookingRule: values.details?.bookingRule?.trim() || undefined,
+      detailsRefundRule: values.details?.refundRule?.trim() || undefined,
+      detailsSafetyNotice: values.details?.safetyNotice?.trim() || undefined,
+      detailImages: values.details?.detailImages,
+      sessions: flattenedSessions,
+      priceTiers: flattenedPriceTiers.map((tier) => ({
         name: tier.name.trim(),
         price: tier.price,
         zoneIds: tier.zoneIds,
@@ -179,7 +240,7 @@ const handleCancel = () => {
   <FormPageLayout>
     <template #default>
       <a-spin :spinning="loading">
-        <div style="max-width: 960px">
+        <div>
           <ShowForm
             v-if="initialValues"
             ref="showFormRef"
@@ -206,12 +267,7 @@ const handleCancel = () => {
         >
           下一步
         </a-button>
-        <a-button
-          v-else
-          type="primary"
-          :loading="submitting"
-          @click="handleFinish"
-        >
+        <a-button v-else type="primary" :loading="submitting" @click="handleFinish">
           保存
         </a-button>
       </div>
