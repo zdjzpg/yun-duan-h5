@@ -6,6 +6,8 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // GitHub Pages 项目名，确保静态资源路径正确： https://zdjzpg.github.io/yun-duan-h5/
+  base: '/yun-duan-h5/',
   plugins: [vue(), vueDevTools()],
   resolve: {
     alias: {
