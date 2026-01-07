@@ -1,11 +1,11 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { theaterVenueRoutes } from './modules/theaterVenues'
 import { theaterShowRoutes } from './modules/theaterShows'
 import { demoRoutes } from './modules/demo'
 import TableColumnSettingDemo from '@/views/Demo/TableColumnSettingDemo.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
