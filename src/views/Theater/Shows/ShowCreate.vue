@@ -15,18 +15,7 @@ const currentStep = ref(0)
 const submitting = ref(false)
 const venueOptions = ref<Array<{ label: string; value: string }>>([])
 
-const initialValues = ref<Partial<ShowFormData>>({
-  // 新建时默认无场次配置，全部由第二步完成
-  salesRule: {
-    saleStartType: 'immediate',
-    saleEndType: 'before_show',
-    saleEndMinutesBeforeShow: 30,
-    allowRefund: true,
-    refundDeadlineType: 'before_show',
-    refundDeadlineHoursBeforeShow: 24,
-    maxPurchasePerOrder: 10,
-  },
-})
+const initialValues = ref<Partial<ShowFormData>>({})
 
 const loadVenues = async () => {
   try {
@@ -132,18 +121,6 @@ const handleFinish = async () => {
         color: tier.color,
         remark: tier.remark?.trim() || undefined,
       })),
-      salesRule: {
-        saleStartType: values.salesRule.saleStartType,
-        saleStartTime: values.salesRule.saleStartTime || undefined,
-        saleEndType: values.salesRule.saleEndType,
-        saleEndMinutesBeforeShow: values.salesRule.saleEndMinutesBeforeShow,
-        saleEndTime: values.salesRule.saleEndTime || undefined,
-        allowRefund: values.salesRule.allowRefund,
-        refundDeadlineType: values.salesRule.refundDeadlineType,
-        refundDeadlineHoursBeforeShow: values.salesRule.refundDeadlineHoursBeforeShow,
-        refundDeadlineTime: values.salesRule.refundDeadlineTime || undefined,
-        maxPurchasePerOrder: values.salesRule.maxPurchasePerOrder,
-      },
     }
 
     await createShow(payload)

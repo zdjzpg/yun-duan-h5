@@ -3,7 +3,6 @@ import type { RouteRecordRaw } from 'vue-router'
 import ShowList from '@/views/Theater/Shows/ShowList.vue'
 import ShowCreate from '@/views/Theater/Shows/ShowCreate.vue'
 import ShowEdit from '@/views/Theater/Shows/ShowEdit.vue'
-import ShowSeatPricingPage from '@/views/Theater/Shows/ShowSeatPricingPage.vue'
 
 export const theaterShowRoutes: RouteRecordRaw[] = [
   {
@@ -23,11 +22,5 @@ export const theaterShowRoutes: RouteRecordRaw[] = [
     name: 'TheaterShowEdit',
     component: ShowEdit,
     meta: { title: '编辑演出' },
-  },
-  {
-    path: '/dashboard/theater/shows/:id/seat-pricing',
-    name: 'TheaterShowSeatPricing',
-    component: ShowSeatPricingPage,
-    meta: { title: '票档配置' },
   },
 ]

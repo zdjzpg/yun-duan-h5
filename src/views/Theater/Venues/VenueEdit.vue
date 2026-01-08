@@ -2,14 +2,15 @@
 import { computed, onMounted, ref } from 'vue'
 import message from 'ant-design-vue/es/message'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchVenueDetail, updateVenue, type UpdateVenueRequest } from '@/api/theaterVenue'
+import {
+  fetchVenueDetail,
+  saveVenue,
+  type SaveVenueRequest,
+  type VenueStatus,
+} from '@/api/theaterVenue'
 import type { TheaterData } from '@/components/theater/seat-map-editor/types.simplified'
-import type { VenueLockStatus } from '@/types/theater'
-import { checkVenueLockStatus } from '@/api/endpoints/theater/venue-lock'
 import FormPageLayout from '@/components/layouts/FormPageLayout.vue'
 import VenueForm, { type VenueFormValues } from './VenueForm.vue'
-import VenueLockAlert from '@/components/theater/VenueLockAlert.vue'
-import CopyVenueModal from '@/components/theater/CopyVenueModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -17,11 +18,11 @@ const router = useRouter()
 const loading = ref(true)
 const submitting = ref(false)
 const initialValues = ref<VenueFormValues | undefined>(undefined)
-const capacityType = ref<string>('free_seating')
+const currentStatus = ref<VenueStatus>('active')
 
 const formRef = ref<InstanceType<typeof VenueForm> | null>(null)
-const lockStatus = ref<VenueLockStatus | null>(null)
-const copyModalVisible = ref(false)
+
+const buildTempId = (prefix: string, index: number) => `${prefix}_${Date.now()}_${index}`
 
 const venueId = computed(() => route.params.id as string)
 
@@ -36,13 +37,17 @@ const loadDetail = async () => {
     loading.value = true
     const detail = await fetchVenueDetail(id)
 
-    capacityType.value = detail.capacityType
+    currentStatus.value = detail.status || 'active'
 
     if (detail.capacityType === 'precise_seat') {
       const preciseSeats: TheaterData = {
         id: detail.id,
         name: detail.name,
-        floors: (detail as any).floors || [],
+        floors: ((detail as any).floors || []).map((floor: any, index: number) => ({
+          id: floor.id,
+          name: floor.name,
+          level: floor.level ?? floor.order ?? index + 1,
+        })),
         zones: (detail.zones || []).map((z: any, index: number) => ({
           id: z.id,
           venueId: z.venueId,
@@ -53,10 +58,10 @@ const loadDetail = async () => {
           order: (z as any).order ?? z.sort ?? index + 1,
         })),
         seats: (detail as any).seats || [],
-        stage: (detail as any).seatMapConfig?.stage,
+        stage: (detail as any).stage,
         metadata: {
-          createdAt: detail.createdAt,
-          updatedAt: detail.updatedAt,
+          createdAt: detail.createdAt || '',
+          updatedAt: detail.updatedAt || '',
         },
       }
 
@@ -88,14 +93,6 @@ const loadDetail = async () => {
           : [],
       }
     }
-
-    // 加载锁定状态
-    try {
-      lockStatus.value = await checkVenueLockStatus(id)
-    } catch (e) {
-      console.error('获取场馆锁定状态失败:', e)
-      lockStatus.value = null
-    }
   } catch (err) {
     console.error(err)
   } finally {
@@ -114,66 +111,88 @@ const handleSubmit = async (values: VenueFormValues) => {
   try {
     submitting.value = true
 
-    const payload: UpdateVenueRequest = {
+    const payload: SaveVenueRequest = {
       id,
+      name: values.name,
+      type: values.type,
+      scenicId: values.scenicId,
+      address: values.address,
+      description: values.description,
+      capacityType: values.capacityType,
+      status: currentStatus.value,
+      totalCapacity: values.totalCapacity || 0,
     }
 
     if (values.capacityType === 'free_seating') {
-      Object.assign(payload, {
-        name: values.name,
-        type: values.type,
-        scenicId: values.scenicId,
-        address: values.address,
-        description: values.description,
-        capacityType: 'free_seating',
-        totalCapacity: values.totalCapacity || 0,
-      })
+      payload.capacityType = 'free_seating'
     } else if (values.capacityType === 'zone_capacity') {
-      Object.assign(payload, {
-        name: values.name,
-        type: values.type,
-        scenicId: values.scenicId,
-        address: values.address,
-        description: values.description,
-        capacityType: 'zone_capacity',
-        zones: (values.zones || []).map((zone, index) => ({
-          name: zone.name,
-          capacity: zone.capacity,
-          sort: index + 1,
-        })),
-      })
+      const mappedZones = (values.zones || []).map((zone, index) => ({
+        id: zone.id || buildTempId('zone', index),
+        name: zone.name,
+        capacity: zone.capacity,
+        sort: zone.sort ?? index + 1,
+      }))
+
+      payload.capacityType = 'zone_capacity'
+      payload.zones = mappedZones
+      payload.totalCapacity = mappedZones.reduce((sum, zone) => sum + (zone.capacity || 0), 0)
     } else if (values.capacityType === 'precise_seat') {
       const precise = (values as any).preciseSeats as TheaterData | undefined
       if (!precise || !precise.zones || !precise.seats) {
         throw new Error('请先配置座位图')
       }
 
-      Object.assign(payload, {
-        name: values.name,
-        type: values.type,
-        scenicId: values.scenicId,
-        address: values.address,
-        description: values.description,
-        capacityType: 'precise_seat',
-        zones: precise.zones.map((zone) => ({
-          name: zone.name,
-          shortName: zone.shortName,
-          color: zone.color,
-          floor: precise.floors.find((f) => f.id === zone.floorId)?.name,
-        })),
-        seats: precise.seats.map((seat) => ({
-          zoneId: seat.zoneId || '',
-          rowLabel: seat.rowLabel,
-          seatLabel: seat.seatLabel,
-          status: seat.status,
-          label: seat.label,
-          x: seat.x,
-          y: seat.y,
-        })),
-      })
+      const mappedFloors = (precise.floors || []).map((floor, index) => ({
+        id: floor.id || buildTempId('floor', index),
+        name: floor.name,
+        order: (floor as any).order ?? floor.level ?? index + 1,
+      }))
+
+      const mappedZones = (precise.zones || []).map((zone, index) => ({
+        id: zone.id || buildTempId('zone', index),
+        floorId: zone.floorId,
+        name: zone.name,
+        shortName: zone.shortName,
+        color: zone.color,
+        sort: zone.order ?? index + 1,
+      }))
+
+      const mappedSeats = (precise.seats || []).map((seat, index) => ({
+        id: seat.id || buildTempId('seat', index),
+        zoneId: seat.zoneId || '',
+        floorId: seat.floorId,
+        rowLabel: seat.rowLabel,
+        seatLabel: seat.seatLabel,
+        status: seat.status,
+        disabledReason: seat.disabledReason,
+        label: seat.label,
+        x: seat.x,
+        y: seat.y,
+      }))
+
+      const stage = precise.stage
+
+      payload.capacityType = 'precise_seat'
+      payload.floors = mappedFloors
+      payload.zones = mappedZones
+      payload.seats = mappedSeats
+      payload.totalCapacity = mappedSeats.length
+      payload.stage = stage
+        ? {
+            id: stage.id || buildTempId('stage', 0),
+            name: stage.name || '舞台方向',
+            x: stage.x ?? 0,
+            y: stage.y ?? -300,
+            shape: stage.shape || 'trapezoid',
+            width: stage.width ?? 480,
+            height: stage.height ?? 40,
+            position: (stage.position as 'top-center') || 'top-center',
+            color: stage.color,
+          }
+        : undefined
     }
 
-    await updateVenue(payload)
+    await saveVenue(payload)
     message.success('保存成功')
     router.push('/dashboard/theater/venues')
   } catch (err: any) {
@@ -185,25 +204,12 @@ const handleSubmit = async (values: VenueFormValues) => {
     submitting.value = false
   }
 }
-
-const handleCopySuccess = (newVenueId: string) => {
-  message.success('场馆复制成功')
-  copyModalVisible.value = false
-  router.push(`/dashboard/theater/venues/${newVenueId}/edit`)
-}
 </script>
 
 <template>
   <FormPageLayout>
     <a-spin :spinning="loading">
       <div style="max-width: 896px">
-        <VenueLockAlert
-          v-if="lockStatus"
-          :lock-status="lockStatus"
-          :show-copy-button="true"
-          @copy="copyModalVisible = true"
-        />
-
         <VenueForm
           v-if="initialValues"
           ref="formRef"
@@ -224,14 +230,5 @@ const handleCopySuccess = (newVenueId: string) => {
         保存
       </a-button>
     </template>
-
-    <CopyVenueModal
-      v-if="lockStatus"
-      :open="copyModalVisible"
-      :source-venue-id="venueId"
-      :source-venue-name="initialValues?.name || ''"
-      @close="copyModalVisible = false"
-      @success="handleCopySuccess"
-    />
   </FormPageLayout>
 </template>

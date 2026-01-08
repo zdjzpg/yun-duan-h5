@@ -172,7 +172,7 @@ const stats = computed(() => {
   max-width: 100% !important;
   padding: 0 !important;
 }
-.seat-map-editor-modal-fullscreen .ant-spin-container > .ant-layout {
+.seat-map-editor-modal-fullscreen .ant-layout {
   height: calc(100vh - 117px) !important;
 }
 .seat-map-editor-modal-fullscreen .ant-layout-content > div {

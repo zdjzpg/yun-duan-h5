@@ -51,12 +51,6 @@ const columns = [
     width: 100,
   },
   {
-    title: '锁定状态',
-    dataIndex: 'isLocked',
-    key: 'isLocked',
-    width: 120,
-  },
-  {
     title: '最近更新时间',
     dataIndex: 'updatedAt',
     key: 'updatedAt',
@@ -144,8 +138,12 @@ const handleExport = () => {
     totalCapacity: venue.totalCapacity,
     status: statusMap[venue.status],
     address: venue.address || '',
-    createdAt: new Date(venue.createdAt).toLocaleString('zh-CN'),
-    updatedAt: new Date(venue.updatedAt).toLocaleString('zh-CN'),
+    createdAt: venue.createdAt
+      ? new Date(venue.createdAt).toLocaleString('zh-CN')
+      : '',
+    updatedAt: venue.updatedAt
+      ? new Date(venue.updatedAt).toLocaleString('zh-CN')
+      : '',
   }))
 
   const headers = [
@@ -257,13 +255,6 @@ const handleExport = () => {
           <a-badge v-else status="default" text="停用" />
         </template>
 
-        <template v-else-if="column.key === 'isLocked'">
-          <span v-if="record.capacityType !== 'precise_seat'">-</span>
-          <a-tag v-else :color="record.isLocked ? 'red' : 'green'">
-            {{ record.isLocked ? '已锁定' : '未锁定' }}
-          </a-tag>
-        </template>
-
         <template v-else-if="column.key === 'updatedAt'">
           {{
             new Date(text).toLocaleString('zh-CN', {
@@ -303,4 +294,3 @@ const handleExport = () => {
     </a-table>
   </ListPageLayout>
 </template>
-

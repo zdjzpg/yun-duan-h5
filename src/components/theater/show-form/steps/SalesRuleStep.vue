@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { ShowFormSalesRule } from '../types'
+import StoreSelectorModal from '@/components/store/StoreSelectorModal.vue'
 
 const props = defineProps<{
   modelValue: ShowFormSalesRule
@@ -16,6 +17,21 @@ const salesRule = computed({
 } as any)
 
 const riskNoticeFileList = ref<any[]>([])
+const storeSelectorVisible = ref(false)
+
+const selectedStoreIds = computed(
+  (): number[] => ((salesRule.value as any).storeIds as number[]) || [],
+)
+
+const handleStoreIdsChange = (ids: number[]) => {
+  ;(salesRule.value as any).storeIds = ids
+}
+
+const selectedStoreText = computed(() => {
+  const count = selectedStoreIds.value.length
+  if (!count) return '未选择门店'
+  return `已选择 ${count} 家门店`
+})
 
 const handleRiskNoticeBeforeUpload = (file: any) => {
   riskNoticeFileList.value = [file]
@@ -65,7 +81,9 @@ const handleRemoveRefundFeeLadderRule = (index: number) => {
       </a-typography-title>
 
       <a-form-item class="sales-rule-line" label="销售门店">
-        <a-typography-link disabled>选择门店</a-typography-link>
+        <a-typography-link @click="storeSelectorVisible = true">
+          {{ selectedStoreText }}
+        </a-typography-link>
       </a-form-item>
 
       <a-form-item class="sales-rule-line" label="可售渠道">
@@ -451,10 +469,7 @@ const handleRemoveRefundFeeLadderRule = (index: number) => {
           <a-radio-group v-model:value="salesRule.refundFeeRuleType">
             <a-radio value="fixed">
               固定金额
-              <span
-                v-if="salesRule.refundFeeRuleType === 'fixed'"
-                class="refund-fee-fixed-row"
-              >
+              <span v-if="salesRule.refundFeeRuleType === 'fixed'" class="refund-fee-fixed-row">
                 每张票实际售价收取
                 <a-input-number
                   v-model:value="salesRule.refundFeeFixedAmount"
@@ -462,35 +477,24 @@ const handleRemoveRefundFeeLadderRule = (index: number) => {
                   :precision="2"
                   style="width: 120px; margin: 0 8px"
                 />
-                <a-select
-                  v-model:value="salesRule.refundFeeFixedUnit"
-                  style="width: 80px"
-                >
+                <a-select v-model:value="salesRule.refundFeeFixedUnit" style="width: 80px">
                   <a-select-option value="yuan">元</a-select-option>
                   <a-select-option value="percent">%</a-select-option>
                 </a-select>
               </span>
             </a-radio>
-            <a-radio value="ladder">
-              阶梯金额
-            </a-radio>
+            <a-radio value="ladder"> 阶梯金额 </a-radio>
           </a-radio-group>
         </div>
 
-        <div
-          v-if="salesRule.refundFeeRuleType === 'ladder'"
-          class="refund-fee-ladder-list"
-        >
+        <div v-if="salesRule.refundFeeRuleType === 'ladder'" class="refund-fee-ladder-list">
           <div
             v-for="(rule, index) in salesRule.refundFeeLadderRules || []"
             :key="rule.id || index"
             class="refund-fee-ladder-row"
           >
             截止检票时间
-            <a-select
-              v-model:value="rule.offsetDirection"
-              style="width: 80px; margin: 0 4px"
-            >
+            <a-select v-model:value="rule.offsetDirection" style="width: 80px; margin: 0 4px">
               <a-select-option value="before">前</a-select-option>
               <a-select-option value="after">后</a-select-option>
             </a-select>
@@ -515,10 +519,7 @@ const handleRemoveRefundFeeLadderRule = (index: number) => {
               :precision="2"
               style="width: 120px; margin: 0 8px"
             />
-            <a-select
-              v-model:value="rule.feeUnit"
-              style="width: 80px; margin-right: 8px"
-            >
+            <a-select v-model:value="rule.feeUnit" style="width: 80px; margin-right: 8px">
               <a-select-option value="yuan">元</a-select-option>
               <a-select-option value="percent">%</a-select-option>
             </a-select>
@@ -531,9 +532,7 @@ const handleRemoveRefundFeeLadderRule = (index: number) => {
             </a-button>
           </div>
 
-          <a-typography-link @click="handleAddRefundFeeLadderRule">
-            添加规则
-          </a-typography-link>
+          <a-typography-link @click="handleAddRefundFeeLadderRule"> 添加规则 </a-typography-link>
         </div>
       </a-form-item>
 
@@ -549,8 +548,13 @@ const handleRemoveRefundFeeLadderRule = (index: number) => {
           <a-radio value="manual">审核后退款</a-radio>
         </a-radio-group>
       </a-form-item>
+      </div>
     </div>
-  </div>
+  <StoreSelectorModal
+    v-model:open="storeSelectorVisible"
+    :selectedIds="selectedStoreIds"
+    @update:selectedIds="handleStoreIdsChange"
+  />
 </template>
 
 <style scoped>
@@ -602,6 +606,16 @@ const handleRemoveRefundFeeLadderRule = (index: number) => {
 
 .refund-fee-fixed-row {
   margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.refund-fee-fixed-row :deep(.ant-input-number),
+.refund-fee-fixed-row :deep(.ant-input-number-input),
+.refund-fee-fixed-row :deep(.ant-select-selector),
+.refund-fee-fixed-row :deep(.ant-select-selection-item) {
+  height: 32px !important;
+  line-height: 32px !important;
 }
 
 .refund-fee-ladder-list {

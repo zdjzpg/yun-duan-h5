@@ -49,19 +49,8 @@ export type SessionPriceTier = ShowFormPriceTier & {
 }
 
 export type ShowFormSalesRule = {
-  // 旧字段（兼容）
-  saleStartType: 'immediate' | 'scheduled'
-  saleStartTime?: string
-  saleEndType: 'before_show' | 'scheduled'
-  saleEndMinutesBeforeShow?: number
-  saleEndTime?: string
-  allowRefund: boolean
-  refundDeadlineType?: 'before_show' | 'scheduled'
-  refundDeadlineHoursBeforeShow?: number
-  refundDeadlineTime?: string
-  maxPurchasePerOrder: number
-
   // 下单规则
+  storeIds?: number[]
   orderChannels?: (
     | 'online_mini_program'
     | 'online_sub_mini_program'

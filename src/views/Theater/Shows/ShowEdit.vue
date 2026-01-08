@@ -10,12 +10,21 @@ import {
   type SessionConfig,
 } from '@/components/theater/show-form/types'
 import { fetchShowDetail, updateShow, type UpdateShowRequest } from '@/api/show'
+import type { Show } from '@/api/endpoints/theater/types'
 import {
   fetchVenues,
   fetchVenueDetail,
   type VenueListRequest,
   type Venue,
 } from '@/api/theaterVenue'
+
+type ShowWithDetails = Show & {
+  detailsIntro?: string
+  detailsBookingRule?: string
+  detailsRefundRule?: string
+  detailsSafetyNotice?: string
+  detailImages?: string[]
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -51,7 +60,7 @@ const loadDetail = async () => {
   try {
     loading.value = true
     const res = await fetchShowDetail(showId)
-    const show = res.show
+    const show = res.show as ShowWithDetails
 
     let venueCapacityType: SessionConfig['venueCapacityType'] = undefined
     if (show.venueId) {
@@ -78,7 +87,6 @@ const loadDetail = async () => {
       remark: tier.remark,
     }))
 
-    // 保持与 a 项一致：编辑旧数据时不预先生成 sessionConfigs，
     // 仅填充旧字段 sessions / priceTiers，由表单内部在提交时兼容处理。
     initialValues.value = {
       basicInfo: {
@@ -95,15 +103,7 @@ const loadDetail = async () => {
       sessions,
       priceTiers,
       seatPriceTierMapping: res.seatPriceTierMapping,
-      salesRule: res.salesRule || {
-        saleStartType: 'immediate',
-        saleEndType: 'before_show',
-        saleEndMinutesBeforeShow: 30,
-        allowRefund: true,
-        refundDeadlineType: 'before_show',
-        refundDeadlineHoursBeforeShow: 24,
-        maxPurchasePerOrder: 10,
-      },
+      salesRule: res.salesRule || {},
       details: {
         intro: show.detailsIntro,
         bookingRule: show.detailsBookingRule,
@@ -206,18 +206,6 @@ const handleFinish = async () => {
         color: tier.color,
         remark: tier.remark?.trim() || undefined,
       })),
-      salesRule: {
-        saleStartType: values.salesRule.saleStartType,
-        saleStartTime: values.salesRule.saleStartTime || undefined,
-        saleEndType: values.salesRule.saleEndType,
-        saleEndMinutesBeforeShow: values.salesRule.saleEndMinutesBeforeShow,
-        saleEndTime: values.salesRule.saleEndTime || undefined,
-        allowRefund: values.salesRule.allowRefund,
-        refundDeadlineType: values.salesRule.refundDeadlineType,
-        refundDeadlineHoursBeforeShow: values.salesRule.refundDeadlineHoursBeforeShow,
-        refundDeadlineTime: values.salesRule.refundDeadlineTime || undefined,
-        maxPurchasePerOrder: values.salesRule.maxPurchasePerOrder,
-      },
     }
 
     await updateShow(payload)

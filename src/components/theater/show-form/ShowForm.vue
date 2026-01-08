@@ -45,15 +45,6 @@ const formState = reactive<any>({
   priceTiers: [],
   seatPriceTierMapping: undefined,
   salesRule: {
-    // 销售时间 & 退票旧字段（兼容用）
-    saleStartType: 'immediate',
-    saleEndType: 'before_show',
-    saleEndMinutesBeforeShow: 30,
-    allowRefund: false,
-    refundDeadlineType: 'before_show',
-    refundDeadlineHoursBeforeShow: 24,
-    refundDeadlineTime: undefined,
-    maxPurchasePerOrder: 10,
     // 下单规则
     orderChannels: ['online_mini_program'],
     realNameType: 'none',
@@ -189,9 +180,6 @@ const validateStep = async (step: number): Promise<boolean> => {
 
     if (stepKey === 'salesRule') {
       await form.validateFields([
-        ['salesRule', 'saleEndType'],
-        ['salesRule', 'allowRefund'],
-        ['salesRule', 'maxPurchasePerOrder'],
         // 新增预订规则必填项校验
         ['salesRule', 'realNameType'],
         ['salesRule', 'needRiskNotice'],
@@ -267,10 +255,6 @@ const getValues = (): ShowFormData & { sessionConfigs?: SessionConfig[] } => {
   return plain
 }
 
-const handleStepChange = (step: number) => {
-  emit('update:currentStep', step)
-}
-
 defineExpose({
   validateStep,
   getValues,
@@ -287,7 +271,6 @@ defineExpose({
     <div class="mb-6">
       <a-steps
         :current="currentStep"
-        @change="handleStepChange"
         :items="
           FORM_STEPS.map((step: (typeof FORM_STEPS)[number]) => ({
             title: step.title,

@@ -1,12 +1,10 @@
-import { get, post, del, patch } from '@/services/request'
+import { get, post, patch, del, put } from '@/services/request'
 import type {
   Venue as DomainVenue,
   VenueZone as DomainVenueZone,
   VenueCapacityType,
   VenueType,
   VenueStatus,
-  VenueSeatStatus,
-  SeatLabel,
 } from '@/types/theater'
 
 export type { VenueCapacityType, VenueType, VenueStatus }
@@ -29,60 +27,11 @@ export interface VenueListResponse {
   pageSize: number
 }
 
-export interface CreateVenueBaseRequest {
-  name: string
-  type?: VenueType
-  scenicId?: string
-  address?: string
-  description?: string
-  capacityType: VenueCapacityType
+export type SaveVenueRequest = Omit<Venue, 'id'> & {
+  id?: string
 }
 
-export interface CreateVenueFreeSeatRequest extends CreateVenueBaseRequest {
-  capacityType: 'free_seating'
-  totalCapacity: number
-}
-
-export interface CreateVenueZoneCapacityRequest extends CreateVenueBaseRequest {
-  capacityType: 'zone_capacity'
-  zones: Array<{
-    name: string
-    capacity: number
-    sort?: number
-  }>
-}
-
-export interface CreateVenuePreciseSeatRequest extends CreateVenueBaseRequest {
-  capacityType: 'precise_seat'
-  zones: Array<{
-    name: string
-    shortName?: string
-    color?: string
-    floor?: string
-    rows?: number
-    seatsPerRow?: number
-  }>
-  seats: Array<{
-    zoneId: string
-    rowLabel: string
-    seatLabel: string
-    status: VenueSeatStatus
-    label?: SeatLabel
-    x: number
-    y: number
-  }>
-}
-
-export type CreateVenueRequest =
-  | CreateVenueFreeSeatRequest
-  | CreateVenueZoneCapacityRequest
-  | CreateVenuePreciseSeatRequest
-
-export interface CreateVenueResponse {
-  id: string
-}
-
-export type UpdateVenueRequest = Partial<CreateVenueRequest> & {
+export interface SaveVenueResponse {
   id: string
 }
 
@@ -95,28 +44,59 @@ export interface DeleteVenueResponse {
   success: boolean
 }
 
-export async function fetchVenues(params: VenueListRequest): Promise<VenueListResponse> {
-  return get<VenueListResponse>('/theater/venues', { params })
+const REAL_BASE_URL = '/Ticketing/TicketingVenue'
+const MOCK_BASE_URL = '/theater/venues'
+
+const isVenueMockMode = (): boolean => {
+  if (!import.meta.env.DEV) return false
+  if (typeof window === 'undefined') return false
+  return window.location.href.includes('dev=1')
 }
 
-export async function createVenue(data: CreateVenueRequest): Promise<CreateVenueResponse> {
-  return post<CreateVenueResponse>('/theater/venues', data)
+export async function fetchVenues(params: VenueListRequest): Promise<VenueListResponse> {
+  if (isVenueMockMode()) {
+    return get<VenueListResponse>(MOCK_BASE_URL, { params })
+  }
+
+  return post<VenueListResponse>(`${REAL_BASE_URL}/VenueList`, params)
+}
+
+export async function saveVenue(data: SaveVenueRequest): Promise<SaveVenueResponse> {
+  if (isVenueMockMode()) {
+    // Mock mode: no id => create, has id => update
+    if (!data.id) {
+      return post<SaveVenueResponse>(MOCK_BASE_URL, data)
+    }
+
+    const updated = await put<Venue>(`${MOCK_BASE_URL}/${data.id}`, data as Venue)
+    return { id: updated.id }
+  }
+
+  return post<SaveVenueResponse>(`${REAL_BASE_URL}/SaveVenue`, data)
 }
 
 export async function fetchVenueDetail(id: string): Promise<Venue> {
-  return get<Venue>(`/theater/venues/${id}`)
-}
+  if (isVenueMockMode()) {
+    return get<Venue>(`${MOCK_BASE_URL}/${id}`)
+  }
 
-export async function updateVenue(data: UpdateVenueRequest): Promise<Venue> {
-  const { id, ...payload } = data
-  return patch<Venue>(`/theater/venues/${id}`, payload)
+  return post<Venue>(`${REAL_BASE_URL}/VenueDetail`, { id })
 }
 
 export async function updateVenueStatus(id: string, status: VenueStatus): Promise<Venue> {
   const payload: UpdateVenueStatusRequest = { id, status }
-  return patch<Venue>(`/theater/venues/${id}/status`, payload)
+
+  if (isVenueMockMode()) {
+    return patch<Venue>(`${MOCK_BASE_URL}/${id}/status`, payload)
+  }
+
+  return post<Venue>(`${REAL_BASE_URL}/UpdateVenueStatus`, payload)
 }
 
 export async function deleteVenue(id: string): Promise<DeleteVenueResponse> {
-  return del<DeleteVenueResponse>(`/theater/venues/${id}`)
+  if (isVenueMockMode()) {
+    return del<DeleteVenueResponse>(`${MOCK_BASE_URL}/${id}`)
+  }
+
+  return post<DeleteVenueResponse>(`${REAL_BASE_URL}/DeleteVenue`, { id })
 }

@@ -7,6 +7,7 @@ import Demo3 from '@/views/Demo/DemoPage3.vue'
 import Demo4 from '@/views/Demo/DemoPage4.vue'
 import Demo5 from '@/views/Demo/DemoPage5.vue'
 import Demo6 from '@/views/Demo/DemoPage6.vue'
+import StoreSelectorDemo from '@/views/Demo/StoreSelectorDemo.vue'
 
 export const demoRoutes: RouteRecordRaw[] = [
   {
@@ -44,5 +45,9 @@ export const demoRoutes: RouteRecordRaw[] = [
     name: 'demo6',
     component: Demo6,
   },
+  {
+    path: '/demo/store-selector',
+    name: 'StoreSelectorDemo',
+    component: StoreSelectorDemo,
+  },
 ]
-

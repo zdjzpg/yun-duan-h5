@@ -7,12 +7,37 @@ const service: AxiosInstance = axios.create({
   timeout: 15000,
 })
 
-// 开发环境总是使用 Mock；
-// 生产环境如果未配置 VITE_API_BASE_URL，则默认也走 Mock（例如 GitHub Pages Demo）。
-const enableTheaterMock = import.meta.env.DEV || !import.meta.env.VITE_API_BASE_URL
+// 本地开发启用剧场业务 Mock
+if (import.meta.env.DEV) {
+  let enableMock = true
 
-if (enableTheaterMock) {
-  setupMockAdapter(service, { delay: 300, enable: true })
+  if (typeof window !== 'undefined') {
+    let devFlag: string | null = null
+
+    // 1) 正常 URL 查询参数: http://host/path?dev=1#/...
+    const search = window.location.search || ''
+    if (search) {
+      const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search)
+      devFlag = params.get('dev')
+    }
+
+    // 2) Hash 路由中的查询参数: http://host/#/xxx?dev=1
+    if (!devFlag && window.location.hash) {
+      const hash = window.location.hash
+      const queryIndex = hash.indexOf('?')
+      if (queryIndex >= 0) {
+        const hashQuery = hash.slice(queryIndex + 1)
+        const hashParams = new URLSearchParams(hashQuery)
+        devFlag = hashParams.get('dev')
+      }
+    }
+
+    if (devFlag === '1') {
+      enableMock = true
+    }
+  }
+
+  setupMockAdapter(service, { delay: 300, enable: enableMock })
 }
 
 service.interceptors.request.use(
@@ -23,35 +48,29 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error) => {
-    const msg = error?.response?.data?.message ?? error?.message ?? '网络异常，请稍后重试'
+    const msg =
+      error?.response?.data?.msg ??
+      error?.response?.data?.message ??
+      error?.message ??
+      '网络异常，请稍后重试'
     message.error(msg)
     return Promise.reject(error)
   },
 )
 
 export interface ApiResponse<T> {
-  status: 'success' | 'error'
-  result?: T
-  messages?: string[]
+  successed: boolean
+  msg?: string
+  code?: number
+  data?: T
 }
 
 function unwrapResponse<T>(raw: ApiResponse<T> | T): T {
   const data: any = raw
 
   if (data && typeof data === 'object') {
-    // 旧 H5 后端响应格式：{ status, result, messages }
-    if ('status' in data) {
-      const wrapped = data as ApiResponse<T>
-      if (wrapped.status === 'success') {
-        return wrapped.result as T
-      }
-      const msg = (wrapped.messages && wrapped.messages[0]) || '请求失败'
-      message.error(msg)
-      throw new Error(msg)
-    }
-
-    // 景区剧场业务 mock/后端响应格式：{ code, message, data }
-    if ('code' in data && 'data' in data) {
+    // Mock：{ code, message, data }
+    if ('code' in data && 'data' in data && !('successed' in data)) {
       const wrapped = data as {
         code: number
         message?: string
@@ -61,6 +80,17 @@ function unwrapResponse<T>(raw: ApiResponse<T> | T): T {
         return wrapped.data as T
       }
       const msg = wrapped.message || '请求失败'
+      message.error(msg)
+      throw new Error(msg)
+    }
+
+    // 真实后端响应格式：{ successed, msg, code, data }
+    if ('successed' in data) {
+      const wrapped = data as ApiResponse<T>
+      if (wrapped.successed) {
+        return wrapped.data as T
+      }
+      const msg = wrapped.msg || '请求失败'
       message.error(msg)
       throw new Error(msg)
     }
@@ -83,6 +113,15 @@ export async function post<T = unknown>(
   return unwrapResponse<T>(res.data)
 }
 
+export async function put<T = unknown>(
+  url: string,
+  data?: unknown,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const res = await service.put<ApiResponse<T> | T>(url, data, config)
+  return unwrapResponse<T>(res.data)
+}
+
 export async function patch<T = unknown>(
   url: string,
   data?: unknown,
@@ -98,4 +137,3 @@ export async function del<T = unknown>(url: string, config?: AxiosRequestConfig)
 }
 
 export default service
-
