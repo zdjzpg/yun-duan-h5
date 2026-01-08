@@ -7,8 +7,11 @@ const service: AxiosInstance = axios.create({
   timeout: 15000,
 })
 
-// 本地开发启用剧场业务 Mock
-if (import.meta.env.DEV) {
+// 开发环境总是使用 Mock；
+// 生产环境如果未配置 VITE_API_BASE_URL，则默认也走 Mock（例如 GitHub Pages Demo）。
+const enableTheaterMock = import.meta.env.DEV || !import.meta.env.VITE_API_BASE_URL
+
+if (enableTheaterMock) {
   setupMockAdapter(service, { delay: 300, enable: true })
 }
 
