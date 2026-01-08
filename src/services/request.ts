@@ -1,41 +1,30 @@
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import message from 'ant-design-vue/es/message'
 import { setupMockAdapter } from '@/api/setup-mocks'
 
-let service: AxiosInstance | null = null
+const service: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: 15000,
+})
 
-const getService = async (): Promise<AxiosInstance> => {
-  if (service) return service
-
-  const { default: axios } = await import('axios')
-
-  const instance: AxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-    timeout: 15000,
-  })
-
-  // 本地开发启用剧场业务 Mock
-  if (import.meta.env.DEV) {
-    setupMockAdapter(instance, { delay: 300, enable: true })
-  }
-
-  instance.interceptors.request.use(
-    (config) => config,
-    (error) => Promise.reject(error),
-  )
-
-  instance.interceptors.response.use(
-    (response: AxiosResponse) => response,
-    (error) => {
-      const msg = error?.response?.data?.message ?? error?.message ?? '网络异常，请稍后重试'
-      message.error(msg)
-      return Promise.reject(error)
-    },
-  )
-
-  service = instance
-  return instance
+// 本地开发启用剧场业务 Mock
+if (import.meta.env.DEV) {
+  setupMockAdapter(service, { delay: 300, enable: true })
 }
+
+service.interceptors.request.use(
+  (config) => config,
+  (error) => Promise.reject(error),
+)
+
+service.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  (error) => {
+    const msg = error?.response?.data?.message ?? error?.message ?? '网络异常，请稍后重试'
+    message.error(msg)
+    return Promise.reject(error)
+  },
+)
 
 export interface ApiResponse<T> {
   status: 'success' | 'error'
@@ -78,8 +67,7 @@ function unwrapResponse<T>(raw: ApiResponse<T> | T): T {
 }
 
 export async function get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
-  const instance = await getService()
-  const res = await instance.get<ApiResponse<T> | T>(url, config)
+  const res = await service.get<ApiResponse<T> | T>(url, config)
   return unwrapResponse<T>(res.data)
 }
 
@@ -88,8 +76,7 @@ export async function post<T = unknown>(
   data?: unknown,
   config?: AxiosRequestConfig,
 ): Promise<T> {
-  const instance = await getService()
-  const res = await instance.post<ApiResponse<T> | T>(url, data, config)
+  const res = await service.post<ApiResponse<T> | T>(url, data, config)
   return unwrapResponse<T>(res.data)
 }
 
@@ -98,15 +85,14 @@ export async function patch<T = unknown>(
   data?: unknown,
   config?: AxiosRequestConfig,
 ): Promise<T> {
-  const instance = await getService()
-  const res = await instance.patch<ApiResponse<T> | T>(url, data, config)
+  const res = await service.patch<ApiResponse<T> | T>(url, data, config)
   return unwrapResponse<T>(res.data)
 }
 
 export async function del<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
-  const instance = await getService()
-  const res = await instance.delete<ApiResponse<T> | T>(url, config)
+  const res = await service.delete<ApiResponse<T> | T>(url, config)
   return unwrapResponse<T>(res.data)
 }
 
-export default getService
+export default service
+
