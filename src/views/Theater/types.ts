@@ -20,7 +20,7 @@ import type {
   SuitableAudience,
   VenueSeatStatus,  // 使用新类型
   SeatLabel,
-} from '../../../types/theater';
+} from '../../types/theater';
 
 // ==================== 场馆管理 API ====================
 

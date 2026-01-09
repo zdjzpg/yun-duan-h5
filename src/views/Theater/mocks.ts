@@ -38,7 +38,7 @@ import type {
   ShowPriceTier,
   ShowSalesRule,
   VenueLockStatus,
-} from '../../../types/theater'
+} from '../../types/theater'
 
 // ==================== Mock 数据 ====================
 
