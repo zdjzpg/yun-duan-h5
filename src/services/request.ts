@@ -8,29 +8,28 @@ const service: AxiosInstance = axios.create({
 })
 
 // 本地开发且路径带dev=1启用剧场业务 Mock
-if (import.meta.env.DEV) {
-  let enableMock = true
 
-  if (typeof window !== 'undefined') {
-    let devFlag: string | null = null
+let enableMock = true
 
-    if (!devFlag && window.location.hash) {
-      const hash = window.location.hash
-      const queryIndex = hash.indexOf('?')
-      if (queryIndex >= 0) {
-        const hashQuery = hash.slice(queryIndex + 1)
-        const hashParams = new URLSearchParams(hashQuery)
-        devFlag = hashParams.get('dev')
-      }
-    }
+if (typeof window !== 'undefined') {
+  let devFlag: string | null = null
 
-    if (devFlag === '1') {
-      enableMock = true
+  if (!devFlag && window.location.hash) {
+    const hash = window.location.hash
+    const queryIndex = hash.indexOf('?')
+    if (queryIndex >= 0) {
+      const hashQuery = hash.slice(queryIndex + 1)
+      const hashParams = new URLSearchParams(hashQuery)
+      devFlag = hashParams.get('dev')
     }
   }
 
-  setupMockAdapter(service, { delay: 300, enable: enableMock })
+  if (devFlag === '1') {
+    enableMock = true
+  }
 }
+
+setupMockAdapter(service, { delay: 300, enable: enableMock })
 
 service.interceptors.request.use(
   (config) => config,
