@@ -1,13 +1,15 @@
-# 自封装组件说明（YSwitch  / YUpload / YUploadDraggable）
+# 自封装组件说明（YSwitch / YUpload / YUploadDraggable）
 
 本文档说明当前项目中自封装的通用组件的用途与用法：
 
 - `YSwitch`：启用/禁用双段开关
 - `YUpload`：图片填满卡片、右上角删除按钮的上传组件
 - `YUploadDraggable`：在 `YUpload` 基础上增加拖拽排序能力的上传组件
-- `TableColumnSetting` + `useTableColumnSetting`：表格列自定义弹窗及其配套 Hook
 
-所有组件均已在 `src/main.ts` 中通过 `app.component` 全局注册，可在任意 `.vue` 文件中直接使用。
+以上所有组件均已在 `src/main.ts` 中通过 `app.component` 全局注册，可在任意 `.vue` 文件中直接使用。
+
+- `TableColumnSetting` + `useTableColumnSetting`：表格列自定义弹窗及其配套 Hook
+- `StoreSelectorModal` 带筛选条件得门店选择弹窗（后续需要对筛选条件进行控制）
 
 ## 使用约定（重要）
 
@@ -41,22 +43,22 @@ const enabled = ref(false)
 
 **Props**
 
-| 名称               | 类型      | 默认值 | 说明                                                                                          |
-| ------------------ | --------- | ------ | --------------------------------------------------------------------------------------------- |
-| `v-model:checked`  | `boolean` | `false`| 当前是否启用（推荐用法）                                                                      |
-| `disabled`         | `boolean` | `false`| 是否禁用                                                                                      |
-| `activeText`       | `string`  | `启用` | 选中状态左侧文案                                                                              |
-| `inactiveText`     | `string`  | `禁用` | 未选中状态右侧文案                                                                            |
-| `item`             | `object`  | `{}`   | 兼容旧用法：其中可包含 `value/label/required/disabled/activeText/inactiveText/settingTip/errorMsg` 等 |
+| 名称              | 类型      | 默认值  | 说明                                                                                                  |
+| ----------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `v-model:checked` | `boolean` | `false` | 当前是否启用（推荐用法）                                                                              |
+| `disabled`        | `boolean` | `false` | 是否禁用                                                                                              |
+| `activeText`      | `string`  | `启用`  | 选中状态左侧文案                                                                                      |
+| `inactiveText`    | `string`  | `禁用`  | 未选中状态右侧文案                                                                                    |
+| `item`            | `object`  | `{}`    | 兼容旧用法：其中可包含 `value/label/required/disabled/activeText/inactiveText/settingTip/errorMsg` 等 |
 
 **事件**
 
-| 事件名             | 参数                 | 说明                                  |
-| ------------------ | -------------------- | ------------------------------------- |
-| `update:checked`   | `(checked: boolean)` | `v-model:checked` 对应的更新事件      |
-| `change`           | `(checked: boolean)` | 新用法：仅基于 `checked` 的变更回调   |
-| `update:item`      | `(item: object)`     | 旧用法：整条 `item` 更新              |
-| `changeAndNotify`  | `(item: object)`     | 旧用法：变更并通知外层表单/配置模块   |
+| 事件名            | 参数                 | 说明                                |
+| ----------------- | -------------------- | ----------------------------------- |
+| `update:checked`  | `(checked: boolean)` | `v-model:checked` 对应的更新事件    |
+| `change`          | `(checked: boolean)` | 新用法：仅基于 `checked` 的变更回调 |
+| `update:item`     | `(item: object)`     | 旧用法：整条 `item` 更新            |
+| `changeAndNotify` | `(item: object)`     | 旧用法：变更并通知外层表单/配置模块 |
 
 ---
 
@@ -92,20 +94,20 @@ const files = ref<UploadFile[]>([])
 
 **Props**
 
-| 名称               | 类型                 | 默认值                                           | 说明                                                   |
-| ------------------ | -------------------- | ------------------------------------------------ | ------------------------------------------------------ |
-| `v-model:fileList` | `UploadFile[]`       | `[]`                                             | 当前文件列表                                           |
-| `disabled`         | `boolean`            | `false`                                          | 是否禁用上传                                           |
-| `max-count`        | `number`             | `Infinity`                                       | 最多上传文件数量                                       |
-| `show-upload-list` | `boolean \| object`  | `{ showPreviewIcon: false, showRemoveIcon: false }` | 是否显示 antd 自带列表；可传 `false` 完全关闭          |
-| 其它               | -                    | -                                                | 通过 `v-bind="$attrs"` 透传给内部 `a-upload`（如 `action` 等） |
+| 名称               | 类型                | 默认值                                              | 说明                                                           |
+| ------------------ | ------------------- | --------------------------------------------------- | -------------------------------------------------------------- |
+| `v-model:fileList` | `UploadFile[]`      | `[]`                                                | 当前文件列表                                                   |
+| `disabled`         | `boolean`           | `false`                                             | 是否禁用上传                                                   |
+| `max-count`        | `number`            | `Infinity`                                          | 最多上传文件数量                                               |
+| `show-upload-list` | `boolean \| object` | `{ showPreviewIcon: false, showRemoveIcon: false }` | 是否显示 antd 自带列表；可传 `false` 完全关闭                  |
+| 其它               | -                   | -                                                   | 通过 `v-bind="$attrs"` 透传给内部 `a-upload`（如 `action` 等） |
 
 **事件**
 
-| 事件名             | 参数                    | 说明                               |
-| ------------------ | ----------------------- | ---------------------------------- |
-| `update:fileList`  | `(files: UploadFile[])` | `v-model:fileList` 对应的更新事件 |
-| `change`           | `(info: unknown)`       | 对应 antd `a-upload` 的 `change` 事件 |
+| 事件名            | 参数                    | 说明                                  |
+| ----------------- | ----------------------- | ------------------------------------- |
+| `update:fileList` | `(files: UploadFile[])` | `v-model:fileList` 对应的更新事件     |
+| `change`          | `(info: unknown)`       | 对应 antd `a-upload` 的 `change` 事件 |
 
 ---
 
@@ -140,14 +142,14 @@ const files = ref<UploadFile[]>([])
 
 **Props**
 
-| 名称               | 类型           | 默认值      | 说明                                                                 |
-| ------------------ | -------------- | ----------- | -------------------------------------------------------------------- |
-| `v-model:fileList` | `UploadFile[]` | `[]`        | 当前文件列表（顺序会随拖拽实时更新）                                 |
-| `disabled`         | `boolean`      | `false`     | 是否禁用拖拽与上传                                                   |
-| `max-count`        | `number`       | `Infinity`  | 最多上传文件数量，达到上限后“+”按钮自动隐藏                           |
-| `show-cover-badge` | `boolean`      | `false`     | 是否在第一张图片卡片左上角展示“封面”标记                             |
-| `cover-badge-text` | `string`       | `封面`      | 封面标记文字内容                                                     |
-| 其它               | -              | -           | 其它属性（如 `action`）透传给内部 `YUpload` / `a-upload`             |
+| 名称               | 类型           | 默认值     | 说明                                                     |
+| ------------------ | -------------- | ---------- | -------------------------------------------------------- |
+| `v-model:fileList` | `UploadFile[]` | `[]`       | 当前文件列表（顺序会随拖拽实时更新）                     |
+| `disabled`         | `boolean`      | `false`    | 是否禁用拖拽与上传                                       |
+| `max-count`        | `number`       | `Infinity` | 最多上传文件数量，达到上限后“+”按钮自动隐藏              |
+| `show-cover-badge` | `boolean`      | `false`    | 是否在第一张图片卡片左上角展示“封面”标记                 |
+| `cover-badge-text` | `string`       | `封面`     | 封面标记文字内容                                         |
+| 其它               | -              | -          | 其它属性（如 `action`）透传给内部 `YUpload` / `a-upload` |
 
 **行为说明**
 
@@ -184,13 +186,8 @@ const columns: ColumnSettingColumn[] = [
   { title: '备注', dataIndex: 'remark', key: 'remark', defaultHidden: true },
 ]
 
-const {
-  visibleColumns,
-  columnSettingItems,
-  checkedKeys,
-  updateCheckedKeys,
-  resetColumns,
-} = useTableColumnSetting({ columns, storageKey: 'member-table-columns' })
+const { visibleColumns, columnSettingItems, checkedKeys, updateCheckedKeys, resetColumns } =
+  useTableColumnSetting({ columns, storageKey: 'member-table-columns' })
 </script>
 
 <template>
@@ -218,8 +215,42 @@ const {
 
 ---
 
-## 统一注意事项
+## StoreSelectorModal（门店选择弹窗）
 
-- 日期相关组件依赖 `dayjs` 作为日期类型，请在使用时按项目约定统一使用 `Dayjs` 类型而不是原生 `Date`。
-- 项目入口 `src/main.ts` 中已通过 `ConfigProvider` 使用 `zh_CN` locale，日期组件均默认显示为中文。
-- 如需局部覆盖样式，建议在 `src/styles/common.less` 中添加规则，优先使用特定作用域（例如 `#YunDuanH5` 下的选择器）避免影响第三方组件的默认行为。
+**文件位置**
+
+- 组件文件：`src/components/store/StoreSelectorModal.vue`
+- 示例页：`/demo/store-selector`（`src/views/Demo/StoreSelectorDemo.vue`）
+
+**能力概览**
+
+- 以树形结构展示门店层级，支持多选。
+- 顶部“假输入框”展示当前已生效的筛选标签，点击后展开筛选面板。
+- 筛选面板内使用草稿值：关键字 / 门店类型（单选）/ 门店标签（多选），点击“确定”才应用到树和外部标签。
+- 右侧数量展示“包含自身在内的所有后代门店数”，仅在数量大于 1 时显示。
+- “全选”只作用于当前筛选结果中的门店，其他已选门店不会被清掉。
+
+**典型用法**
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import StoreSelectorModal from '@/components/store/StoreSelectorModal.vue'
+
+const open = ref(false)
+const selectedIds = ref<number[]>([])
+</script>
+
+<template>
+  <div>
+    <a-typography-link @click="open = true">选择门店</a-typography-link>
+
+    <StoreSelectorModal v-model:open="open" v-model:selectedIds="selectedIds" />
+  </div>
+</template>
+
+## 统一注意事项 - 日期相关组件依赖 `dayjs` 作为日期类型，请在使用时按项目约定统一使用 `Dayjs`
+类型而不是原生 `Date`。 - 项目入口 `src/main.ts` 中已通过 `ConfigProvider` 使用 `zh_CN`
+locale，日期组件均默认显示为中文。 - 如需局部覆盖样式，建议在 `src/styles/common.less`
+中添加规则，优先使用特定作用域（例如 `#YunDuanH5` 下的选择器）避免影响第三方组件的默认行为。
+```

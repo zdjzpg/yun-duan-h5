@@ -40,6 +40,9 @@ const loadDetail = async () => {
     currentStatus.value = detail.status || 'active'
 
     if (detail.capacityType === 'precise_seat') {
+      const rawStage =
+        (detail as any).stage || ((detail as any).seatMapConfig && (detail as any).seatMapConfig.stage)
+
       const preciseSeats: TheaterData = {
         id: detail.id,
         name: detail.name,
@@ -58,7 +61,19 @@ const loadDetail = async () => {
           order: (z as any).order ?? z.sort ?? index + 1,
         })),
         seats: (detail as any).seats || [],
-        stage: (detail as any).stage,
+        stage: rawStage
+          ? {
+              id: rawStage.id,
+              name: rawStage.name,
+              x: rawStage.x ?? 0,
+              y: rawStage.y ?? -300,
+              width: rawStage.width ?? 480,
+              height: rawStage.height ?? 40,
+              shape: (rawStage as any).shape || 'trapezoid',
+              position: (rawStage as any).position || 'top-center',
+              color: rawStage.color,
+            }
+          : undefined,
         metadata: {
           createdAt: detail.createdAt || '',
           updatedAt: detail.updatedAt || '',

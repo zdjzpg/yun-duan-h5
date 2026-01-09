@@ -51,6 +51,8 @@ export type SessionPriceTier = ShowFormPriceTier & {
 export type ShowFormSalesRule = {
   // 下单规则
   storeIds?: number[]
+  // 核销门店（逻辑同销售门店，字段独立）
+  verifyStoreIds?: number[]
   orderChannels?: (
     | 'online_mini_program'
     | 'online_sub_mini_program'
@@ -140,9 +142,6 @@ export type SessionConfig = {
 
 export type ShowFormData = {
   basicInfo: ShowFormBasicInfo
-  sessions: ShowFormSession[]
-  priceTiers: ShowFormPriceTier[]
-  seatPriceTierMapping?: Record<string, string>
   sessionConfigs?: SessionConfig[]
   salesRule: ShowFormSalesRule
   details: ShowFormDetails

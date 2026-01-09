@@ -1,4 +1,4 @@
-import { get, post, patch, del, put } from '@/services/request'
+import { post } from '@/services/request'
 import type {
   Venue as DomainVenue,
   VenueZone as DomainVenueZone,
@@ -46,6 +46,10 @@ export interface DeleteVenueResponse {
 
 const REAL_BASE_URL = '/Ticketing/TicketingVenue'
 const MOCK_BASE_URL = '/theater/venues'
+const MOCK_VENUE_LIST_URL = '/theater/venues/list'
+const MOCK_VENUE_DETAIL_URL = '/theater/venues/detail'
+const MOCK_VENUE_UPDATE_STATUS_URL = '/theater/venues/update-status'
+const MOCK_VENUE_DELETE_URL = '/theater/venues/delete'
 
 const isVenueMockMode = (): boolean => {
   if (!import.meta.env.DEV) return false
@@ -55,20 +59,22 @@ const isVenueMockMode = (): boolean => {
 
 export async function fetchVenues(params: VenueListRequest): Promise<VenueListResponse> {
   if (isVenueMockMode()) {
-    return get<VenueListResponse>(MOCK_BASE_URL, { params })
+    // Mock 模式：使用 POST + 本地 /theater/venues/list
+    return post<VenueListResponse>(MOCK_VENUE_LIST_URL, params)
   }
 
+  // 真实后端统一使用 POST
   return post<VenueListResponse>(`${REAL_BASE_URL}/VenueList`, params)
 }
 
 export async function saveVenue(data: SaveVenueRequest): Promise<SaveVenueResponse> {
   if (isVenueMockMode()) {
-    // Mock mode: no id => create, has id => update
+    // Mock 模式：无 id 时创建，有 id 时更新
     if (!data.id) {
       return post<SaveVenueResponse>(MOCK_BASE_URL, data)
     }
 
-    const updated = await put<Venue>(`${MOCK_BASE_URL}/${data.id}`, data as Venue)
+    const updated = await post<Venue>(`${MOCK_BASE_URL}/${data.id}`, data as Venue)
     return { id: updated.id }
   }
 
@@ -77,7 +83,8 @@ export async function saveVenue(data: SaveVenueRequest): Promise<SaveVenueRespon
 
 export async function fetchVenueDetail(id: string): Promise<Venue> {
   if (isVenueMockMode()) {
-    return get<Venue>(`${MOCK_BASE_URL}/${id}`)
+    // Mock 模式：使用 POST + 本地 /theater/venues/detail
+    return post<Venue>(MOCK_VENUE_DETAIL_URL, { id })
   }
 
   return post<Venue>(`${REAL_BASE_URL}/VenueDetail`, { id })
@@ -87,7 +94,8 @@ export async function updateVenueStatus(id: string, status: VenueStatus): Promis
   const payload: UpdateVenueStatusRequest = { id, status }
 
   if (isVenueMockMode()) {
-    return patch<Venue>(`${MOCK_BASE_URL}/${id}/status`, payload)
+    // Mock 模式：使用 POST + 本地 /theater/venues/update-status
+    return post<Venue>(MOCK_VENUE_UPDATE_STATUS_URL, payload)
   }
 
   return post<Venue>(`${REAL_BASE_URL}/UpdateVenueStatus`, payload)
@@ -95,7 +103,8 @@ export async function updateVenueStatus(id: string, status: VenueStatus): Promis
 
 export async function deleteVenue(id: string): Promise<DeleteVenueResponse> {
   if (isVenueMockMode()) {
-    return del<DeleteVenueResponse>(`${MOCK_BASE_URL}/${id}`)
+    // Mock 模式：使用 POST + 本地 /theater/venues/delete
+    return post<DeleteVenueResponse>(MOCK_VENUE_DELETE_URL, { id })
   }
 
   return post<DeleteVenueResponse>(`${REAL_BASE_URL}/DeleteVenue`, { id })

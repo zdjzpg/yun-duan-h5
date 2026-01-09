@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { theaterVenueRoutes } from './modules/theaterVenues'
 import { theaterShowRoutes } from './modules/theaterShows'
 import { demoRoutes } from './modules/demo'
+import { tmsTicketingSaleRoutes } from './modules/tmsTicketingSale'
 import TableColumnSettingDemo from '@/views/Demo/TableColumnSettingDemo.vue'
 
 const router = createRouter({
@@ -20,6 +21,7 @@ const router = createRouter({
     ...demoRoutes,
     ...theaterVenueRoutes,
     ...theaterShowRoutes,
+    ...tmsTicketingSaleRoutes,
   ],
 })
 

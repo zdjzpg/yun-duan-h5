@@ -42,6 +42,8 @@ export interface UseCanvasInteractionProps {
   canvasWidth?: number
   selectedSeatIds: { value: string[] }
   enableSnap?: boolean
+  /** 是否允许拖动座位（TMS 场景下关闭） */
+  enableSeatDrag?: boolean
   onSeatSelect?: (seatIds: string[]) => void
   onSeatMove?: (seatId: string, x: number, y: number) => void
   onSeatsMove?: (updates: Array<{ id: string; x: number; y: number }>) => void
@@ -62,6 +64,7 @@ export function useCanvasInteractionEnhanced({
   canvasWidth = 1200,
   selectedSeatIds,
   enableSnap = true,
+  enableSeatDrag = true,
   onSeatSelect,
   onSeatMove,
   onSeatsMove,
@@ -136,7 +139,7 @@ export function useCanvasInteractionEnhanced({
     }
 
     if (clickedSeat && !isSpacePressed) {
-      const isLocked = clickedSeat.locked === true
+      const isLocked = clickedSeat.locked === true || !enableSeatDrag
 
       dragState.isDragging = true
       dragState.dragType = isLocked ? null : 'seat'

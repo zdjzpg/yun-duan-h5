@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import message from 'ant-design-vue/es/message'
 import { FORM_STEPS, type ShowFormData, type ShowFormBasicInfo, type SessionConfig } from './types'
 import BasicInfoStep from './steps/BasicInfoStep.vue'
@@ -20,30 +20,33 @@ const props = withDefaults(
   },
 )
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'update:currentStep', value: number): void
 }>()
 
 const formRef = ref()
 
-const formState = reactive<any>({
+type InternalFormState = {
+  basicInfo: ShowFormBasicInfo
+  sessionConfigs: SessionConfig[]
+  salesRule: ShowFormData['salesRule']
+  details: ShowFormData['details']
+}
+
+const formState = reactive<InternalFormState>({
   basicInfo: {
     name: '',
     venueId: '',
-    type: 'live_show',
+    type: 'live_show' as any,
     suitableAudience: undefined,
     coverImage: undefined,
     subtitle: '',
     description: '',
     producer: '',
-    status: 'draft',
-  } as ShowFormBasicInfo,
+    status: 'draft' as any,
+  },
   // 新架构：场次配置列表
-  sessionConfigs: [] as SessionConfig[],
-  // 旧字段（兼容早期实现，不再在界面直接使用）
-  sessions: [],
-  priceTiers: [],
-  seatPriceTierMapping: undefined,
+  sessionConfigs: [],
   salesRule: {
     // 下单规则
     orderChannels: ['online_mini_program'],
@@ -55,7 +58,7 @@ const formState = reactive<any>({
     riskNoticeFileName: '',
     enableGroupTicket: false,
     groupMinOrderLimitType: 'unlimited',
-    groupMinOrderQuantity: null,
+    groupMinOrderQuantity: undefined,
     paymentLimitType: 'unlimited',
     paymentLimitMinutesAfterOrder: undefined,
     purchaseLimitType: 'per_identity',
@@ -101,33 +104,28 @@ watch(
   () => props.initialValues,
   (val) => {
     if (!val) return
+
     if (val.basicInfo) {
       Object.assign(formState.basicInfo, val.basicInfo)
     }
-    // 优先使用 sessionConfigs；若不存在则兼容旧的 sessions + priceTiers
+
+    // 仅使用新结构 sessionConfigs，旧的 sessions/priceTiers 不再兼容
     if ((val as any).sessionConfigs && (val as any).sessionConfigs!.length) {
       formState.sessionConfigs = [...((val as any).sessionConfigs as SessionConfig[])]
     } else {
-      if (val.sessions) {
-        formState.sessions = [...val.sessions]
-      }
-      if (val.priceTiers) {
-        formState.priceTiers = [...val.priceTiers]
-      }
+      formState.sessionConfigs = []
     }
+
     if (val.salesRule) {
       Object.assign(formState.salesRule, val.salesRule)
     }
-    if (val.seatPriceTierMapping) {
-      formState.seatPriceTierMapping = { ...val.seatPriceTierMapping }
+
+    if (val.details) {
+      Object.assign(formState.details, val.details)
     }
   },
   { immediate: true },
 )
-
-onMounted(() => {
-  // ensure defaults applied
-})
 
 const validateStep = async (step: number): Promise<boolean> => {
   const form = formRef.value
@@ -146,7 +144,7 @@ const validateStep = async (step: number): Promise<boolean> => {
     }
 
     if (stepKey === 'sessions') {
-      const configs: SessionConfig[] = (formState.sessionConfigs || []) as SessionConfig[]
+      const configs: SessionConfig[] = formState.sessionConfigs || []
 
       if (!configs.length) {
         message.error('请至少添加一个场次配置')
@@ -155,7 +153,7 @@ const validateStep = async (step: number): Promise<boolean> => {
 
       const hasNoSessions = configs.some((config) => !config.sessions || !config.sessions.length)
       if (hasNoSessions) {
-        message.error('请为所有场次配置添加场次时间')
+        message.error('请为所有场次配置添加演出时间')
         return false
       }
 
@@ -163,7 +161,7 @@ const validateStep = async (step: number): Promise<boolean> => {
         (config) => !config.priceTiers || !config.priceTiers.length,
       )
       if (hasNoPriceTiers) {
-        message.error('请为所有场次配置票档信息')
+        message.error('请为所有场次配置设置票档信息')
         return false
       }
 
@@ -180,7 +178,7 @@ const validateStep = async (step: number): Promise<boolean> => {
 
     if (stepKey === 'salesRule') {
       await form.validateFields([
-        // 新增预订规则必填项校验
+        // 新增预订规则必填校验字段
         ['salesRule', 'realNameType'],
         ['salesRule', 'needRiskNotice'],
         ['salesRule', 'enableGroupTicket'],
@@ -224,35 +222,22 @@ const validateStep = async (step: number): Promise<boolean> => {
   }
 }
 
-const getValues = (): ShowFormData & { sessionConfigs?: SessionConfig[] } => {
-  const plain = JSON.parse(JSON.stringify(formState)) as ShowFormData & {
-    sessionConfigs?: SessionConfig[]
-    sessions?: any[]
-    priceTiers?: any[]
+const getValues = (): ShowFormData => {
+  const basicInfo = JSON.parse(JSON.stringify(formState.basicInfo)) as ShowFormBasicInfo
+  const sessionConfigs = JSON.parse(
+    JSON.stringify(formState.sessionConfigs),
+  ) as SessionConfig[]
+  const salesRule = JSON.parse(JSON.stringify(formState.salesRule)) as ShowFormData['salesRule']
+  const details = JSON.parse(JSON.stringify(formState.details)) as ShowFormData['details']
+
+  const result: ShowFormData = {
+    basicInfo,
+    sessionConfigs,
+    salesRule,
+    details,
   }
 
-  let sessionConfigs: SessionConfig[] = (plain.sessionConfigs || []) as SessionConfig[]
-
-  // 兼容旧数据：如果没有 sessionConfigs，则从 sessions + priceTiers 回填一条配置
-  if (!sessionConfigs.length && plain.basicInfo && (plain.sessions || []).length) {
-    const venueId = (plain.basicInfo as any).venueId
-    if (venueId) {
-      sessionConfigs = [
-        {
-          venueId,
-          venueName: undefined,
-          venueCapacityType: undefined,
-          priceTiers: ((plain as any).priceTiers || []) as any,
-          seatPriceTierMapping: (plain as any).seatPriceTierMapping,
-          sessions: ((plain as any).sessions || []) as any,
-        },
-      ]
-    }
-  }
-
-  plain.sessionConfigs = sessionConfigs
-
-  return plain
+  return result
 }
 
 defineExpose({
@@ -297,3 +282,4 @@ defineExpose({
   margin-bottom: 24px;
 }
 </style>
+

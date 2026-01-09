@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-
+import { SearchOutlined } from '@ant-design/icons-vue'
 type RawStore = {
-  subUsers: RawStore[] | null
   id: number
   account: string
-  address: string
   company: string
+  address: string
   userType: number | null
   isFranchise: number | null
   number: string | null
+  subUsers: RawStore[] | null
 }
 
 type StoreTreeNode = {
@@ -30,10 +30,24 @@ const emit = defineEmits<{
   (e: 'update:selectedIds', value: number[]): void
 }>()
 
-const visible = computed({
-  get: () => props.open,
-  set: (val: boolean) => emit('update:open', val),
-} as any)
+const visible = ref<boolean>(props.open)
+
+// 同步外部 open -> 内部 visible
+watch(
+  () => props.open,
+  (val: boolean) => {
+    if (val !== visible.value) {
+      visible.value = val
+    }
+  },
+)
+
+// 同步内部 visible -> 外部 v-model:open
+watch(visible, (val: boolean) => {
+  if (val !== props.open) {
+    emit('update:open', val)
+  }
+})
 
 // ---- mock data ----
 
@@ -274,19 +288,27 @@ const MOCK_STORES: RawStore[] = [
   },
 ]
 
-const formatStoreLabel = (store: RawStore): string => {
-  const num = store.number || ''
-  const name = store.company || store.account
-  return num ? `${num} - ${name}` : name
-}
+// ---- tree build & counts ----
 
-const buildTree = (list: RawStore[]): StoreTreeNode[] =>
-  list.map((item) => ({
-    key: String(item.id),
-    title: formatStoreLabel(item),
-    raw: item,
-    children: item.subUsers ? buildTree(item.subUsers) : undefined,
-  }))
+const buildTree = (stores: RawStore[]): StoreTreeNode[] => {
+  const walk = (nodes: RawStore[]): StoreTreeNode[] => {
+    return nodes.map((store) => {
+      const children = store.subUsers ? walk(store.subUsers) : []
+      const titleParts: string[] = []
+      if (store.number) titleParts.push(store.number)
+      if (store.company) titleParts.push(store.company)
+
+      return {
+        key: String(store.id),
+        title: titleParts.join(' - '),
+        raw: store,
+        children: children.length ? children : undefined,
+      }
+    })
+  }
+
+  return walk(stores)
+}
 
 const fullTree = ref<StoreTreeNode[]>(buildTree(MOCK_STORES))
 
@@ -294,12 +316,9 @@ const computeTotalCounts = (nodes: StoreTreeNode[]): number => {
   let total = 0
 
   nodes.forEach((node) => {
-    let selfTotal = 1
-
-    if (node.children && node.children.length) {
-      const childTotal = computeTotalCounts(node.children)
-      selfTotal += childTotal
-    }
+    const children = node.children || []
+    const childrenTotal = children.length ? computeTotalCounts(children) : 0
+    const selfTotal = 1 + childrenTotal
 
     node.totalDescCount = selfTotal
     total += selfTotal
@@ -308,8 +327,11 @@ const computeTotalCounts = (nodes: StoreTreeNode[]): number => {
   return total
 }
 
+computeTotalCounts(fullTree.value)
+
 const allStoreIds = computed<string[]>(() => {
   const ids: string[] = []
+
   const walk = (nodes: StoreTreeNode[]) => {
     nodes.forEach((node) => {
       ids.push(node.key)
@@ -318,6 +340,7 @@ const allStoreIds = computed<string[]>(() => {
       }
     })
   }
+
   walk(fullTree.value)
   return ids
 })
@@ -328,6 +351,11 @@ const keyword = ref('')
 const selectedStoreType = ref<string | undefined>(undefined)
 const selectedTags = ref<string[]>([])
 
+// draft values used inside filter panel; only applied on confirm
+const draftKeyword = ref('')
+const draftSelectedStoreType = ref<string | undefined>(undefined)
+const draftSelectedTags = ref<string[]>([])
+
 const STORE_TYPE_OPTIONS = [
   { label: '普通门店', value: 'normal' },
   { label: '仓库', value: 'warehouse' },
@@ -335,26 +363,12 @@ const STORE_TYPE_OPTIONS = [
   { label: '加盟店', value: 'franchise' },
 ]
 
-const STORE_TAG_OPTIONS = [
-  '福建省',
-  '宁夏回族自治区',
-  '江西省',
-  '新疆维吾尔自治区',
-  '湖南省',
-  '湖北省',
-  '香港特别行政区',
-  '湖北省',
-  '贵州省',
-  '广西',
-  '云南省',
-  '北京市',
-  '天津市',
-  '第三方',
-  '批发门店',
-  '销售门店',
-  '仓库门店',
-  '本地经销商',
-].map((t) => ({ label: t, value: t }))
+const STORE_TAG_OPTIONS = ['福建', '北京', '上海', '广东', '仓库门店', '销售门店'].map(
+  (t: string) => ({
+    label: t,
+    value: t,
+  }),
+)
 
 const matchesType = (store: RawStore, type: string | undefined): boolean => {
   if (!type) return true
@@ -368,8 +382,69 @@ const matchesType = (store: RawStore, type: string | undefined): boolean => {
 const matchesTags = (store: RawStore, tags: string[]): boolean => {
   if (!tags.length) return true
   const text = `${store.address || ''}${store.company || ''}`
-  return tags.every((tag) => text.includes(tag))
+  return tags.every((tag: string) => text.includes(tag))
 }
+
+type SummaryTag = {
+  key: string
+  label: string
+}
+
+const filterPopoverVisible = ref(false)
+
+const summaryTags = computed<SummaryTag[]>(() => {
+  const tags: SummaryTag[] = []
+
+  if (selectedStoreType.value) {
+    const foundType = STORE_TYPE_OPTIONS.find((opt) => opt.value === selectedStoreType.value)
+    if (foundType) {
+      tags.push({ key: 'type', label: foundType.label })
+    }
+  }
+
+  selectedTags.value.forEach((value: string) => {
+    const found = STORE_TAG_OPTIONS.find(
+      (opt: { label: string; value: string }) => opt.value === value,
+    )
+    if (found) {
+      tags.push({ key: `tag:${value}`, label: found.label })
+    }
+  })
+
+  const kw = keyword.value.trim()
+  if (kw) {
+    tags.push({ key: 'keyword', label: kw })
+  }
+
+  return tags
+})
+
+const draftSummaryTags = computed<SummaryTag[]>(() => {
+  const tags: SummaryTag[] = []
+
+  if (draftSelectedStoreType.value) {
+    const foundType = STORE_TYPE_OPTIONS.find((opt) => opt.value === draftSelectedStoreType.value)
+    if (foundType) {
+      tags.push({ key: 'type', label: foundType.label })
+    }
+  }
+
+  draftSelectedTags.value.forEach((value: string) => {
+    const found = STORE_TAG_OPTIONS.find(
+      (opt: { label: string; value: string }) => opt.value === value,
+    )
+    if (found) {
+      tags.push({ key: `tag:${value}`, label: found.label })
+    }
+  })
+
+  const kw = draftKeyword.value.trim()
+  if (kw) {
+    tags.push({ key: 'keyword', label: kw })
+  }
+
+  return tags
+})
 
 const filteredTree = computed<StoreTreeNode[]>(() => {
   const kw = keyword.value.trim().toLowerCase()
@@ -387,12 +462,14 @@ const filteredTree = computed<StoreTreeNode[]>(() => {
 
   const filterNodes = (nodes: StoreTreeNode[]): StoreTreeNode[] => {
     const result: StoreTreeNode[] = []
+
     nodes.forEach((node) => {
       const children = node.children ? filterNodes(node.children) : []
       if (matchStore(node.raw) || children.length) {
         result.push({ ...node, children })
       }
     })
+
     return result
   }
 
@@ -401,24 +478,71 @@ const filteredTree = computed<StoreTreeNode[]>(() => {
   return tree
 })
 
+// 当前筛选结果下可见门店的 key 列表
+const visibleStoreIds = computed<string[]>(() => {
+  const ids: string[] = []
+
+  const walk = (nodes: StoreTreeNode[]) => {
+    nodes.forEach((node) => {
+      ids.push(node.key)
+      if (node.children && node.children.length) {
+        walk(node.children)
+      }
+    })
+  }
+
+  walk(filteredTree.value)
+  return ids
+})
+
+const handleRemoveSummaryTag = (key: string) => {
+  if (key === 'type') {
+    selectedStoreType.value = undefined
+    return
+  }
+
+  if (key === 'keyword') {
+    keyword.value = ''
+    return
+  }
+
+  if (key.startsWith('tag:')) {
+    const value = key.slice(4)
+    selectedTags.value = selectedTags.value.filter((tag: string) => tag !== value)
+  }
+}
+
+watch(
+  () => filterPopoverVisible.value,
+  (open: boolean) => {
+    if (open) {
+      draftKeyword.value = keyword.value
+      draftSelectedStoreType.value = selectedStoreType.value
+      draftSelectedTags.value = [...selectedTags.value]
+    }
+  },
+)
+
 // ---- selection ----
 
 const localCheckedKeys = ref<string[]>([])
 
 watch(
   () => props.open,
-  (open) => {
+  (open: boolean) => {
     if (open) {
       localCheckedKeys.value = (props.selectedIds || []).map((id: number) => String(id))
     }
   },
 )
 
-const totalCount = computed(() => allStoreIds.value.length)
-const selectedCount = computed(() => localCheckedKeys.value.length)
+const totalCount = computed(() => visibleStoreIds.value.length)
+const selectedCount = computed(
+  () => localCheckedKeys.value.filter((id: string) => visibleStoreIds.value.includes(id)).length,
+)
 
 const isAllChecked = computed(
-  () => selectedCount.value > 0 && selectedCount.value === totalCount.value,
+  () => totalCount.value > 0 && selectedCount.value > 0 && selectedCount.value === totalCount.value,
 )
 const isIndeterminate = computed(
   () => selectedCount.value > 0 && selectedCount.value < totalCount.value,
@@ -426,9 +550,14 @@ const isIndeterminate = computed(
 
 const handleToggleAll = (e: any) => {
   if (e.target.checked) {
-    localCheckedKeys.value = [...allStoreIds.value]
+    const merged = new Set<string>(localCheckedKeys.value)
+    visibleStoreIds.value.forEach((id: string) => merged.add(id))
+    localCheckedKeys.value = Array.from(merged)
   } else {
-    localCheckedKeys.value = []
+    // 只取消当前筛选结果里的门店，其它已选门店保留
+    localCheckedKeys.value = localCheckedKeys.value.filter(
+      (id: string) => !visibleStoreIds.value.includes(id),
+    )
   }
 }
 
@@ -441,6 +570,36 @@ const handleOk = () => {
 const handleCancel = () => {
   visible.value = false
 }
+
+const handleSelectStoreType = (value: string | undefined) => {
+  if (draftSelectedStoreType.value === value) {
+    draftSelectedStoreType.value = undefined
+  } else {
+    draftSelectedStoreType.value = value
+  }
+}
+
+const handleToggleTag = (value: string) => {
+  const idx = draftSelectedTags.value.indexOf(value)
+  if (idx >= 0) {
+    draftSelectedTags.value.splice(idx, 1)
+  } else {
+    draftSelectedTags.value.push(value)
+  }
+}
+
+const handleClearFilters = () => {
+  draftKeyword.value = ''
+  draftSelectedStoreType.value = undefined
+  draftSelectedTags.value = []
+}
+
+const applyDraftFilters = () => {
+  keyword.value = draftKeyword.value.trim()
+  selectedStoreType.value = draftSelectedStoreType.value
+  selectedTags.value = [...draftSelectedTags.value]
+  filterPopoverVisible.value = false
+}
 </script>
 
 <template>
@@ -452,29 +611,85 @@ const handleCancel = () => {
     @ok="handleOk"
     @cancel="handleCancel"
   >
-    <div style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px">
-      <a-input
-        v-model:value="keyword"
-        placeholder="搜索门店名称、编号、地址"
-        allow-clear
-        style="width: 180px"
-      />
-      <a-select
-        v-model:value="selectedStoreType"
-        :options="STORE_TYPE_OPTIONS"
-        allow-clear
-        placeholder="门店类型"
-        style="width: 150px"
-      />
-      <a-select
-        v-model:value="selectedTags"
-        :options="STORE_TAG_OPTIONS"
-        mode="multiple"
-        :max-tag-count="1"
-        allow-clear
-        placeholder="门店标签"
-        style="min-width: 190px; flex: 1"
-      />
+    <div class="store-filter-container">
+      <div class="store-filter-trigger" @click="filterPopoverVisible = true">
+        <template v-if="summaryTags.length">
+          <a-space wrap>
+            <a-tag
+              v-for="tag in summaryTags"
+              :key="tag.key"
+              closable
+              @close.stop="handleRemoveSummaryTag(tag.key)"
+            >
+              {{ tag.label }}
+            </a-tag>
+          </a-space>
+        </template>
+        <template v-else>
+          <span class="store-filter-placeholder"
+            ><SearchOutlined style="margin-right: 4px" />点击选择筛选条件</span
+          >
+        </template>
+      </div>
+
+      <div v-if="filterPopoverVisible" class="store-filter-panel">
+        <div class="store-filter-popover">
+          <div v-if="draftSummaryTags.length" class="store-filter-popover-tags">
+            <a-space wrap>
+              <a-tag v-for="tag in draftSummaryTags" :key="tag.key">
+                {{ tag.label }}
+              </a-tag>
+            </a-space>
+          </div>
+
+          <div class="store-filter-popover-row">
+            <a-input
+              v-model:value="draftKeyword"
+              placeholder="搜索门店名称、编号、地址"
+              allow-clear
+            />
+          </div>
+
+          <div class="store-filter-group">
+            <div class="store-filter-group-label">门店类型（单选）</div>
+            <div class="store-filter-group-tags">
+              <a-tag
+                v-for="opt in STORE_TYPE_OPTIONS"
+                :key="opt.value"
+                :class="[
+                  'store-filter-tag',
+                  { 'store-filter-tag-active': draftSelectedStoreType === opt.value },
+                ]"
+                @click="handleSelectStoreType(opt.value)"
+              >
+                {{ opt.label }}
+              </a-tag>
+            </div>
+          </div>
+
+          <div class="store-filter-group">
+            <div class="store-filter-group-label">门店标签（多选）</div>
+            <div class="store-filter-group-tags">
+              <a-tag
+                v-for="opt in STORE_TAG_OPTIONS"
+                :key="opt.value"
+                :class="[
+                  'store-filter-tag',
+                  { 'store-filter-tag-active': draftSelectedTags.includes(opt.value) },
+                ]"
+                @click="handleToggleTag(opt.value)"
+              >
+                {{ opt.label }}
+              </a-tag>
+            </div>
+          </div>
+
+          <div class="store-filter-popover-footer">
+            <a-button size="small" @click="handleClearFilters">清空</a-button>
+            <a-button type="primary" size="small" @click="applyDraftFilters"> 确定 </a-button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="store-tree-container">
@@ -521,19 +736,121 @@ const handleCancel = () => {
 </template>
 
 <style scoped>
+.store-filter-container {
+  position: relative;
+}
+
+.store-filter-trigger {
+  border-top: 1px solid #f0f0f0;
+  border-radius: 0px;
+  padding: 8px 16px;
+  cursor: pointer;
+  background: rgb(250, 250, 250);
+}
+
+.store-filter-trigger :deep(.ant-space) {
+  margin-bottom: 0 !important;
+}
+
+.store-filter-trigger :deep(.ant-tag),
+.store-filter-panel :deep(.ant-tag) {
+  font-size: 14px;
+  height: 32px;
+  line-height: 32px;
+  border-radius: 2px;
+}
+
+.store-filter-placeholder {
+  color: #999;
+  font-size: 14px;
+}
+
+.store-filter-panel {
+  position: absolute;
+  width: 100%;
+  padding: 16px;
+  left: 0;
+  right: 8px;
+  top: -65px;
+  background: #fff;
+  box-shadow: 0px 8px 7px 7px rgba(0, 0, 0, 0.08);
+  border-radius: 0 0 4px 4px;
+  z-index: 1110;
+}
+
+.store-filter-placeholder {
+  display: inline-flex;
+  align-items: center;
+  color: #999;
+  font-size: 14px;
+}
+store-filter-popover {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.store-filter-popover-tags {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.store-filter-popover-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.store-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.store-filter-group-label {
+  font-size: 14px;
+  color: #999;
+  margin: 4px 0;
+}
+
+.store-filter-group-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.store-filter-tag {
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+}
+
+.store-filter-tag-active {
+  color: #0088dd;
+  border-color: #0088dd;
+  background-color: #e6f4ff;
+}
+
+.store-filter-popover-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .store-tree-container {
   max-height: 360px;
   overflow: auto;
   border: 1px solid #f0f0f0;
-
   width: 100%;
   box-sizing: border-box;
+  padding: 0 0px 16px;
 }
 
 .store-tree-container :deep(.ant-tree-node-content-wrapper) {
   flex: 1;
 }
-
 :deep(.store-selector-modal-wrap .ant-modal-content) {
   padding: 0 !important;
 }
@@ -543,9 +860,7 @@ const handleCancel = () => {
   padding: 10px 0;
   border-bottom: 1px solid #f0f0f0;
 }
-/* .store-tree-container :deep(.ant-tree-treenode) {
-  border-bottom: 1px solid #ddd;
-} */
+
 .store-tree-title {
   display: block;
   width: 100%;
@@ -554,7 +869,6 @@ const handleCancel = () => {
 
 .store-tree-title-main {
   min-width: 0;
-
   color: #666;
   font-size: 14px;
   font-family:
@@ -564,20 +878,21 @@ const handleCancel = () => {
 
 .store-tree-desc-count {
   position: absolute;
-  right: 0;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   color: #555;
 }
 </style>
-
 <style>
 .store-selector-modal-wrap .ant-modal-content {
   padding: 0 !important;
 }
+
 .store-selector-modal-wrap .ant-modal .ant-modal-title {
   padding: 18px;
 }
+
 .store-selector-modal-wrap .ant-modal-footer {
   padding: 0 18px 18px 18px;
 }

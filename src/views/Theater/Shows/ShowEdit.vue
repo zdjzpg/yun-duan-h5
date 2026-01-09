@@ -4,11 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import message from 'ant-design-vue/es/message'
 import FormPageLayout from '@/components/layouts/FormPageLayout.vue'
 import ShowForm from '@/components/theater/show-form/ShowForm.vue'
-import {
-  FORM_STEPS,
-  type ShowFormData,
-  type SessionConfig,
-} from '@/components/theater/show-form/types'
+import { FORM_STEPS, type ShowFormData, type SessionConfig } from '@/components/theater/show-form/types'
 import { fetchShowDetail, updateShow, type UpdateShowRequest } from '@/api/show'
 import type { Show } from '@/api/endpoints/theater/types'
 import {
@@ -72,22 +68,9 @@ const loadDetail = async () => {
       }
     }
 
-    const sessions = (res.sessions || []).map((session) => ({
-      date: session.date,
-      startTime: session.startTime,
-      durationMinutes: session.durationMinutes,
-      openTime: session.openTime,
-    }))
+    const sessionConfigsFromApi =
+      ((res as any).sessionConfigs as SessionConfig[] | undefined) || undefined
 
-    const priceTiers = (res.priceTiers || []).map((tier) => ({
-      name: tier.name,
-      price: tier.price,
-      zoneIds: tier.zoneIds,
-      color: tier.color,
-      remark: tier.remark,
-    }))
-
-    // 仅填充旧字段 sessions / priceTiers，由表单内部在提交时兼容处理。
     initialValues.value = {
       basicInfo: {
         name: show.name,
@@ -100,9 +83,7 @@ const loadDetail = async () => {
         producer: show.producer,
         status: show.status,
       },
-      sessions,
-      priceTiers,
-      seatPriceTierMapping: res.seatPriceTierMapping,
+      sessionConfigs: sessionConfigsFromApi,
       salesRule: res.salesRule || {},
       details: {
         intro: show.detailsIntro,
@@ -149,23 +130,10 @@ const handleFinish = async () => {
   try {
     submitting.value = true
     const values = showFormRef.value.getValues() as ShowFormData & {
-      sessionConfigs?: import('@/components/theater/show-form/types').SessionConfig[]
+      sessionConfigs?: SessionConfig[]
     }
 
-    const sessionConfigs =
-      (values.sessionConfigs && values.sessionConfigs.length
-        ? values.sessionConfigs
-        : [
-            {
-              venueId: values.basicInfo.venueId,
-              venueName: undefined,
-              venueCapacityType: undefined,
-              priceTiers: (values.priceTiers || []) as any,
-              seatPriceTierMapping: values.seatPriceTierMapping,
-              seatDisabledStates: undefined,
-              sessions: (values.sessions || []) as any,
-            },
-          ]) || []
+    const sessionConfigs: SessionConfig[] = (values.sessionConfigs || []) as SessionConfig[]
 
     const flattenedSessions = sessionConfigs.flatMap((config) =>
       (config.sessions || []).map((session: SessionConfig['sessions'][number]) => ({
@@ -178,9 +146,7 @@ const handleFinish = async () => {
 
     const primaryVenueId = sessionConfigs[0]?.venueId || values.basicInfo.venueId
 
-    const flattenedPriceTiers = (sessionConfigs[0]?.priceTiers ||
-      values.priceTiers ||
-      []) as ShowFormData['priceTiers']
+    const flattenedPriceTiers = sessionConfigs[0]?.priceTiers || []
 
     const payload: UpdateShowRequest = {
       id: showId,
@@ -262,3 +228,4 @@ const handleCancel = () => {
     </template>
   </FormPageLayout>
 </template>
+

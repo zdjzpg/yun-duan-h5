@@ -18,6 +18,7 @@ const salesRule = computed({
 
 const riskNoticeFileList = ref<any[]>([])
 const storeSelectorVisible = ref(false)
+const verifyStoreSelectorVisible = ref(false)
 
 const selectedStoreIds = computed(
   (): number[] => ((salesRule.value as any).storeIds as number[]) || [],
@@ -29,6 +30,20 @@ const handleStoreIdsChange = (ids: number[]) => {
 
 const selectedStoreText = computed(() => {
   const count = selectedStoreIds.value.length
+  if (!count) return '未选择门店'
+  return `已选择 ${count} 家门店`
+})
+
+const selectedVerifyStoreIds = computed(
+  (): number[] => ((salesRule.value as any).verifyStoreIds as number[]) || [],
+)
+
+const handleVerifyStoreIdsChange = (ids: number[]) => {
+  ;(salesRule.value as any).verifyStoreIds = ids
+}
+
+const selectedVerifyStoreText = computed(() => {
+  const count = selectedVerifyStoreIds.value.length
   if (!count) return '未选择门店'
   return `已选择 ${count} 家门店`
 })
@@ -287,6 +302,12 @@ const handleRemoveRefundFeeLadderRule = (index: number) => {
       <a-typography-title :level="5" class="sales-rule-section-title">
         取票 / 验票规则
       </a-typography-title>
+
+      <a-form-item class="sales-rule-line" label="核销门店">
+        <a-typography-link @click="verifyStoreSelectorVisible = true">
+          {{ selectedVerifyStoreText }}
+        </a-typography-link>
+      </a-form-item>
 
       <a-form-item
         class="sales-rule-line"
@@ -549,11 +570,16 @@ const handleRemoveRefundFeeLadderRule = (index: number) => {
         </a-radio-group>
       </a-form-item>
       </div>
-    </div>
+      </div>
   <StoreSelectorModal
     v-model:open="storeSelectorVisible"
     :selectedIds="selectedStoreIds"
     @update:selectedIds="handleStoreIdsChange"
+  />
+  <StoreSelectorModal
+    v-model:open="verifyStoreSelectorVisible"
+    :selectedIds="selectedVerifyStoreIds"
+    @update:selectedIds="handleVerifyStoreIdsChange"
   />
 </template>
 

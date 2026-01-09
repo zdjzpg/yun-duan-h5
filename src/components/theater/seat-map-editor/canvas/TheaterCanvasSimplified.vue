@@ -22,6 +22,12 @@ const props = withDefaults(
     enableSnap?: boolean
     showSeatLabels?: boolean
     viewport: CanvasViewport
+    /**
+     * 是否允许舞台交互（点击、拖拽等）
+     * 在仅展示场景（如 TMS 售票）中可以关闭
+     */
+    enableStageInteraction?: boolean
+    enableSeatDrag?: boolean
   }>(),
   {
     seats: () => [],
@@ -37,6 +43,8 @@ const props = withDefaults(
       offsetY: 0,
       scale: 1,
     }),
+    enableStageInteraction: true,
+    enableSeatDrag: true,
   },
 )
 
@@ -56,7 +64,9 @@ const emit = defineEmits<{
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 
 const seatsRef = computed(() => props.seats)
-const stagesRef = computed<Stage[]>(() => (props.stage ? [props.stage] : []))
+const stagesRef = computed<Stage[]>(() =>
+  props.stage && props.enableStageInteraction ? [props.stage] : [],
+)
 const viewportRef = computed<CanvasViewport>(() => props.viewport)
 const selectedSeatIdsRef = computed<string[]>(() => props.selectedSeatIds)
 
@@ -69,6 +79,7 @@ const { dragState, selectionBox, hoveredSeatId, hoveredStageId } =
     canvasWidth: props.width,
     selectedSeatIds: selectedSeatIdsRef,
     enableSnap: props.enableSnap,
+    enableSeatDrag: props.enableSeatDrag,
     onSeatSelect: (ids) => emit('seat-select', ids),
     onSeatMove: (seatId, x, y) => emit('seat-move', seatId, x, y),
     onSeatsMove: (updates) => emit('seats-move', updates),

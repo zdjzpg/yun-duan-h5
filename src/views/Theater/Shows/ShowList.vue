@@ -51,12 +51,6 @@ const columns = [
     fixed: 'left' as const,
   },
   {
-    title: '所属场馆',
-    dataIndex: 'venueName',
-    key: 'venueName',
-    width: 160,
-  },
-  {
     title: '演出类型',
     dataIndex: 'type',
     key: 'type',
@@ -158,7 +152,6 @@ const handleExport = () => {
 
   const rows = dataSource.value.map((show: Show) => ({
     name: show.name,
-    venueName: show.venueName || '',
     type: SHOW_TYPE_MAP[show.type],
     status: SHOW_STATUS_CONFIG[show.status].text,
     sessionCount: show.sessionCount || 0,
@@ -168,22 +161,14 @@ const handleExport = () => {
     createdAt: new Date(show.createdAt).toLocaleString('zh-CN'),
   }))
 
-  const headers = ['演出名称', '所属场馆', '演出类型', '状态', '场次数量', '最近开演', '创建时间']
+  const headers = ['演出名称', '演出类型', '状态', '场次数量', '最近开演', '创建时间']
 
   type ExportRow = (typeof rows)[number]
 
   const csv = [
     headers.join(','),
     ...rows.map((row: ExportRow) =>
-      [
-        row.name,
-        row.venueName,
-        row.type,
-        row.status,
-        row.sessionCount,
-        row.nextSessionTime,
-        row.createdAt,
-      ]
+      [row.name, row.type, row.status, row.sessionCount, row.nextSessionTime, row.createdAt]
         .map((value) => `"${String(value).replace(/"/g, '""')}"`)
         .join(','),
     ),

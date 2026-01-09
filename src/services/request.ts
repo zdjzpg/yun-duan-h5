@@ -7,21 +7,13 @@ const service: AxiosInstance = axios.create({
   timeout: 15000,
 })
 
-// 本地开发启用剧场业务 Mock
+// 本地开发且路径带dev=1启用剧场业务 Mock
 if (import.meta.env.DEV) {
   let enableMock = true
 
   if (typeof window !== 'undefined') {
     let devFlag: string | null = null
 
-    // 1) 正常 URL 查询参数: http://host/path?dev=1#/...
-    const search = window.location.search || ''
-    if (search) {
-      const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search)
-      devFlag = params.get('dev')
-    }
-
-    // 2) Hash 路由中的查询参数: http://host/#/xxx?dev=1
     if (!devFlag && window.location.hash) {
       const hash = window.location.hash
       const queryIndex = hash.indexOf('?')
@@ -110,15 +102,6 @@ export async function post<T = unknown>(
   config?: AxiosRequestConfig,
 ): Promise<T> {
   const res = await service.post<ApiResponse<T> | T>(url, data, config)
-  return unwrapResponse<T>(res.data)
-}
-
-export async function put<T = unknown>(
-  url: string,
-  data?: unknown,
-  config?: AxiosRequestConfig,
-): Promise<T> {
-  const res = await service.put<ApiResponse<T> | T>(url, data, config)
   return unwrapResponse<T>(res.data)
 }
 
