@@ -1,22 +1,19 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { theaterVenueRoutes } from './modules/theaterVenues'
-import { theaterShowRoutes } from './modules/theaterShows'
+import { theaterVenueRoutes } from './modules/theater/theaterVenues'
+import { theaterShowRoutes } from './modules/theater/theaterShows'
 import { demoRoutes } from './modules/demo'
 import { tmsTicketingSaleRoutes } from './modules/tmsTicketingSale'
-import TableColumnSettingDemo from '@/views/Demo/TableColumnSettingDemo.vue'
+import HomeView from '@/views/HomeView.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/demo/table-column-setting',
-    },
-    {
-      path: '/demo/table-column-setting',
-      name: 'TableColumnSettingDemo',
-      component: TableColumnSettingDemo,
-      meta: { title: '表头自定义 Demo' },
+      name: 'Home',
+      component: HomeView,
+      meta: { title: '云端 · 模块入口' },
     },
     ...demoRoutes,
     ...theaterVenueRoutes,
@@ -25,11 +22,14 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const title = (to.meta.title as string) || 'Vue3 App'
   document.title = title
 
-  const token = localStorage.getItem('token')
+  const authStore = useAuthStore()
+  await authStore.ensureLogin()
+
+  const token = authStore.token
 
   if (to.meta.requiresAuth && !token) {
     return { name: 'Login' }

@@ -1,5 +1,5 @@
 /**
- * 演出管理模块 - 类型定义
+ * 演出管理模块 - 类型定义 --暂时用不到
  *
  * 仅包含票档与座位-票档映射等演出级配置的数据结构。
  *
@@ -187,4 +187,3 @@ export type UpdateShowSeatStatusResponse = {
   success: boolean
   affectedCount: number
 }
-

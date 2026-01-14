@@ -5,31 +5,33 @@ import { setupMockAdapter } from '@/api/setup-mocks'
 const service: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 15000,
+  withCredentials: true,
 })
 
 // 本地开发且路径带dev=1启用剧场业务 Mock
+if (import.meta.env.DEV || true) {
+  let enableMock = true
 
-let enableMock = true
+  if (typeof window !== 'undefined') {
+    let devFlag: string | null = null
 
-if (typeof window !== 'undefined') {
-  let devFlag: string | null = null
+    if (!devFlag && window.location.hash) {
+      const hash = window.location.hash
+      const queryIndex = hash.indexOf('?')
+      if (queryIndex >= 0) {
+        const hashQuery = hash.slice(queryIndex + 1)
+        const hashParams = new URLSearchParams(hashQuery)
+        devFlag = hashParams.get('dev')
+      }
+    }
 
-  if (!devFlag && window.location.hash) {
-    const hash = window.location.hash
-    const queryIndex = hash.indexOf('?')
-    if (queryIndex >= 0) {
-      const hashQuery = hash.slice(queryIndex + 1)
-      const hashParams = new URLSearchParams(hashQuery)
-      devFlag = hashParams.get('dev')
+    if (devFlag === '1') {
+      enableMock = true
     }
   }
 
-  if (devFlag === '1') {
-    enableMock = true
-  }
+  setupMockAdapter(service, { delay: 300, enable: enableMock })
 }
-
-setupMockAdapter(service, { delay: 300, enable: enableMock })
 
 service.interceptors.request.use(
   (config) => config,

@@ -290,22 +290,12 @@ export type ShowType =
   | 'other';     // 其他
 
 /**
- * 适合人群
- */
-export type SuitableAudience =
-  | 'children'      // 儿童
-  | 'teenager'      // 青少年
-  | 'adult'         // 成人
-  | 'elderly'       // 老年人
-  | 'all_ages';     // 全年龄
-
-/**
  * 演出状态
  */
 export type ShowStatus =
-  | 'draft'       // 草稿
-  | 'on_sale'     // 在售
-  | 'off_sale'    // 停售
+  | 'draft'       // 放入仓库
+  | 'on_sale'     // 上架
+  | 'off_sale'    // 下架
   | 'finished';   // 已结束
 
 /**
@@ -336,19 +326,11 @@ export interface Show {
   /** 演出类型 */
   type: ShowType;
 
-  /** 适合人群 */
-  suitableAudience?: SuitableAudience[];
-
   /** 封面图 URL 数组 */
   coverImage?: string[];
 
-  /** 副标题 */
-  subtitle?: string;
-
   /** 演出简介 */
   description?: string;
-  /** 主办方 */
-  producer?: string;
 
   /** 演出状态 */
   status: ShowStatus;

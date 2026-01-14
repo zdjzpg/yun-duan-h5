@@ -36,9 +36,9 @@ const SHOW_STATUS_CONFIG: Record<
   ShowStatus,
   { text: string; status: 'default' | 'success' | 'error' | 'warning' }
 > = {
-  draft: { text: '草稿', status: 'default' },
-  on_sale: { text: '在售', status: 'success' },
-  off_sale: { text: '停售', status: 'warning' },
+  draft: { text: '放入仓库', status: 'default' },
+  on_sale: { text: '上架', status: 'success' },
+  off_sale: { text: '下架', status: 'warning' },
   finished: { text: '已结束', status: 'error' },
 }
 
@@ -215,9 +215,9 @@ const handleExport = () => {
         allow-clear
       />
       <a-select v-model:value="status" placeholder="全部状态" allow-clear style="width: 216px">
-        <a-select-option value="draft">草稿</a-select-option>
-        <a-select-option value="on_sale">在售</a-select-option>
-        <a-select-option value="off_sale">停售</a-select-option>
+        <a-select-option value="draft">放入仓库</a-select-option>
+        <a-select-option value="on_sale">上架</a-select-option>
+        <a-select-option value="off_sale">下架</a-select-option>
         <a-select-option value="finished">已结束</a-select-option>
       </a-select>
     </template>
@@ -242,16 +242,7 @@ const handleExport = () => {
     >
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.key === 'name'">
-          <div>
-            <span>{{ record.name }}</span>
-            <span
-              v-if="record.subtitle"
-              type="secondary"
-              style="font-size: 12px; display: block; margin-top: 4px"
-            >
-              {{ record.subtitle }}
-            </span>
-          </div>
+          <span>{{ record.name }}</span>
         </template>
 
         <template v-else-if="column.key === 'type'">
@@ -305,7 +296,7 @@ const handleExport = () => {
               v-else-if="record.status === 'on_sale'"
               @click="handleUpdateStatus(record.id, 'off_sale')"
             >
-              停售
+              下架
             </a>
             <a
               v-else-if="record.status === 'off_sale'"

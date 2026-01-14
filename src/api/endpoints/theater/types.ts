@@ -17,7 +17,6 @@ import type {
   ShowSalesRule,
   ShowType,
   ShowStatus,
-  SuitableAudience,
   VenueSeatStatus,  // 使用新类型
   SeatLabel,
 } from '../../../types/theater';
@@ -328,20 +327,11 @@ export type CreateShowRequest = {
   /** 演出类型 */
   type: ShowType;
   
-  /** 适合人群 */
-  suitableAudience?: SuitableAudience[];
-  
   /** 封面图 URL 数组 */
   coverImage?: string[];
   
-  /** 副标题 */
-  subtitle?: string;
-  
   /** 演出简介 */
   description?: string;
-  
-  /** 主办方 */
-  producer?: string;
   
   /** 演出详情 - 演出介绍文本 */
   detailsIntro?: string;
@@ -547,7 +537,6 @@ export type {
   ShowSalesRule,
   ShowType,
   ShowStatus,
-  SuitableAudience,
   VenueSeatStatus,  // 使用新类型
   SeatLabel,
 };

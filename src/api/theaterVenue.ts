@@ -52,7 +52,6 @@ const MOCK_VENUE_UPDATE_STATUS_URL = '/theater/venues/update-status'
 const MOCK_VENUE_DELETE_URL = '/theater/venues/delete'
 
 const isVenueMockMode = (): boolean => {
-  if (!import.meta.env.DEV) return false
   if (typeof window === 'undefined') return false
   return window.location.href.includes('dev=1')
 }

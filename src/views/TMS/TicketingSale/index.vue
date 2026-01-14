@@ -8,6 +8,7 @@ import {
   SearchOutlined,
   ZoomInOutlined,
   ZoomOutOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons-vue'
 
 import YDatePicker from '@/components/YDatePicker.vue'
@@ -843,18 +844,12 @@ watch(
               </a-button>
             </a-space>
 
-            <a-dropdown
-              :open="showDropdownOpen"
-              :trigger="['click']"
-              @openChange="(open: boolean) => (showDropdownOpen = open)"
-            >
+            <a-dropdown v-model:open="showDropdownOpen" trigger="click">
               <a-input
                 v-model:value="showSearchValue"
                 allow-clear
                 placeholder="请输入演出名称匹配具体的演出"
                 style="width: 360px"
-                @focus="showDropdownOpen = true"
-                @click="showDropdownOpen = true"
               >
                 <template #prefix>
                   <SearchOutlined />
@@ -964,6 +959,14 @@ watch(
               <template #icon><ZoomOutOutlined /></template>
             </a-button>
             <a-button @click="resetView">重置</a-button>
+            <a-tooltip title="Space + 拖拽 平移画布；Ctrl + 滚轮 缩放画布">
+              <a-button>
+                <template #icon>
+                  <QuestionCircleOutlined />
+                </template>
+                快捷键
+              </a-button>
+            </a-tooltip>
           </div>
         </div>
 
@@ -974,6 +977,7 @@ watch(
               :stage="venueStage"
               :enable-stage-interaction="false"
               :enable-seat-drag="false"
+              :toggle-single-click-select="true"
               :selected-seat-ids="selectedSeatIds"
               :selected-element="null"
               :width="canvasSize.width"
@@ -1228,6 +1232,12 @@ watch(
 .canvas-title__sub {
   font-size: 12px;
   color: rgba(0, 0, 0, 0.45);
+}
+
+.canvas-shortcuts {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 8px;
 }
 
 .canvas-actions {

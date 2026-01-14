@@ -44,6 +44,8 @@ export interface UseCanvasInteractionProps {
   enableSnap?: boolean
   /** 是否允许拖动座位（TMS 场景下关闭） */
   enableSeatDrag?: boolean
+  /** 单击座位时是否直接切换选中状态（TMS 售票需要） */
+  toggleSingleClickSelect?: boolean
   onSeatSelect?: (seatIds: string[]) => void
   onSeatMove?: (seatId: string, x: number, y: number) => void
   onSeatsMove?: (updates: Array<{ id: string; x: number; y: number }>) => void
@@ -65,6 +67,7 @@ export function useCanvasInteractionEnhanced({
   selectedSeatIds,
   enableSnap = true,
   enableSeatDrag = true,
+  toggleSingleClickSelect = false,
   onSeatSelect,
   onSeatMove,
   onSeatsMove,
@@ -156,7 +159,7 @@ export function useCanvasInteractionEnhanced({
             onSeatSelect(currentSelected.filter((id: string) => id !== clickedSeat.id))
           } else {
             const clickedSeatData = seats.value.find((s) => s.id === clickedSeat.id)
-            if (clickedSeatData?.groupId) {
+            if (clickedSeatData?.groupId && !toggleSingleClickSelect) {
               const groupSeatIds = seats.value
                 .filter((s) => s.groupId === clickedSeatData.groupId)
                 .map((s) => s.id)
@@ -167,16 +170,14 @@ export function useCanvasInteractionEnhanced({
             }
           }
         } else {
-          if (!currentSelected.includes(clickedSeat.id)) {
-            const clickedSeatData = seats.value.find((s) => s.id === clickedSeat.id)
-            if (clickedSeatData?.groupId) {
-              const groupSeatIds = seats.value
-                .filter((s) => s.groupId === clickedSeatData.groupId)
-                .map((s) => s.id)
-              onSeatSelect(groupSeatIds)
-            } else {
-              onSeatSelect([clickedSeat.id])
-            }
+          const clickedSeatData = seats.value.find((s) => s.id === clickedSeat.id)
+          if (clickedSeatData?.groupId && !toggleSingleClickSelect) {
+            const groupSeatIds = seats.value
+              .filter((s) => s.groupId === clickedSeatData.groupId)
+              .map((s) => s.id)
+            onSeatSelect(groupSeatIds)
+          } else {
+            onSeatSelect([clickedSeat.id])
           }
         }
       }

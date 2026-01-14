@@ -76,11 +76,8 @@ const loadDetail = async () => {
         name: show.name,
         venueId: show.venueId,
         type: show.type,
-        suitableAudience: show.suitableAudience,
         coverImage: show.coverImage,
-        subtitle: show.subtitle,
         description: show.description,
-        producer: show.producer,
         status: show.status,
       },
       sessionConfigs: sessionConfigsFromApi,
@@ -153,11 +150,8 @@ const handleFinish = async () => {
       name: values.basicInfo.name.trim(),
       venueId: primaryVenueId,
       type: values.basicInfo.type,
-      suitableAudience: values.basicInfo.suitableAudience,
       coverImage: values.basicInfo.coverImage,
-      subtitle: values.basicInfo.subtitle?.trim() || undefined,
       description: values.basicInfo.description?.trim() || undefined,
-      producer: values.basicInfo.producer?.trim() || undefined,
       status: values.basicInfo.status,
       detailsIntro: values.details?.intro?.trim() || undefined,
       detailsBookingRule: values.details?.bookingRule?.trim() || undefined,
@@ -228,4 +222,3 @@ const handleCancel = () => {
     </template>
   </FormPageLayout>
 </template>
-

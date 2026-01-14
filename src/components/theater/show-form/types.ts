@@ -1,19 +1,11 @@
-import type {
-  ShowType,
-  ShowStatus,
-  SuitableAudience,
-  VenueCapacityType,
-} from '@/api/endpoints/theater/types'
+import type { ShowType, ShowStatus, VenueCapacityType } from '@/api/endpoints/theater/types'
 
 export type ShowFormBasicInfo = {
   name: string
   venueId: string
   type: ShowType
-  suitableAudience?: SuitableAudience[]
   coverImage?: string[]
-  subtitle?: string
   description?: string
-  producer?: string
   status: ShowStatus
 }
 

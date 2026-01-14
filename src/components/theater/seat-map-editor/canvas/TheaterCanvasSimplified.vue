@@ -28,6 +28,8 @@ const props = withDefaults(
      */
     enableStageInteraction?: boolean
     enableSeatDrag?: boolean
+    /** 单击座位直接切换选中状态（TMS 售票用） */
+    toggleSingleClickSelect?: boolean
   }>(),
   {
     seats: () => [],
@@ -45,6 +47,7 @@ const props = withDefaults(
     }),
     enableStageInteraction: true,
     enableSeatDrag: true,
+    toggleSingleClickSelect: false,
   },
 )
 
@@ -80,6 +83,7 @@ const { dragState, selectionBox, hoveredSeatId, hoveredStageId } =
     selectedSeatIds: selectedSeatIdsRef,
     enableSnap: props.enableSnap,
     enableSeatDrag: props.enableSeatDrag,
+    toggleSingleClickSelect: props.toggleSingleClickSelect,
     onSeatSelect: (ids) => emit('seat-select', ids),
     onSeatMove: (seatId, x, y) => emit('seat-move', seatId, x, y),
     onSeatsMove: (updates) => emit('seats-move', updates),

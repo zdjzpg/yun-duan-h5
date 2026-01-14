@@ -38,11 +38,8 @@ const formState = reactive<InternalFormState>({
     name: '',
     venueId: '',
     type: 'live_show' as any,
-    suitableAudience: undefined,
     coverImage: undefined,
-    subtitle: '',
     description: '',
-    producer: '',
     status: 'draft' as any,
   },
   // 新架构：场次配置列表
@@ -224,9 +221,7 @@ const validateStep = async (step: number): Promise<boolean> => {
 
 const getValues = (): ShowFormData => {
   const basicInfo = JSON.parse(JSON.stringify(formState.basicInfo)) as ShowFormBasicInfo
-  const sessionConfigs = JSON.parse(
-    JSON.stringify(formState.sessionConfigs),
-  ) as SessionConfig[]
+  const sessionConfigs = JSON.parse(JSON.stringify(formState.sessionConfigs)) as SessionConfig[]
   const salesRule = JSON.parse(JSON.stringify(formState.salesRule)) as ShowFormData['salesRule']
   const details = JSON.parse(JSON.stringify(formState.details)) as ShowFormData['details']
 
@@ -282,4 +277,3 @@ defineExpose({
   margin-bottom: 24px;
 }
 </style>
-

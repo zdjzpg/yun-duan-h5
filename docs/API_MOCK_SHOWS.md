@@ -43,17 +43,10 @@ export type ShowType =
   | 'concert'     // 演唱会
   | 'other'       // 其它
 
-export type SuitableAudience =
-  | 'children'    // 儿童
-  | 'teenager'    // 青少年
-  | 'adult'       // 成人
-  | 'elderly'     // 老年
-  | 'all_ages'    // 全年龄
-
 export type ShowStatus =
-  | 'draft'       // 草稿
-  | 'on_sale'     // 在售
-  | 'off_sale'    // 已下架
+  | 'draft'       // 放入仓库
+  | 'on_sale'     // 上架
+  | 'off_sale'    // 下架
   | 'finished'    // 已结束
 ```
 
@@ -67,12 +60,9 @@ export interface Show {
 
   name: string             // 演出名称
   type: ShowType           // 演出类型
-  suitableAudience?: SuitableAudience[]
 
   coverImage?: string[]    // 封面图 URL 数组
-  subtitle?: string        // 副标题
   description?: string     // 简介
-  producer?: string        // 出品方 / 主办方
   status: ShowStatus       // 状态：draft/on_sale/off_sale/finished
 
   sessionCount?: number    // 场次数量（统计字段）
@@ -190,11 +180,8 @@ export type CreateShowRequest = {
   name: string
   venueId: string
   type: ShowType
-  suitableAudience?: SuitableAudience[]
   coverImage?: string[]
-  subtitle?: string
   description?: string
-  producer?: string
 
   // 详情文案
   detailsIntro?: string           // 演出介绍

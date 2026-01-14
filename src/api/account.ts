@@ -1,4 +1,4 @@
-import { post } from '@/services/request'
+import { get, post } from '@/services/request'
 
 export interface SignInParams {
   account: string
@@ -31,4 +31,25 @@ export async function checkPointSignIn(
   params: CheckPointSignInParams,
 ): Promise<CheckPointSignInResult> {
   return post<CheckPointSignInResult>('/TMSH5/Account/CheckPointSignIn', params)
+}
+
+export interface GetUserTokenUser {
+  userId: number
+  account: string
+  areaId: string
+  industry: string
+  createdDatetime: string
+}
+
+export interface GetUserTokenResult {
+  token: string
+  user: GetUserTokenUser
+}
+
+/**
+ * 获取当前云端登录用户的 Token 和基础信息
+ * 接口依赖云端的 Cookie 做鉴权，不需要额外参数
+ */
+export async function getUserToken(): Promise<GetUserTokenResult> {
+  return post<GetUserTokenResult>('/Account/GetUserToken')
 }
