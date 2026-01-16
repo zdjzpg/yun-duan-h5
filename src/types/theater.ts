@@ -293,9 +293,9 @@ export type ShowType =
  * 演出状态
  */
 export type ShowStatus =
-  | 'draft'       // 放入仓库
-  | 'on_sale'     // 上架
-  | 'off_sale'    // 下架
+  | 'draft'       // 草稿
+  | 'on_sale'     // 在售
+  | 'off_sale'    // 停售
   | 'finished';   // 已结束
 
 /**

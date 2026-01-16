@@ -29,6 +29,14 @@ import YUploadDraggable from './components/YUploadDraggable.vue'
 import App from './App.vue'
 import router from './router'
 
+// 为宿主页面的 body 打上统一的标记，便于样式作用域控制
+if (typeof document !== 'undefined') {
+  const hostBody = document.body
+  if (hostBody && !hostBody.classList.contains('pospal-userweb-front-body')) {
+    hostBody.classList.add('pospal-userweb-front-body')
+  }
+}
+
 const app = createApp(App)
 
 app.use(createPinia())

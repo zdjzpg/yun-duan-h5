@@ -16,16 +16,9 @@ import type {
   VenueDetailResponse,
   UpdateVenueStatusRequest,
   DeleteVenueResponse,
-  ShowListRequest,
   ShowListResponse,
-  CreateShowRequest,
-  CreateShowResponse,
-  UpdateShowRequest,
-  ShowDetailResponse,
-  UpdateShowStatusRequest,
-  DeleteShowResponse,
-  BatchCreateSessionsRequest,
-  BatchCreateSessionsResponse,
+  ShowListRequestDto,
+  ShowDto,
 } from './types'
 import type { ApiResponse } from '../../shared/types'
 import { ApiResponseCode } from '../../shared/response-codes'
@@ -39,7 +32,211 @@ import type {
   ShowSalesRule,
   VenueLockStatus,
 } from '../../../types/theater'
-
+const SAMPLE_TICKETING_SHOW_DETAIL: ShowDto = {
+  Uid: 1,
+  VenueUid: 1,
+  ShowName: '夜游山水实景演出',
+  ShowType: 2,
+  CoverImages: ['https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800'],
+  Description:
+    '1沉浸式山水光影秀，演绎千年文化传奇。大型实景演出，融合山水自然景观与现代科技，讲述当地历史文化故事。',
+  DetailsIncludeRule: '1',
+  DetailsBookingRule: '2',
+  DetailsRefundRule: '3',
+  DetailsSafetyNotice: '5',
+  DetailImages: [],
+  ShowStatus: 4,
+  OnlineTimeType: 3,
+  OnlineTime: '2026-01-15 00:07:00',
+  OfflineTimeType: 3,
+  OfflineTime: '2026-01-31 07:00:00',
+  AssignUsersForSale: [3122001],
+  OrderChannels: [0],
+  NeedRiskNotice: 1,
+  RiskNoticeMode: 0,
+  RiskNoticeText: '123',
+  RiskNoticeFileName: '',
+  EnableGroupTicket: 1,
+  GroupTicketMinQuantity: 3,
+  TimeLengthForAutoCancel: 1,
+  MaxQuantityForPerIdentity: 2,
+  TimeLengthForStopSale: -3,
+  AssignUsersForVerify: [3122002, 3122001],
+  VerifyStoreStations: [
+    {
+      StoreId: 3122002,
+      Stations: [
+        {
+          StationId: '3122002-2',
+          StationName: '北门入园',
+          Enabled: 1,
+          VerifyLimit: null,
+        },
+        {
+          StationId: '3122002-3',
+          StationName: '南门入园A',
+          Enabled: 1,
+          VerifyLimit: null,
+        },
+      ],
+    },
+    {
+      StoreId: 3122001,
+      Stations: [
+        {
+          StationId: '3122001-1',
+          StationName: '北门出园',
+          Enabled: 1,
+          VerifyLimit: 1,
+        },
+      ],
+    },
+  ],
+  VenueCapacityType: 2,
+  PickupTimeType: 1,
+  PrintMode: 2,
+  PrintTiming: 0,
+  PrintTemplateUid: 1002,
+  PrintPriceType: 1,
+  CustomPrintPrice: 3,
+  CheckingWay: [3],
+  VerifyTimeType: 1,
+  VerifyTimeBeforeHours: 1,
+  VerifyTimeBeforeMinutes: 1,
+  VerifyTimeAfterHours: 2,
+  VerifyTimeAfterMinutes: 2,
+  RefundRuleType: 2,
+  RefundDeadlineMinutesBeforeShow: null,
+  NeedRefundFee: 1,
+  RefundFeeMode: 1,
+  RefundFeeFixedUnit: null,
+  RefundFeeFixedValue: null,
+  RefundFeeLadderRules: [
+    {
+      OffsetDirection: 0,
+      OffsetDays: 2,
+      OffsetTime: '11:21',
+      FeeUnit: 0,
+      FeeValue: 3,
+    },
+    {
+      OffsetDirection: 1,
+      OffsetDays: 1,
+      OffsetTime: '11:21',
+      FeeUnit: 1,
+      FeeValue: 4,
+    },
+  ],
+  RefundAuditMode: 0,
+  OverdueOperationType: 1,
+  Sessions: [
+    {
+      Date: '2025-12-15',
+      StartTime: '19:30',
+      DurationMinutes: 11,
+      PriceTiers: [
+        {
+          PriceTierName: 'VIP 区',
+          Price: 11,
+          VenueZoneUid: 1,
+          Stock: 97,
+        },
+        {
+          PriceTierName: 'A 区',
+          Price: 2,
+          VenueZoneUid: 2,
+          Stock: 296,
+        },
+        {
+          PriceTierName: 'B 区',
+          Price: 3,
+          VenueZoneUid: 3,
+          Stock: 497,
+        },
+      ],
+    },
+    {
+      Date: '2025-12-16',
+      StartTime: '19:30',
+      DurationMinutes: 90,
+      PriceTiers: [
+        {
+          PriceTierName: 'VIP 区',
+          Price: 11,
+          VenueZoneUid: 1,
+          Stock: 97,
+        },
+        {
+          PriceTierName: 'A 区',
+          Price: 2,
+          VenueZoneUid: 2,
+          Stock: 296,
+        },
+        {
+          PriceTierName: 'B 区',
+          Price: 3,
+          VenueZoneUid: 3,
+          Stock: 497,
+        },
+      ],
+    },
+    {
+      Date: '2025-12-22',
+      StartTime: '19:30',
+      DurationMinutes: 90,
+      PriceTiers: [
+        {
+          PriceTierName: 'VIP 区',
+          Price: 11,
+          VenueZoneUid: 1,
+          Stock: 97,
+        },
+        {
+          PriceTierName: 'A 区',
+          Price: 2,
+          VenueZoneUid: 2,
+          Stock: 296,
+        },
+        {
+          PriceTierName: 'B 区',
+          Price: 3,
+          VenueZoneUid: 3,
+          Stock: 497,
+        },
+      ],
+    },
+    {
+      Date: '2025-12-18',
+      StartTime: '19:30',
+      DurationMinutes: 80,
+      PriceTiers: [
+        {
+          PriceTierName: 'VIP 区',
+          Price: 11,
+          VenueZoneUid: 1,
+          Stock: 97,
+        },
+        {
+          PriceTierName: 'A 区',
+          Price: 2,
+          VenueZoneUid: 2,
+          Stock: 296,
+        },
+        {
+          PriceTierName: 'B 区',
+          Price: 3,
+          VenueZoneUid: 3,
+          Stock: 497,
+        },
+      ],
+    },
+  ],
+}
+const MOCK_PRINT_TEMPLATES = [
+  { Uid: 1001, Name: '默认打印模板' },
+  { Uid: 1002, Name: '山水实景模板' },
+  { Uid: 1003, Name: '演唱会票根模板' },
+]
 // ==================== Mock 数据 ====================
 
 // Mock 场馆数据
@@ -527,6 +724,200 @@ function generateSeatsForVenue005(): VenueSeat[] {
   return seats
 }
 
+function initializeShowUidMap() {
+  mockShows.forEach((show, index) => {
+    const uid = extractDigits(show.id) || index + 1
+    showUidToIdMap.set(uid, show.id)
+    showIdToUidMap.set(show.id, uid)
+  })
+}
+
+function extractDigits(value?: string | number | null): number {
+  if (typeof value === 'number') {
+    return Number.isNaN(value) ? 0 : value
+  }
+  if (typeof value === 'string') {
+    const digits = value.match(/\d+/g)?.join('')
+    if (digits) {
+      const parsed = Number(digits)
+      if (!Number.isNaN(parsed)) return parsed
+    }
+  }
+  return 0
+}
+
+const dtoShowTypeToLegacy: Record<number, Show['type']> = {
+  1: 'live_show',
+  2: 'musical',
+  3: 'drama',
+  4: 'concert',
+  5: 'other',
+}
+
+const legacyShowTypeToDto: Record<Show['type'], number> = {
+  live_show: 1,
+  musical: 2,
+  drama: 3,
+  concert: 4,
+  other: 5,
+}
+
+const dtoStatusToLegacy: Record<string, Show['status']> = {
+  '1': 'on_sale',
+  '2': 'draft',
+  '3': 'off_sale',
+  '4': 'finished',
+}
+
+const legacyStatusToDto: Record<Show['status'], string> = {
+  draft: '2',
+  on_sale: '1',
+  off_sale: '3',
+  finished: '4',
+}
+
+function resolveVenueInfoByUid(uid?: number) {
+  if (!uid) {
+    return { id: '', name: '' }
+  }
+  const venue = mockVenues.find((v) => extractDigits(v.id) === uid)
+  if (venue) {
+    return { id: venue.id, name: venue.name }
+  }
+  return { id: `venue-${uid}`, name: '' }
+}
+
+function mapShowDtoToLegacy(
+  dto: ShowDto,
+  showId: string,
+  existingShow?: Show,
+): {
+  show: Show
+  sessions: ShowSession[]
+  priceTiers: ShowPriceTier[]
+} {
+  const now = new Date().toISOString().split('T')[0]
+  const createdAt = existingShow?.createdAt || now
+  const updatedAt = now
+  const venueInfo = resolveVenueInfoByUid(dto.VenueUid)
+
+  const show: Show = {
+    id: showId,
+    merchantId: existingShow?.merchantId || 'merchant-001',
+    venueId: venueInfo.id || existingShow?.venueId || '',
+    venueName: venueInfo.name || existingShow?.venueName,
+    name: dto.ShowName,
+    type: dtoShowTypeToLegacy[dto.ShowType] || existingShow?.type || 'other',
+    coverImage: dto.CoverImages || existingShow?.coverImage,
+    description: dto.Description || existingShow?.description,
+    status: dtoStatusToLegacy[dto.ShowStatus] || existingShow?.status || 'draft',
+    sessionCount: dto.Sessions?.length || existingShow?.sessionCount || 0,
+    nextSessionTime: existingShow?.nextSessionTime,
+    createdAt,
+    updatedAt,
+  }
+
+  const sessions: ShowSession[] = (dto.Sessions || []).map((session, index) => ({
+    id: `${showId}-session-${index + 1}`,
+    showId,
+    venueId: show.venueId,
+    date: session.Date,
+    startTime: session.StartTime,
+    durationMinutes: session.DurationMinutes,
+    openTime: undefined,
+    status: 'scheduled',
+    createdAt,
+    updatedAt,
+  }))
+
+  const basePriceTiers = (dto.Sessions?.[0]?.PriceTiers || []).map((tier, index) => ({
+    id: `${showId}-tier-${index + 1}`,
+    showId,
+    name: tier.PriceTierName,
+    price: tier.Price,
+    zoneIds: tier.VenueZoneUid ? [String(tier.VenueZoneUid)] : [],
+    color: undefined,
+    remark: undefined,
+    createdAt,
+    updatedAt,
+  }))
+
+  return {
+    show,
+    sessions,
+    priceTiers: basePriceTiers,
+  }
+}
+
+function mapLegacyShowToDto(showId: string, show: Show): ShowDto {
+  const sessions = mockSessions[showId] || []
+  const priceTiers = mockPriceTiers[showId] || []
+  const uid = showIdToUidMap.get(showId) || extractDigits(showId) || Date.now()
+
+  return {
+    Uid: uid,
+    VenueUid: extractDigits(show.venueId),
+    ShowName: show.name,
+    ShowType: legacyShowTypeToDto[show.type] || 5,
+    CoverImages: show.coverImage || [],
+    Description: show.description || '',
+    DetailsIncludeRule: '',
+    DetailsBookingRule: '',
+    DetailsRefundRule: '',
+    DetailsSafetyNotice: '',
+    DetailImages: [],
+    ShowStatus: legacyStatusToDto[show.status] || '2',
+    OnlineTimeType: null,
+    OnlineTime: null,
+    OfflineTimeType: null,
+    OfflineTime: null,
+    AssignUsersForSale: [],
+    OrderChannels: [],
+    NeedRiskNotice: 0,
+    RiskNoticeMode: 0,
+    RiskNoticeText: '',
+    RiskNoticeFileName: '',
+    EnableGroupTicket: 0,
+    GroupTicketMinQuantity: null,
+    TimeLengthForAutoCancel: null,
+    MaxQuantityForPerIdentity: null,
+    TimeLengthForStopSale: 0,
+    AssignUsersForVerify: [],
+    PickupTimeType: 0,
+    PrintMode: 0,
+    PrintTiming: 0,
+    PrintTemplateUid: 0,
+    PrintPriceType: 0,
+    CustomPrintPrice: null,
+    CheckingWay: [],
+    VerifyTimeType: 0,
+    VerifyTimeBeforeHours: null,
+    VerifyTimeBeforeMinutes: null,
+    VerifyTimeAfterHours: null,
+    VerifyTimeAfterMinutes: null,
+    RefundRuleType: 0,
+    RefundDeadlineMinutesBeforeShow: null,
+    NeedRefundFee: 0,
+    RefundFeeMode: null,
+    RefundFeeFixedUnit: null,
+    RefundFeeFixedValue: null,
+    RefundFeeLadderRules: [],
+    RefundAuditMode: 0,
+    OverdueOperationType: 0,
+    Sessions: sessions.map((session) => ({
+      Date: session.date,
+      StartTime: session.startTime,
+      DurationMinutes: session.durationMinutes,
+      PriceTiers: priceTiers.map((tier) => ({
+        PriceTierName: tier.name,
+        Price: tier.price,
+        VenueZoneUid: extractDigits(tier.zoneIds?.[0] || 0),
+        Stock: 0,
+      })),
+    })),
+  }
+}
+
 // Mock 演出数据
 const mockShows: Show[] = [
   {
@@ -539,7 +930,8 @@ const mockShows: Show[] = [
     type: 'live_show',
     suitableAudience: ['all_ages'],
     coverImage: ['https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800'],
-    description: '沉浸式山水光影秀，演绎千年文化传奇。大型实景演出，融合山水自然景观与现代科技，讲述当地历史文化故事。',
+    description:
+      '沉浸式山水光影秀，演绎千年文化传奇。大型实景演出，融合山水自然景观与现代科技，讲述当地历史文化故事。',
     status: 'on_sale',
     sessionCount: 12,
     nextSessionTime: '2025-12-15 19:30:00',
@@ -630,6 +1022,11 @@ const mockShows: Show[] = [
   },
 ]
 
+const showUidToIdMap = new Map<number, string>()
+const showIdToUidMap = new Map<string, number>()
+
+initializeShowUidMap()
+
 // Mock 场次数据
 const mockSessions: Record<string, ShowSession[]> = {
   'show-001': [
@@ -668,17 +1065,6 @@ const mockSessions: Record<string, ShowSession[]> = {
     },
     // 额外：为「夜游山水实景演出」增加梦幻音乐厅（venue-005）的场次配置
     // 其中 2025-12-15 这天大剧场 + 梦幻音乐厅都有演出，便于验证多场馆
-    {
-      id: 'session-006',
-      showId: 'show-001',
-      venueId: 'venue-005',
-      date: '2025-12-15',
-      startTime: '20:00',
-      durationMinutes: 80,
-      openTime: '19:30',
-      createdAt: '2025-11-10',
-      updatedAt: '2025-11-10',
-    },
     {
       id: 'session-007',
       showId: 'show-001',
@@ -1269,414 +1655,238 @@ export function setupCopyVenueMock(mock: MockAdapter) {
 }
 
 // ==================== 演出管理 Mock ====================
+export function setupTicketingShowDtoMocks(mock: MockAdapter) {
+  mock.onPost('/Ticketing/TicketingShow/ShowList').reply((config) => {
+    const request = JSON.parse(config.data || '{}') as ShowListRequestDto
+    const page = request.Page ?? 1
+    const pageSize = request.PageSize ?? 10
+    const keyword = request.Keyword?.trim() || ''
+    const venueUid = request.VenueUid ?? null
+    const statusFilter = request.ShowStatus ?? 0
 
-/**
- * 设置演出列表 Mock
- */
-export function setupShowListMock(mock: MockAdapter) {
-  mock.onGet('/theater/shows').reply((config) => {
-    const params: ShowListRequest = config.params || {}
-    const { page = 1, pageSize = 10, keyword, venueId, status } = params
-
-    // 筛选
-    let filteredShows = [...mockShows]
+    let filtered = [...mockShows]
 
     if (keyword) {
-      filteredShows = filteredShows.filter((show) => show.name.includes(keyword))
+      filtered = filtered.filter((show) => show.name.includes(keyword))
     }
 
-    if (venueId) {
-      filteredShows = filteredShows.filter((show) => show.venueId === venueId)
+    if (typeof venueUid === 'number' && venueUid > 0) {
+      filtered = filtered.filter((show) => extractDigits(show.venueId) === venueUid)
     }
 
-    if (status) {
-      filteredShows = filteredShows.filter((show) => show.status === status)
+    const statusKey = statusFilter ? String(statusFilter) : ''
+    if (statusKey && dtoStatusToLegacy[statusKey]) {
+      filtered = filtered.filter((show) => show.status === dtoStatusToLegacy[statusKey])
     }
 
-    // 分页
+    const total = filtered.length
     const start = (page - 1) * pageSize
-    const end = start + pageSize
-    const list = filteredShows.slice(start, end)
+    const paged = filtered.slice(start, start + pageSize)
+    const dtoList = paged.map((show) => mapLegacyShowToDto(show.id, show))
 
-    const response: ApiResponse<ShowListResponse> = {
+    const response: ApiResponse<{ List: ShowDto[]; Total: number }> = {
       code: ApiResponseCode.SUCCESS,
       message: '获取演出列表成功',
       data: {
-        list,
-        total: filteredShows.length,
-        page,
-        pageSize,
+        List: dtoList,
+        Total: total,
       },
     }
 
     return [200, response]
   })
-}
 
-/**
- * 设置创建演出 Mock
- */
-export function setupCreateShowMock(mock: MockAdapter) {
-  mock.onPost('/theater/shows').reply((config) => {
-    const request: CreateShowRequest = JSON.parse(config.data)
-
-    const venue = mockVenues.find((v) => v.id === request.venueId)
-
-    const newShow: Show = {
-      id: 'show-' + Date.now(),
-      merchantId: 'merchant-001',
-      venueId: request.venueId,
-      venueName: venue?.name,
-      name: request.name,
-      type: request.type,
-      coverImage: request.coverImage,
-      description: request.description,
-      status: request.status,
-      sessionCount: request.sessions?.length || 0,
-      createdAt: new Date().toISOString().split('T')[0],
-      updatedAt: new Date().toISOString().split('T')[0],
+  mock.onPost('/Ticketing/TicketingShow/SaveShow').reply((config) => {
+    const dto = JSON.parse(config.data) as ShowDto
+    let uid = dto.Uid
+    if (!uid || uid <= 0) {
+      uid = Date.now()
+      dto.Uid = uid
     }
 
-    mockShows.push(newShow)
-
-    // 保存场次数据
-    if (request.sessions && request.sessions.length > 0) {
-      mockSessions[newShow.id] = request.sessions.map((session, index) => ({
-        id: `session-${Date.now()}-${index}`,
-        showId: newShow.id,
-        venueId: request.venueId,
-        date: session.date,
-        startTime: session.startTime,
-        durationMinutes: session.durationMinutes,
-        openTime: session.openTime,
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0],
-      }))
+    let showId = showUidToIdMap.get(uid)
+    if (!showId) {
+      showId = `show-${uid}`
+      showUidToIdMap.set(uid, showId)
+      showIdToUidMap.set(showId, uid)
     }
 
-    // 保存票档数据
-    if (request.priceTiers && request.priceTiers.length > 0) {
-      mockPriceTiers[newShow.id] = request.priceTiers.map((tier, index) => ({
-        id: `tier-${Date.now()}-${index}`,
-        showId: newShow.id,
-        name: tier.name,
-        price: tier.price,
-        zoneIds: tier.zoneIds,
-        color: tier.color,
-        remark: tier.remark,
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0],
-      }))
+    const existingIndex = mockShows.findIndex((s) => s.id === showId)
+    const existingShow = existingIndex >= 0 ? mockShows[existingIndex] : undefined
+    const { show, sessions, priceTiers } = mapShowDtoToLegacy(dto, showId, existingShow)
+
+    if (existingIndex >= 0) {
+      mockShows[existingIndex] = show
+    } else {
+      mockShows.push(show)
     }
 
-    // 保存销售规则
-    if (request.salesRule) {
-      mockSalesRules[newShow.id] = {
-        showId: newShow.id,
-        ...request.salesRule,
-      }
-    }
+    mockSessions[showId] = sessions
+    mockPriceTiers[showId] = priceTiers
 
-    const response: ApiResponse<CreateShowResponse> = {
+    const response: ApiResponse<ShowDto> = {
       code: ApiResponseCode.SUCCESS,
-      message: '创建演出成功',
-      data: {
-        id: newShow.id,
-      },
+      message: '保存演出成功',
+      data: dto,
     }
 
     return [200, response]
   })
-}
 
-/**
- * 设置演出详情 Mock
- */
-export function setupShowDetailMock(mock: MockAdapter) {
-  mock.onGet(/\/theater\/shows\/[\w-]+$/).reply((config) => {
-    const id = config.url?.split('/').pop()
-    const show = mockShows.find((s) => s.id === id)
+  mock.onPost('/Ticketing/PrintTemplate/List').reply(() => {
+    const response: ApiResponse<typeof MOCK_PRINT_TEMPLATES> = {
+      code: ApiResponseCode.SUCCESS,
+      message: '获取打印模板成功',
+      data: MOCK_PRINT_TEMPLATES,
+    }
+    return [200, response]
+  })
 
-    if (show) {
-      const sessions = mockSessions[show.id] || []
-      const priceTiers = mockPriceTiers[show.id] || []
+  mock.onPost('/Ticketing/TicketingShow/ShowDetail').reply((config) => {
+    const request = JSON.parse(config.data || '{}') as { Uid?: number }
+    const uid = request?.Uid
 
-      // 构造多场馆「场次配置」列表
-      const configsByVenue: Record<string, any> = {}
+    if (!uid) {
+      const response: ApiResponse<null> = {
+        code: ApiResponseCode.INVALID_PARAMS,
+        message: 'Uid 不能为空',
+        data: null,
+      }
+      return [400, response]
+    }
 
-      sessions.forEach((s) => {
-        const venueId = s.venueId || show.venueId
-        if (!venueId) return
-
-        if (!configsByVenue[venueId]) {
-          const venue = mockVenues.find((v) => v.id === venueId)
-          configsByVenue[venueId] = {
-            venueId,
-            venueName: venue?.name,
-            venueCapacityType: (venue as any)?.capacityType,
-            priceTiers: [] as any[],
-            sessions: [] as any[],
-          }
-        }
-
-        configsByVenue[venueId].sessions.push({
-          date: s.date,
-          startTime: s.startTime,
-          durationMinutes: s.durationMinutes,
-          openTime: s.openTime,
-        })
-      })
-
-      // zoneId -> venueId 映射，用于把票档按场馆拆分
-      const zoneIdToVenueId: Record<string, string> = {}
-      mockVenues.forEach((venue) => {
-        ;(venue as any).zones?.forEach((zone: any) => {
-          if (zone?.id) zoneIdToVenueId[zone.id] = venue.id
-        })
-      })
-
-      const firstVenueId = sessions[0]?.venueId || show.venueId
-
-      // 将票档分配到场馆配置上
-      priceTiers.forEach((tier) => {
-        const zoneIds: string[] = (tier.zoneIds || []) as string[]
-        const targetVenueIds = new Set<string>()
-
-        zoneIds.forEach((zoneId) => {
-          const vId = zoneIdToVenueId[zoneId]
-          if (vId) targetVenueIds.add(vId)
-        })
-
-        const venueIdsForTier =
-          targetVenueIds.size > 0 ? Array.from(targetVenueIds) : firstVenueId ? [firstVenueId] : []
-
-        venueIdsForTier.forEach((venueId) => {
-          if (!configsByVenue[venueId]) {
-            const venue = mockVenues.find((v) => v.id === venueId)
-            configsByVenue[venueId] = {
-              venueId,
-              venueName: venue?.name,
-              venueCapacityType: (venue as any)?.capacityType,
-              priceTiers: [] as any[],
-              sessions: [] as any[],
-            }
-          }
-
-          configsByVenue[venueId].priceTiers.push({
-            name: tier.name,
-            price: tier.price,
-            zoneIds: tier.zoneIds,
-            color: tier.color,
-            remark: tier.remark,
-          })
-        })
-      })
-
-      const sessionConfigs = Object.values(configsByVenue).filter(
-        (config) => (config.sessions || []).length > 0,
-      )
-
-      const response: ApiResponse<ShowDetailResponse> = {
+    if (uid === 1) {
+      const response: ApiResponse<ShowDto> = {
         code: ApiResponseCode.SUCCESS,
         message: '获取演出详情成功',
-        data: {
-          show,
-          sessionConfigs,
-          sessions,
-          priceTiers,
-          salesRule: mockSalesRules[show.id] || {
-            showId: show.id,
-            saleStartType: 'immediate',
-            saleEndType: 'before_show',
-            saleEndMinutesBeforeShow: 30,
-            allowRefund: false,
-            maxPurchasePerOrder: 10,
-          },
-        },
+        data: SAMPLE_TICKETING_SHOW_DETAIL,
       }
-
       return [200, response]
-    } else {
+    }
+
+    const showId = showUidToIdMap.get(uid)
+    if (!showId) {
       const response: ApiResponse<null> = {
         code: ApiResponseCode.NOT_FOUND,
         message: '演出不存在',
         data: null,
       }
-
       return [404, response]
     }
-  })
-}
 
-/**
- * 设置更新演出 Mock
- */
-export function setupUpdateShowMock(mock: MockAdapter) {
-  mock.onPut(/\/theater\/shows\/[\w-]+/).reply((config) => {
-    const id = config.url?.split('/').pop()
-    const request: UpdateShowRequest = JSON.parse(config.data)
-    const showIndex = mockShows.findIndex((s) => s.id === id)
-
-    if (showIndex !== -1) {
-      mockShows[showIndex] = {
-        ...mockShows[showIndex],
-        ...request,
-        updatedAt: new Date().toISOString().split('T')[0],
-      }
-
-      const response: ApiResponse<ShowDetailResponse> = {
-        code: ApiResponseCode.SUCCESS,
-        message: '更新演出成功',
-        data: {
-          show: mockShows[showIndex],
-          sessions: mockSessions[mockShows[showIndex].id] || [],
-          priceTiers: mockPriceTiers[mockShows[showIndex].id] || [],
-          salesRule: mockSalesRules[mockShows[showIndex].id] || {
-            showId: mockShows[showIndex].id,
-            saleStartType: 'immediate',
-            saleEndType: 'before_show',
-            saleEndMinutesBeforeShow: 30,
-            allowRefund: false,
-            maxPurchasePerOrder: 10,
-          },
-        },
-      }
-
-      return [200, response]
-    } else {
+    const show = mockShows.find((s) => s.id === showId)
+    if (!show) {
       const response: ApiResponse<null> = {
         code: ApiResponseCode.NOT_FOUND,
         message: '演出不存在',
         data: null,
       }
-
       return [404, response]
     }
-  })
-}
 
-/**
- * 设置更新演出状态 Mock
- */
-export function setupUpdateShowStatusMock(mock: MockAdapter) {
-  mock.onPatch(/\/theater\/shows\/[\w-]+\/status/).reply((config) => {
-    const id = config.url?.split('/')[3]
-    const request: UpdateShowStatusRequest = JSON.parse(config.data)
-    const showIndex = mockShows.findIndex((s) => s.id === id)
+    const dto = mapLegacyShowToDto(showId, show)
+    showUidToIdMap.set(dto.Uid, showId)
+    showIdToUidMap.set(showId, dto.Uid)
 
-    if (showIndex !== -1) {
-      mockShows[showIndex].status = request.status
-      mockShows[showIndex].updatedAt = new Date().toISOString().split('T')[0]
-
-      const response: ApiResponse<ShowDetailResponse> = {
-        code: ApiResponseCode.SUCCESS,
-        message: '更新演出状态成功',
-        data: {
-          show: mockShows[showIndex],
-          sessions: mockSessions[mockShows[showIndex].id] || [],
-          priceTiers: mockPriceTiers[mockShows[showIndex].id] || [],
-          salesRule: mockSalesRules[mockShows[showIndex].id] || {
-            showId: mockShows[showIndex].id,
-            saleStartType: 'immediate',
-            saleEndType: 'before_show',
-            saleEndMinutesBeforeShow: 30,
-            allowRefund: false,
-            maxPurchasePerOrder: 10,
-          },
-        },
-      }
-
-      return [200, response]
-    } else {
-      const response: ApiResponse<null> = {
-        code: ApiResponseCode.NOT_FOUND,
-        message: '演出不存在',
-        data: null,
-      }
-
-      return [404, response]
-    }
-  })
-}
-
-/**
- * 设置删除演出 Mock
- */
-export function setupDeleteShowMock(mock: MockAdapter) {
-  mock.onDelete(/\/theater\/shows\/[\w-]+/).reply((config) => {
-    const id = config.url?.split('/').pop()
-    const showIndex = mockShows.findIndex((s) => s.id === id)
-
-    if (showIndex !== -1) {
-      mockShows.splice(showIndex, 1)
-
-      const response: ApiResponse<DeleteShowResponse> = {
-        code: ApiResponseCode.SUCCESS,
-        message: '删除演出成功',
-        data: {
-          success: true,
-        },
-      }
-
-      return [200, response]
-    } else {
-      const response: ApiResponse<null> = {
-        code: ApiResponseCode.NOT_FOUND,
-        message: '演出不存在',
-        data: null,
-      }
-
-      return [404, response]
-    }
-  })
-}
-
-/**
- * 设置批量生成场次 Mock
- */
-export function setupBatchCreateSessionsMock(mock: MockAdapter) {
-  mock.onPost(/\/theater\/shows\/[\w-]+\/sessions\/batch/).reply((config) => {
-    const showId = config.url?.split('/')[3]
-    const request: BatchCreateSessionsRequest = JSON.parse(config.data)
-
-    const sessions: ShowSession[] = []
-    const startDate = new Date(request.startDate)
-    const endDate = new Date(request.endDate)
-
-    // 生成日期范围内符合星期条件的场次
-    for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
-      const weekday = date.getDay()
-      if (request.weekdays.includes(weekday)) {
-        const session: ShowSession = {
-          id: `session-${Date.now()}-${sessions.length}`,
-          showId: showId!,
-          venueId: mockShows.find((s) => s.id === showId)?.venueId || '',
-          date: date.toISOString().split('T')[0],
-          startTime: request.startTime,
-          durationMinutes: request.durationMinutes,
-          openTime: request.openTime,
-          createdAt: new Date().toISOString().split('T')[0],
-          updatedAt: new Date().toISOString().split('T')[0],
-        }
-        sessions.push(session)
-      }
-    }
-
-    // 保存到 mockSessions
-    if (!mockSessions[showId!]) {
-      mockSessions[showId!] = []
-    }
-    mockSessions[showId!].push(...sessions)
-
-    const response: ApiResponse<BatchCreateSessionsResponse> = {
+    const response: ApiResponse<ShowDto> = {
       code: ApiResponseCode.SUCCESS,
-      message: '批量生成场次成功',
-      data: {
-        count: sessions.length,
-        sessions,
-      },
+      message: '获取演出详情成功',
+      data: dto,
     }
 
+    return [200, response]
+  })
+
+  mock.onPost('/Ticketing/TicketingShow/UpdateShowStatus').reply((config) => {
+    const payload = JSON.parse(config.data || '{}') as {
+      Uid?: number
+      ShowStatus?: number | string
+    }
+    const uid = payload.Uid
+    if (!uid) {
+      const response: ApiResponse<null> = {
+        code: ApiResponseCode.INVALID_PARAMS,
+        message: 'Uid 不能为空',
+        data: null,
+      }
+      return [400, response]
+    }
+    const showId = showUidToIdMap.get(uid)
+    if (!showId) {
+      const response: ApiResponse<null> = {
+        code: ApiResponseCode.NOT_FOUND,
+        message: '演出不存在',
+        data: null,
+      }
+      return [404, response]
+    }
+    const numericStatus =
+      typeof payload.ShowStatus === 'number' ? payload.ShowStatus : Number(payload.ShowStatus ?? 0)
+    const legacyStatus = dtoStatusToLegacy[String(numericStatus)]
+    if (!legacyStatus) {
+      const response: ApiResponse<null> = {
+        code: ApiResponseCode.INVALID_PARAMS,
+        message: '无效的演出状态',
+        data: null,
+      }
+      return [400, response]
+    }
+    const show = mockShows.find((s) => s.id === showId)
+    if (!show) {
+      const response: ApiResponse<null> = {
+        code: ApiResponseCode.NOT_FOUND,
+        message: '演出不存在',
+        data: null,
+      }
+      return [404, response]
+    }
+    show.status = legacyStatus
+    show.updatedAt = new Date().toISOString().split('T')[0]
+
+    const response: ApiResponse<{ success: boolean }> = {
+      code: ApiResponseCode.SUCCESS,
+      message: '更新状态成功',
+      data: { success: true },
+    }
+
+    return [200, response]
+  })
+
+  mock.onPost('/Ticketing/TicketingShow/DeleteShow').reply((config) => {
+    const payload = JSON.parse(config.data || '{}') as { Uid?: number }
+    const uid = payload.Uid
+    if (!uid) {
+      const response: ApiResponse<null> = {
+        code: ApiResponseCode.INVALID_PARAMS,
+        message: 'Uid 不能为空',
+        data: null,
+      }
+      return [400, response]
+    }
+    const showId = showUidToIdMap.get(uid)
+    if (!showId) {
+      const response: ApiResponse<null> = {
+        code: ApiResponseCode.NOT_FOUND,
+        message: '演出不存在',
+        data: null,
+      }
+      return [404, response]
+    }
+    const index = mockShows.findIndex((s) => s.id === showId)
+    if (index >= 0) {
+      mockShows.splice(index, 1)
+    }
+    delete mockSessions[showId]
+    delete mockPriceTiers[showId]
+    delete mockSalesRules[showId]
+    showUidToIdMap.delete(uid)
+    showIdToUidMap.delete(showId)
+
+    const response: ApiResponse<{ success: boolean }> = {
+      code: ApiResponseCode.SUCCESS,
+      message: '删除演出成功',
+      data: { success: true },
+    }
     return [200, response]
   })
 }

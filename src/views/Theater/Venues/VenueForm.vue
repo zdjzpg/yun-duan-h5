@@ -39,14 +39,14 @@ const formState = ref<VenueFormValues>({
   scenicId: undefined,
   address: '',
   description: '',
-  capacityType: 'free_seating',
+  capacityType: 'precise_seat',
   totalCapacity: undefined,
   zones: [],
   preciseSeats: undefined,
 })
 
 const zones = ref<VenueFormValues['zones']>([])
-const capacityType = ref<VenueCapacityType>('free_seating')
+const capacityType = ref<VenueCapacityType>('precise_seat')
 const preciseSeats = ref<TheaterData | undefined>()
 
 watch(
@@ -56,7 +56,7 @@ watch(
     formState.value = {
       ...formState.value,
       ...val,
-      capacityType: (val.capacityType || 'free_seating') as VenueCapacityType,
+      capacityType: (val.capacityType || 'precise_seat') as VenueCapacityType,
     }
     zones.value = (val.zones || []).map((z: any, index: number) => ({
       ...z,
@@ -142,9 +142,7 @@ const handleSubmit = async () => {
       message.error('请填写所有座区的名称')
       return
     }
-    const hasInvalidCapacity = current.some(
-      (zone: any) => !zone.capacity || zone.capacity <= 0,
-    )
+    const hasInvalidCapacity = current.some((zone: any) => !zone.capacity || zone.capacity <= 0)
     if (hasInvalidCapacity) {
       message.error('请填写所有座区的容量，且容量必须大于 0')
       return
@@ -179,16 +177,10 @@ defineExpose<{
 </script>
 
 <template>
-  <a-form
-    ref="formRef"
-    :model="formState"
-    layout="vertical"
-  >
+  <a-form ref="formRef" :model="formState" layout="vertical">
     <!-- 基础信息 -->
     <div style="margin-bottom: 24px">
-      <a-typography-title :level="5" style="margin-bottom: 16px">
-        基础信息
-      </a-typography-title>
+      <a-typography-title :level="5" style="margin-bottom: 16px"> 基础信息 </a-typography-title>
 
       <div class="venue-form__two-columns">
         <a-form-item
@@ -196,22 +188,11 @@ defineExpose<{
           name="name"
           :rules="[{ required: true, message: '请输入场馆名称' }]"
         >
-          <a-input
-            v-model:value="formState.name"
-            placeholder="请输入场馆名称"
-            :maxlength="50"
-          />
+          <a-input v-model:value="formState.name" placeholder="请输入场馆名称" :maxlength="50" />
         </a-form-item>
 
-        <a-form-item
-          label="场馆类型"
-          name="type"
-        >
-          <a-select
-            v-model:value="formState.type"
-            placeholder="请选择"
-            allow-clear
-          >
+        <a-form-item label="场馆类型" name="type">
+          <a-select v-model:value="formState.type" placeholder="请选择" allow-clear>
             <a-select-option value="indoor_theater">室内剧场</a-select-option>
             <a-select-option value="outdoor_scene">室外实景</a-select-option>
             <a-select-option value="multifunctional">多功能厅</a-select-option>
@@ -220,21 +201,11 @@ defineExpose<{
         </a-form-item>
       </div>
 
-      <a-form-item
-        label="场馆地址"
-        name="address"
-      >
-        <a-input
-          v-model:value="formState.address"
-          placeholder="请输入场馆地址"
-          :maxlength="200"
-        />
+      <a-form-item label="场馆地址" name="address">
+        <a-input v-model:value="formState.address" placeholder="请输入场馆地址" :maxlength="200" />
       </a-form-item>
 
-      <a-form-item
-        label="场馆简介"
-        name="description"
-      >
+      <a-form-item label="场馆简介" name="description">
         <a-textarea
           v-model:value="formState.description"
           placeholder="简要描述场馆的特点、设施、适用场景等"
@@ -247,11 +218,9 @@ defineExpose<{
 
     <!-- 容量配置 -->
     <div style="margin-bottom: 24px">
-      <a-typography-title :level="5" style="margin-bottom: 16px">
-        容量配置
-      </a-typography-title>
+      <a-typography-title :level="5" style="margin-bottom: 16px"> 容量配置 </a-typography-title>
 
-      <a-form-item
+      <!-- <a-form-item
         label="容量类型"
         name="capacityType"
         :rules="[{ required: true, message: '请选择容量类型' }]"
@@ -264,7 +233,7 @@ defineExpose<{
           <a-radio value="zone_capacity">按座区数量</a-radio>
           <a-radio value="precise_seat">精确座位</a-radio>
         </a-radio-group>
-      </a-form-item>
+      </a-form-item> -->
 
       <!-- 自由站席模式 -->
       <a-form-item
@@ -295,26 +264,14 @@ defineExpose<{
               已添加 {{ zones?.length || 0 }} 个座区
             </a-typography-text>
             <template v-if="zones && zones.length">
-              <a-typography-text type="secondary">
-                ，总容量：
-              </a-typography-text>
+              <a-typography-text type="secondary"> ，总容量： </a-typography-text>
               <a-typography-text strong>
-                {{
-                  (zones || []).reduce(
-                    (sum: number, z: any) => sum + (z.capacity || 0),
-                    0,
-                  )
-                }}
+                {{ (zones || []).reduce((sum: number, z: any) => sum + (z.capacity || 0), 0) }}
                 人
               </a-typography-text>
             </template>
           </a-space>
-          <a-button
-            type="dashed"
-            @click="handleAddZone"
-          >
-            添加座区
-          </a-button>
+          <a-button type="dashed" @click="handleAddZone"> 添加座区 </a-button>
         </div>
 
         <a-table
@@ -324,11 +281,7 @@ defineExpose<{
           :row-key="(_: unknown, index: number) => String(index)"
           :scroll="{ y: 400 }"
         >
-          <a-table-column
-            key="name"
-            :data-index="'name'"
-            :width="'40%'"
-          >
+          <a-table-column key="name" :data-index="'name'" :width="'40%'">
             <template #title>
               <span style="color: #ff4d4f">*</span>
               <span style="margin-left: 4px">座区名称</span>
@@ -343,11 +296,7 @@ defineExpose<{
             </template>
           </a-table-column>
 
-          <a-table-column
-            key="capacity"
-            :data-index="'capacity'"
-            :width="'40%'"
-          >
+          <a-table-column key="capacity" :data-index="'capacity'" :width="'40%'">
             <template #title>
               <span style="color: #ff4d4f">*</span>
               <span style="margin-left: 4px">容量（人）</span>
@@ -364,12 +313,7 @@ defineExpose<{
             </template>
           </a-table-column>
 
-          <a-table-column
-            key="actions"
-            title="操作"
-            :width="80"
-            align="right"
-          >
+          <a-table-column key="actions" title="操作" :width="80" align="right">
             <template #default="{ index }">
               <a-popconfirm
                 title="确认删除该座区吗？"
@@ -377,29 +321,18 @@ defineExpose<{
                 cancel-text="取消"
                 @confirm="() => handleDeleteZone(index)"
               >
-                <a-button
-                  type="link"
-                  size="small"
-                >
-                  删除
-                </a-button>
+                <a-button type="link" size="small"> 删除 </a-button>
               </a-popconfirm>
             </template>
           </a-table-column>
         </a-table>
 
-        <a-empty
-          v-else
-          description="暂无座区，请点击上方“添加座区”按钮添加"
-        />
+        <a-empty v-else description="暂无座区，请点击上方“添加座区”按钮添加" />
       </div>
 
       <!-- 精确座位模式 -->
       <div v-else-if="capacityType === 'precise_seat'">
-        <SeatMapEditorModal
-          :initial-data="preciseSeats"
-          @change="handleSeatMapChange"
-        />
+        <SeatMapEditorModal :initial-data="preciseSeats" @change="handleSeatMapChange" />
       </div>
     </div>
   </a-form>

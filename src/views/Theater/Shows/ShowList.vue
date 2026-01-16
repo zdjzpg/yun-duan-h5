@@ -7,9 +7,11 @@ import {
   fetchShows,
   updateShowStatus,
   deleteShow,
-  type ShowListRequest,
+  showStatusToDtoCode,
+  type ShowListRequestDto,
   type ShowStatus,
 } from '@/api/show'
+import { fetchVenues, type VenueListRequest, type Venue } from '@/api/theaterVenue'
 import type { Show, ShowType } from '@/types/theater'
 
 const router = useRouter()
@@ -23,6 +25,8 @@ const dataSource = ref<Show[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(10)
+const venueOptionsLoading = ref(false)
+const venueOptions = ref<Array<{ label: string; value: string }>>([])
 
 const SHOW_TYPE_MAP: Record<ShowType, string> = {
   live_show: '实景演出',
@@ -36,9 +40,9 @@ const SHOW_STATUS_CONFIG: Record<
   ShowStatus,
   { text: string; status: 'default' | 'success' | 'error' | 'warning' }
 > = {
-  draft: { text: '放入仓库', status: 'default' },
-  on_sale: { text: '上架', status: 'success' },
-  off_sale: { text: '下架', status: 'warning' },
+  on_sale: { text: '在售', status: 'success' },
+  draft: { text: '草稿', status: 'default' },
+  off_sale: { text: '停售', status: 'warning' },
   finished: { text: '已结束', status: 'error' },
 }
 
@@ -93,14 +97,14 @@ const columns = [
 const fetchList = async () => {
   try {
     loading.value = true
-    const params: ShowListRequest = {
-      page: page.value,
-      pageSize: pageSize.value,
-      keyword: keyword.value || undefined,
-      venueId: venueId.value,
-      status: status.value,
+    const currentStatus = status.value as ShowStatus | undefined
+    const params: ShowListRequestDto = {
+      Page: page.value,
+      PageSize: pageSize.value,
+      Keyword: keyword.value || '',
+      VenueUid: extractNumericUid(venueId.value),
+      ShowStatus: currentStatus ? showStatusToDtoCode[currentStatus] ?? 0 : 0,
     }
-
     const res = await fetchShows(params)
     dataSource.value = res.list
     total.value = res.total
@@ -117,14 +121,41 @@ watch([keyword, venueId, status], () => {
   fetchList()
 })
 
+const loadVenues = async () => {
+  try {
+    venueOptionsLoading.value = true
+    const params: VenueListRequest = {
+      page: 1,
+      pageSize: 100,
+      status: 'active',
+    }
+    const res = await fetchVenues(params)
+    venueOptions.value = res.list.map((venue: Venue) => ({
+      label: venue.name,
+      value: venue.id,
+    }))
+  } catch (err) {
+    console.error(err)
+    message.error('获取场馆列表失败')
+  } finally {
+    venueOptionsLoading.value = false
+  }
+}
+
 onMounted(() => {
+  loadVenues()
   fetchList()
 })
 
 const handleUpdateStatus = async (id: string, newStatus: ShowStatus) => {
   const text = SHOW_STATUS_CONFIG[newStatus].text
+  const uid = extractNumericUid(id)
+  if (!uid) {
+    message.error('未找到演出 UID')
+    return
+  }
   try {
-    await updateShowStatus(id, newStatus)
+    await updateShowStatus(uid, newStatus)
     message.success(`状态已更新为「${text}」`)
     fetchList()
   } catch (err) {
@@ -134,8 +165,13 @@ const handleUpdateStatus = async (id: string, newStatus: ShowStatus) => {
 }
 
 const handleDelete = async (id: string) => {
+  const uid = extractNumericUid(id)
+  if (!uid) {
+    message.error('未找到演出 UID')
+    return
+  }
   try {
-    await deleteShow(id)
+    await deleteShow(uid)
     message.success('删除演出成功')
     fetchList()
   } catch (err) {
@@ -184,6 +220,22 @@ const handleExport = () => {
 
   URL.revokeObjectURL(url)
 }
+
+function extractNumericUid(value?: string | number | null): number | null {
+  if (typeof value === 'number' && !Number.isNaN(value)) {
+    return value
+  }
+  if (typeof value === 'string') {
+    const digits = value.match(/\d+/g)?.join('')
+    if (digits) {
+      const parsed = Number(digits)
+      if (!Number.isNaN(parsed)) {
+        return parsed
+      }
+    }
+  }
+  return null
+}
 </script>
 
 <template>
@@ -208,16 +260,20 @@ const handleExport = () => {
         style="width: 216px"
         allow-clear
       />
-      <a-input
+      <a-select
         v-model:value="venueId"
-        placeholder="（暂用）输入场馆ID筛选"
+        placeholder="全部场馆"
         style="width: 216px"
         allow-clear
+        show-search
+        option-filter-prop="label"
+        :loading="venueOptionsLoading"
+        :options="venueOptions"
       />
       <a-select v-model:value="status" placeholder="全部状态" allow-clear style="width: 216px">
-        <a-select-option value="draft">放入仓库</a-select-option>
-        <a-select-option value="on_sale">上架</a-select-option>
-        <a-select-option value="off_sale">下架</a-select-option>
+        <a-select-option value="on_sale">在售</a-select-option>
+        <a-select-option value="draft">草稿</a-select-option>
+        <a-select-option value="off_sale">停售</a-select-option>
         <a-select-option value="finished">已结束</a-select-option>
       </a-select>
     </template>
@@ -276,13 +332,15 @@ const handleExport = () => {
 
         <template v-else-if="column.key === 'createdAt'">
           {{
-            new Date(text as string).toLocaleString('zh-CN', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-            })
+            text
+              ? new Date(text as string).toLocaleString('zh-CN', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : '-'
           }}
         </template>
 
@@ -296,7 +354,7 @@ const handleExport = () => {
               v-else-if="record.status === 'on_sale'"
               @click="handleUpdateStatus(record.id, 'off_sale')"
             >
-              下架
+              停售
             </a>
             <a
               v-else-if="record.status === 'off_sale'"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { SearchOutlined } from '@ant-design/icons-vue'
 type RawStore = {
   id: number
@@ -391,6 +391,7 @@ type SummaryTag = {
 }
 
 const filterPopoverVisible = ref(false)
+const filterContainerRef = ref<HTMLElement | null>(null)
 
 const summaryTags = computed<SummaryTag[]>(() => {
   const tags: SummaryTag[] = []
@@ -523,6 +524,22 @@ watch(
   },
 )
 
+const handleDocumentClick = (event: MouseEvent) => {
+  if (!filterPopoverVisible.value) return
+  const container = filterContainerRef.value
+  if (!container) return
+  if (container.contains(event.target as Node)) return
+  filterPopoverVisible.value = false
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleDocumentClick)
+})
+
 // ---- selection ----
 
 const localCheckedKeys = ref<string[]>([])
@@ -600,6 +617,18 @@ const applyDraftFilters = () => {
   selectedTags.value = [...draftSelectedTags.value]
   filterPopoverVisible.value = false
 }
+
+const handleTreeTitleClick = (event: MouseEvent) => {
+  const target = event.currentTarget as HTMLElement | null
+  if (!target) return
+  const treeNode = target.closest('.ant-tree-treenode')
+  if (!treeNode) return
+  const checkbox = treeNode.querySelector('.ant-tree-checkbox') as HTMLElement | null
+  if (checkbox) {
+    event.preventDefault()
+    checkbox.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+  }
+}
 </script>
 
 <template>
@@ -611,7 +640,7 @@ const applyDraftFilters = () => {
     @ok="handleOk"
     @cancel="handleCancel"
   >
-    <div class="store-filter-container">
+    <div ref="filterContainerRef" class="store-filter-container">
       <div class="store-filter-trigger" @click="filterPopoverVisible = true">
         <template v-if="summaryTags.length">
           <a-space wrap>
@@ -703,7 +732,7 @@ const applyDraftFilters = () => {
         default-expand-all
       >
         <template #title="{ dataRef }">
-          <div class="store-tree-title">
+          <div class="store-tree-title" @click.stop="handleTreeTitleClick">
             <span class="store-tree-title-main">{{ dataRef.title }}</span>
             <span
               v-if="dataRef.totalDescCount && dataRef.totalDescCount > 1"
@@ -865,6 +894,7 @@ store-filter-popover {
   display: block;
   width: 100%;
   padding-right: 32px;
+  cursor: pointer;
 }
 
 .store-tree-title-main {

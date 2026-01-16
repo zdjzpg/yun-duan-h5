@@ -1,4 +1,8 @@
-import type { ShowType, ShowStatus, VenueCapacityType } from '@/api/endpoints/theater/types'
+import type { ShowType, VenueCapacityType } from '@/api/endpoints/theater/types'
+
+export type ShowPublishStatus = 'on_sale' | 'stored' | 'off_sale' | 'scheduled'
+export type ShowPublishOnlineTimeType = 'immediate' | 'booking_start' | 'at_time'
+export type ShowPublishOfflineTimeType = 'booking_end' | 'at_time'
 
 export type ShowFormBasicInfo = {
   name: string
@@ -6,7 +10,11 @@ export type ShowFormBasicInfo = {
   type: ShowType
   coverImage?: string[]
   description?: string
-  status: ShowStatus
+  status: ShowPublishStatus
+  onlineTimeType?: ShowPublishOnlineTimeType
+  onlineTime?: string
+  offlineTimeType?: ShowPublishOfflineTimeType
+  offlineTime?: string
 }
 
 export type ShowFormDetails = {
@@ -23,6 +31,27 @@ export type ShowFormPriceTier = {
   zoneIds?: string[]
   color?: string
   remark?: string
+}
+
+export type VerifyStoreStationItem = {
+  stationId: string
+  stationName: string
+  enabled: boolean
+  /**
+   * 单站点可验票次数；
+   * - null / undefined 表示“无限”
+   * - 大于 0 的整数表示限制次数
+   */
+  verifyLimit?: number | null
+}
+
+export type VerifyStoreStationConfig = {
+  /** 核销门店 Id（与 verifyStoreIds 中的元素一致） */
+  storeId: number
+  /** 门店名称（仅用于展示，可选） */
+  storeName?: string
+  /** 该门店下的所有验票站点配置列表 */
+  stations: VerifyStoreStationItem[]
 }
 
 /**
@@ -45,6 +74,7 @@ export type ShowFormSalesRule = {
   storeIds?: number[]
   // 核销门店（逻辑同销售门店，字段独立）
   verifyStoreIds?: number[]
+  verifyStoreStations?: VerifyStoreStationConfig[]
   orderChannels?: (
     | 'online_mini_program'
     | 'online_sub_mini_program'
@@ -101,6 +131,7 @@ export type ShowFormSalesRule = {
     feeUnit?: 'yuan' | 'percent'
   }>
   refundReviewType?: 'auto' | 'manual'
+  overdueOperationType?: 'none' | 'auto_refund'
 }
 
 export type ShowFormSession = {

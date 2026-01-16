@@ -95,17 +95,13 @@ const handleUploadChange = (info: any) => {
 </script>
 
 <template>
-  <div style="max-width: 720px">
+  <div style="max-width: 820px">
     <a-form-item
       :name="['basicInfo', 'name']"
       label="演出名称"
       :rules="[{ required: true, message: '请输入演出名称' }]"
     >
-      <a-input
-        v-model:value="basicInfo.name"
-        placeholder="请输入演出名称"
-        :maxlength="50"
-      />
+      <a-input v-model:value="basicInfo.name" placeholder="请输入演出名称" :maxlength="50" />
     </a-form-item>
 
     <a-form-item
@@ -154,10 +150,65 @@ const handleUploadChange = (info: any) => {
     >
       <a-radio-group v-model:value="basicInfo.status">
         <a-radio value="on_sale">上架</a-radio>
-        <a-radio value="draft">放入仓库</a-radio>
+        <a-radio value="stored">放入仓库</a-radio>
         <a-radio value="off_sale">下架</a-radio>
-        <a-radio value="finished">已结束</a-radio>
+        <a-radio value="scheduled">定时上下架</a-radio>
       </a-radio-group>
+    </a-form-item>
+
+    <a-form-item
+      v-if="basicInfo.status === 'scheduled'"
+      :name="['basicInfo', 'onlineTimeType']"
+      label="上架时间"
+      :rules="[{ required: true, message: '请选择上架时间' }]"
+    >
+      <div class="publish-time-row">
+        <a-radio-group v-model:value="basicInfo.onlineTimeType">
+          <a-radio value="immediate">立即上架</a-radio>
+          <a-radio value="booking_start">第一场次开始自动上架</a-radio>
+          <a-radio value="at_time">指定时间开始自动上架</a-radio>
+        </a-radio-group>
+        <a-date-picker
+          v-if="basicInfo.onlineTimeType === 'at_time'"
+          v-model:value="basicInfo.onlineTime"
+          show-time
+          format="YYYY-MM-DD HH:mm"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          placeholder="选择时间"
+          style="width: 220px"
+        />
+      </div>
+    </a-form-item>
+
+    <a-form-item
+      v-if="basicInfo.status === 'scheduled'"
+      :name="['basicInfo', 'offlineTimeType']"
+      label="下架时间"
+      :rules="[{ required: true, message: '请选择下架时间' }]"
+    >
+      <div class="publish-time-row">
+        <a-radio-group v-model:value="basicInfo.offlineTimeType">
+          <a-radio value="booking_end">最后一个场次结束自动下架</a-radio>
+          <a-radio value="at_time">指定时间开始自动下架</a-radio>
+        </a-radio-group>
+        <a-date-picker
+          v-if="basicInfo.offlineTimeType === 'at_time'"
+          v-model:value="basicInfo.offlineTime"
+          show-time
+          format="YYYY-MM-DD HH:mm"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          placeholder="选择时间"
+          style="width: 220px"
+        />
+      </div>
     </a-form-item>
   </div>
 </template>
+
+<style scoped>
+.publish-time-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+</style>

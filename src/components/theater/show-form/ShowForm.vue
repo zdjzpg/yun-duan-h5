@@ -20,7 +20,7 @@ const props = withDefaults(
   },
 )
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'update:currentStep', value: number): void
 }>()
 
@@ -40,12 +40,17 @@ const formState = reactive<InternalFormState>({
     type: 'live_show' as any,
     coverImage: undefined,
     description: '',
-    status: 'draft' as any,
+    status: 'on_sale' as any,
+    onlineTimeType: 'immediate' as any,
+    onlineTime: undefined,
+    offlineTimeType: 'booking_end' as any,
+    offlineTime: undefined,
   },
-  // 新架构：场次配置列表
   sessionConfigs: [],
   salesRule: {
     // 下单规则
+    storeIds: undefined,
+    verifyStoreIds: undefined,
     orderChannels: ['online_mini_program'],
     realNameType: 'none',
     ageLimitType: 'unlimited',
@@ -67,7 +72,7 @@ const formState = reactive<InternalFormState>({
     pickupTimeType: 'no_pickup',
     printMode: 'one_per_person',
     autoPrint: true,
-    printTemplate: 'default',
+    printTemplate: undefined,
     printCopyType: 'real_price',
     printCustomPrice: undefined,
     verifyMethods: [],
@@ -85,6 +90,7 @@ const formState = reactive<InternalFormState>({
     refundFeeFixedUnit: 'yuan',
     refundFeeLadderRules: [],
     refundReviewType: 'auto',
+    overdueOperationType: 'none',
   },
   details: {
     intro: '',
@@ -106,7 +112,6 @@ watch(
       Object.assign(formState.basicInfo, val.basicInfo)
     }
 
-    // 仅使用新结构 sessionConfigs，旧的 sessions/priceTiers 不再兼容
     if ((val as any).sessionConfigs && (val as any).sessionConfigs!.length) {
       formState.sessionConfigs = [...((val as any).sessionConfigs as SessionConfig[])]
     } else {
@@ -137,6 +142,19 @@ const validateStep = async (step: number): Promise<boolean> => {
         ['basicInfo', 'type'],
         ['basicInfo', 'status'],
       ] as any)
+
+      const info = formState.basicInfo as any
+      if (info.status === 'scheduled') {
+        if (info.onlineTimeType === 'at_time' && !info.onlineTime) {
+          message.error('请选择上架时间')
+          return false
+        }
+        if (info.offlineTimeType === 'at_time' && !info.offlineTime) {
+          message.error('请选择下架时间')
+          return false
+        }
+      }
+
       return true
     }
 
@@ -174,33 +192,11 @@ const validateStep = async (step: number): Promise<boolean> => {
     }
 
     if (stepKey === 'salesRule') {
-      await form.validateFields([
-        // 新增预订规则必填校验字段
-        ['salesRule', 'realNameType'],
-        ['salesRule', 'needRiskNotice'],
-        ['salesRule', 'enableGroupTicket'],
-        ['salesRule', 'paymentLimitType'],
-        ['salesRule', 'purchaseLimitType'],
-        ['salesRule', 'saleEndRuleType'],
-        // 取票 / 打印规则
-        ['salesRule', 'pickupTimeType'],
-        ['salesRule', 'printMode'],
-        ['salesRule', 'autoPrint'],
-        ['salesRule', 'printTemplate'],
-        ['salesRule', 'printCopyType'],
-        // 验票时间
-        ['salesRule', 'verifyTimeType'],
-        // 退改规则
-        ['salesRule', 'refundRuleType'],
-        ['salesRule', 'refundDeadlineMinutesBeforeShow'],
-        ['salesRule', 'refundFeeType'],
-        ['salesRule', 'refundReviewType'],
-      ] as any)
+      await form.validateFields()
       return true
     }
 
     if (stepKey === 'details') {
-      // 当前演出详情步骤不做强校验
       return true
     }
 
@@ -239,6 +235,24 @@ defineExpose({
   validateStep,
   getValues,
 })
+
+const handleStepChange = async (nextStep: number) => {
+  if (nextStep === props.currentStep) return
+  if (nextStep < 0 || nextStep >= FORM_STEPS.length) return
+
+  if (nextStep < props.currentStep) {
+    emit('update:currentStep', nextStep)
+    return
+  }
+
+  const basicInfoValid = await validateStep(0)
+  if (!basicInfoValid) {
+    emit('update:currentStep', 0)
+    return
+  }
+
+  emit('update:currentStep', nextStep)
+}
 </script>
 
 <template>
@@ -251,6 +265,7 @@ defineExpose({
     <div class="mb-6">
       <a-steps
         :current="currentStep"
+        @change="handleStepChange"
         :items="
           FORM_STEPS.map((step: (typeof FORM_STEPS)[number]) => ({
             title: step.title,

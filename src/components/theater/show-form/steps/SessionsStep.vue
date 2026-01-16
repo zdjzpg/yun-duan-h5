@@ -90,6 +90,18 @@ const getDurationText = (sessions: { durationMinutes?: number }[]) => {
   return `${Math.min(...durations)}-${Math.max(...durations)}`
 }
 
+const formatPriceValue = (value?: number) => {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '未定价'
+  return `¥${value.toFixed(2)}`
+}
+
+const getPriceTierTooltipLines = (tiers?: SessionConfig['priceTiers']) => {
+  if (!tiers || !tiers.length) {
+    return ['暂无票档']
+  }
+  return tiers.map((tier) => `${tier.name || '未命名'} · ${formatPriceValue(tier.price)}`)
+}
+
 const handleModalOk = (config: SessionConfig) => {
   const list = [...sessionConfigs.value]
   if (editingIndex.value !== null && editingIndex.value >= 0) {
@@ -112,12 +124,12 @@ const handleModalCancel = () => {
       type="info"
       show-icon
       style="margin-bottom: 16px"
-      message="可以配置多个场馆的场次，每个配置可包含多个场次时间和票档。"
+      message="支持配置多个场馆，每个场馆可配置多个场次和多个票档"
     />
 
     <div style="margin-bottom: 16px; display: flex; justify-content: space-between">
       <a-typography-text type="secondary">
-        已添加 {{ sessionConfigs.length }} 个场次配置，共 {{ totalSessionCount }} 个场次
+        已添加 {{ sessionConfigs.length }} 个场馆配置，共 {{ totalSessionCount }} 个场次
       </a-typography-text>
       <a-button type="primary" @click="handleAdd">添加场次配置</a-button>
     </div>
@@ -180,9 +192,22 @@ const handleModalCancel = () => {
         <template #title>配置统计</template>
         <template #default="{ record }">
           <a-space :size="8">
-            <a-tag :color="(record.priceTiers || []).length > 0 ? 'success' : 'default'">
-              {{ (record.priceTiers || []).length }} 个票档
-            </a-tag>
+            <a-tooltip>
+              <template #title>
+                <div class="session-price-tier-tooltip">
+                  <div
+                    v-for="(line, idx) in getPriceTierTooltipLines(record.priceTiers)"
+                    :key="idx"
+                    class="session-price-tier-tooltip__line"
+                  >
+                    {{ line }}
+                  </div>
+                </div>
+              </template>
+              <a-tag :color="(record.priceTiers || []).length > 0 ? 'success' : 'default'">
+                {{ (record.priceTiers || []).length }} 个票档
+              </a-tag>
+            </a-tooltip>
             <a-tag color="blue">
               {{ (record.sessions || []).length }} 个场次
             </a-tag>
@@ -227,3 +252,15 @@ const handleModalCancel = () => {
     />
   </div>
 </template>
+
+<style scoped>
+.session-price-tier-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.session-price-tier-tooltip__line {
+  white-space: nowrap;
+}
+</style>

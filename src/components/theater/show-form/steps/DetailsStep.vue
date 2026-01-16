@@ -98,20 +98,20 @@ const handleUploadChange = (info: any) => {
 <template>
   <div>
     <a-tabs v-model:activeKey="activeKey">
-      <a-tab-pane key="intro" tab="演出介绍">
-        <a-form-item :name="['details', 'intro']" label="演出介绍">
+      <a-tab-pane key="intro" tab="票务包含">
+        <a-form-item :name="['details', 'intro']">
           <a-textarea
             v-model:value="details.intro"
             :rows="6"
             show-count
             :maxlength="2000"
-            placeholder="请输入演出介绍"
+            placeholder="请输入票务包含"
           />
         </a-form-item>
       </a-tab-pane>
 
       <a-tab-pane key="bookingRule" tab="预订规则">
-        <a-form-item :name="['details', 'bookingRule']" label="预订规则">
+        <a-form-item :name="['details', 'bookingRule']">
           <a-textarea
             v-model:value="details.bookingRule"
             :rows="6"
@@ -123,7 +123,7 @@ const handleUploadChange = (info: any) => {
       </a-tab-pane>
 
       <a-tab-pane key="refundRule" tab="退改规则">
-        <a-form-item :name="['details', 'refundRule']" label="退改规则">
+        <a-form-item :name="['details', 'refundRule']">
           <a-textarea
             v-model:value="details.refundRule"
             :rows="6"
@@ -135,7 +135,7 @@ const handleUploadChange = (info: any) => {
       </a-tab-pane>
 
       <a-tab-pane key="safetyNotice" tab="安全须知">
-        <a-form-item :name="['details', 'safetyNotice']" label="安全须知">
+        <a-form-item :name="['details', 'safetyNotice']" >
           <a-textarea
             v-model:value="details.safetyNotice"
             :rows="6"
@@ -157,7 +157,7 @@ const handleUploadChange = (info: any) => {
         <a-form-item
           :name="['details', 'detailImages']"
           label="上传图片"
-          extra="支持 JPG/PNG/GIF，单张不超过 6MB，建议尺寸不小于 1500px 宽，可拖拽调整顺序"
+          extra="支持 JPG/PNG；宽 ≥1500px；单张 ≤1MB,最多20张；可拖拽调整顺序"
         >
           <YUploadDraggable
             v-model:fileList="detailImageList"

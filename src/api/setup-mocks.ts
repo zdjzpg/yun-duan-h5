@@ -18,13 +18,7 @@ import {
   setupCopyVenueMock,
 
   // 演出管理
-  setupShowListMock,
-  setupCreateShowMock,
-  setupShowDetailMock,
-  setupUpdateShowMock,
-  setupUpdateShowStatusMock,
-  setupDeleteShowMock,
-  setupBatchCreateSessionsMock,
+  setupTicketingShowDtoMocks,
 } from './endpoints/theater/mocks'
 
 export type SetupMockOptions = {
@@ -63,14 +57,8 @@ export function setupMockAdapter(axiosInstance: AxiosInstance, options: SetupMoc
   setupVenueLockStatusMock(mock)
   setupCopyVenueMock(mock)
 
-  // ==================== 演出管理（与 a 保持一致，预留后续使用） ====================
-  setupShowListMock(mock)
-  setupCreateShowMock(mock)
-  setupShowDetailMock(mock)
-  setupUpdateShowMock(mock)
-  setupUpdateShowStatusMock(mock)
-  setupDeleteShowMock(mock)
-  setupBatchCreateSessionsMock(mock)
+  // ==================== 演出管理（新 Ticketing 接口） ====================
+  setupTicketingShowDtoMocks(mock)
 
   // 其它未匹配的请求走真实后端
   mock.onAny().passThrough()

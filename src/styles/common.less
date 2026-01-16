@@ -44,7 +44,7 @@
   --color-p8: #290763;
 }
 
-#YunDuanH5 {
+#pospal-userweb-front-body {
   font-family:
     Helvetica, Tahoma, Arial, 'Hiragino Sans GB', 'Hiragino Sans GB W3', 'Microsoft YaHei', STXihei,
     STHeiti, Heiti, SimSun, sans-serif;
@@ -272,256 +272,262 @@
   .ant-pagination .ant-pagination-next .ant-pagination-item-link {
     color: #595959;
   }
-}
-.ant-select-selector {
-  border-radius: 2px !important;
-}
-.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-  background-color: #0088dd !important;
-  color: #fff !important;
-}
-.ant-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
-  background: #e6f9ff;
-}
-.ant-select-dropdown .ant-select-item-option {
-  font-size: 12px !important;
-  padding: 0 8px !important;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  color: #555;
-  line-height: 24px;
-  height: 24px;
-  min-height: 24px;
-  box-sizing: border-box;
-  border-radius: 0;
-  font-family:
-    Helvetica, Tahoma, Arial, 'Hiragino Sans GB', 'Hiragino Sans GB W3', 'Microsoft YaHei', STXihei,
-    STHeiti, Heiti, SimSun, sans-serif;
-}
-.ant-select-selection-item {
-  color: rgb(85, 85, 85);
-  font-family:
-    Helvetica, Tahoma, Arial, 'Hiragino Sans GB', 'Hiragino Sans GB W3', 'Microsoft YaHei', STXihei,
-    STHeiti, Heiti, SimSun, sans-serif;
-}
-.ant-select-arrow {
-  > .anticon {
-    display: none; // 隐藏原来的 DownOutlined
+  .ant-select-selector {
+    border-radius: 2px !important;
+  }
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: #0088dd !important;
+    color: #fff !important;
+  }
+  .ant-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+    background: #e6f9ff;
+  }
+  .ant-select-dropdown .ant-select-item-option {
+    font-size: 12px !important;
+    padding: 0 8px !important;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    color: #555;
+    line-height: 24px;
+    height: 24px;
+    min-height: 24px;
+    box-sizing: border-box;
+    border-radius: 0;
+    font-family:
+      Helvetica, Tahoma, Arial, 'Hiragino Sans GB', 'Hiragino Sans GB W3', 'Microsoft YaHei',
+      STXihei, STHeiti, Heiti, SimSun, sans-serif;
+  }
+  .ant-select-selection-item {
+    color: rgb(85, 85, 85);
+    font-family:
+      Helvetica, Tahoma, Arial, 'Hiragino Sans GB', 'Hiragino Sans GB W3', 'Microsoft YaHei',
+      STXihei, STHeiti, Heiti, SimSun, sans-serif;
+  }
+  .ant-select-arrow {
+    > .anticon {
+      display: none; // 隐藏原来的 DownOutlined
+    }
+
+    &::before {
+      font-family: 'font_family';
+      content: '\e62e'; // 自己的图标（可以是字体图标）
+      font-size: 18px;
+      color: #555;
+    }
+  }
+  .ant-select-dropdown {
+    border: 1px solid #aaaaaa;
+    border-radius: 2px;
+    padding: 6px 0 !important;
   }
 
-  &::before {
-    font-family: 'font_family';
-    content: '\e62e'; // 自己的图标（可以是字体图标）
-    font-size: 18px;
+  .ant-cascader-menu {
+    min-height: 120px; // 设置最小高度，默认是180px
+    max-height: 300px; // 设置最大高度
+    overflow-y: auto; // 超过最大高度时启用滚动
+    padding: 0 !important;
+  }
+  .ant-select-focused.ant-select-outlined:not(.ant-select-disabled):not(
+      .ant-select-customize-input
+    ):not(.ant-pagination-size-changer)
+    .ant-select-selector {
+    border: none;
+  }
+  .ant-cascader-dropdown .ant-cascader-menu-item {
+    font-size: 12px;
+    border-radius: 2px !important;
+  }
+  .ant-cascader-dropdown .ant-cascader-menu-item:hover {
+    background-color: #e6f9ff; // 设置鼠标悬停时的背景色
+  }
+  .ant-cascader-menu-item-active {
+    background: #08d !important;
+    color: #fff;
+  }
+  .ant-cascader-dropdown {
+    border-radius: 2px !important;
+  }
+
+  .ant-picker .ant-picker-suffix {
+    color: #999;
+  }
+
+  // DatePicker 面板样式，贴近示例效果
+  .ant-picker-panel {
+    font-size: 12px;
+  }
+  .ant-picker-header {
+    padding-inline: 12px;
+  }
+  .ant-picker-content th {
+    font-size: 12px;
+    color: #666;
+  }
+  .ant-picker-cell-inner {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    border-radius: 2px;
+  }
+  .ant-picker-footer {
+    border-top: 1px solid #e5e5e5;
+    padding: 6px 8px;
+  }
+  .ant-picker-cell-today .ant-picker-cell-inner {
+    color: #0088dd !important;
+  }
+  .ant-picker-dropdown .ant-picker-cell .ant-picker-cell-inner {
+    width: inherit;
+    transition: none;
+  }
+  .ant-picker-cell-selected {
+    .ant-picker-cell-inner {
+      color: white !important;
+      background: #0088dd !important;
+    }
+  }
+  .ant-picker-cell .ant-picker-cell-inner,
+  .ant-picker-dropdown
+    .ant-picker-cell-in-view.ant-picker-cell-today
+    .ant-picker-cell-inner::before {
+    border-radius: 2px !important;
+    color: #888;
+    font-size: 14px;
+    font-family:
+      Helvetica, Tahoma, Arial, 'Hiragino Sans GB', 'Hiragino Sans GB W3', 'Microsoft YaHei',
+      STXihei, STHeiti, Heiti, SimSun, sans-serif;
+  }
+  .ant-picker-focused {
+    box-shadow: none !important;
+  }
+  .ant-picker-panel-container {
+    border-radius: 0;
+    border: 1px solid #ccc;
+  }
+  .ant-picker-dropdown .ant-picker-cell:not(.ant-picker-cell-in-view) {
+    visibility: hidden; /* 看不见 */
+    pointer-events: none; /* 点不到 */
+  }
+  /* 隐藏整行都是非当月日期的那一行（比如你截图里的第六行） */
+  .ant-picker-dropdown .ant-picker-content tr:not(:has(.ant-picker-cell-in-view)) {
+    display: none;
+  }
+  .ant-btn {
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 28px;
+    border-radius: 2px;
+  }
+  .ant-btn-primary {
+    background: #0088dd;
+    border: 1px solid #0088dd;
+    color: white;
+    &:hover {
+      background-color: #339fe3 !important;
+    }
+  }
+  .ant-btn-default {
+    border: 1px solid #cccccc;
+    color: #555;
+    &:hover {
+      background: #e6f9ff;
+      color: #222222;
+      border: 1px solid #4fc2f7;
+    }
+  }
+
+  .ant-picker-dropdown .ant-picker-cell:hover:not(.ant-picker-cell-in-view) .ant-picker-cell-inner,
+  .ant-picker-dropdown
+    .ant-picker-cell:hover:not(.ant-picker-cell-selected):not(.ant-picker-cell-range-start):not(
+      .ant-picker-cell-range-end
+    ):not(.ant-picker-cell-range-hover-start):not(.ant-picker-cell-range-hover-end)
+    .ant-picker-cell-inner {
+    background: #e6f9ff;
+    border: 1px solid#7AD9FF;
+    color: #222;
+    line-height: 22px;
+    box-sizing: border-box;
+  }
+  .ant-upload-wrapper.ant-upload-picture-card-wrapper .ant-upload.ant-upload-select {
+    border: 1px dashed #cccccc;
+    border-radius: 2px;
+    width: 80px;
+    height: 80px;
+    &:hover {
+      border-color: #cccccc !important;
+    }
+  }
+  .ant-upload-wrapper.ant-upload-picture-card-wrapper
+    .ant-upload-list.ant-upload-list-picture-card
+    .ant-upload-list-item-container {
+    border-radius: 2px;
+    width: 80px;
+    height: 80px;
+  }
+  .ant-upload-wrapper.ant-upload-picture-card-wrapper
+    .ant-upload-list.ant-upload-list-picture-card
+    .ant-upload-list-item {
+    border-radius: 2px;
+    padding: 0;
+  }
+  .ant-upload-wrapper.ant-upload-picture-card-wrapper
+    .ant-upload-list.ant-upload-list-picture-card
+    .ant-upload-list-item::before {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ant-modal .ant-modal-content {
+    border-radius: 0;
+  }
+  .ant-input-affix-wrapper {
+    height: 32px;
+    border-radius: 2px;
+  }
+  .ant-btn-dashed:not(:disabled):hover {
+    color: #0088dd;
+    border-color: #0088dd;
+  }
+  .ant-form-item-control-input-content {
     color: #555;
   }
-}
-.ant-select-dropdown {
-  border: 1px solid #aaaaaa;
-  border-radius: 2px;
-  padding: 6px 0 !important;
-}
-
-.ant-cascader-menu {
-  min-height: 120px; // 设置最小高度，默认是180px
-  max-height: 300px; // 设置最大高度
-  overflow-y: auto; // 超过最大高度时启用滚动
-  padding: 0 !important;
-}
-.ant-select-focused.ant-select-outlined:not(.ant-select-disabled):not(
-    .ant-select-customize-input
-  ):not(.ant-pagination-size-changer)
-  .ant-select-selector {
-  border: none;
-}
-.ant-cascader-dropdown .ant-cascader-menu-item {
-  font-size: 12px;
-  border-radius: 2px !important;
-}
-.ant-cascader-dropdown .ant-cascader-menu-item:hover {
-  background-color: #e6f9ff; // 设置鼠标悬停时的背景色
-}
-.ant-cascader-menu-item-active {
-  background: #08d !important;
-  color: #fff;
-}
-.ant-cascader-dropdown {
-  border-radius: 2px !important;
-}
-
-.ant-picker .ant-picker-suffix {
-  color: #999;
-}
-
-// DatePicker 面板样式，贴近示例效果
-.ant-picker-panel {
-  font-size: 12px;
-}
-.ant-picker-header {
-  padding-inline: 12px;
-}
-.ant-picker-content th {
-  font-size: 12px;
-  color: #666;
-}
-.ant-picker-cell-inner {
-  width: 24px;
-  height: 24px;
-  line-height: 24px;
-  border-radius: 2px;
-}
-.ant-picker-footer {
-  border-top: 1px solid #e5e5e5;
-  padding: 6px 8px;
-}
-.ant-picker-cell-today .ant-picker-cell-inner {
-  color: #0088dd !important;
-}
-.ant-picker-dropdown .ant-picker-cell .ant-picker-cell-inner {
-  width: inherit;
-  transition: none;
-}
-.ant-picker-cell-selected {
-  .ant-picker-cell-inner {
-    color: white !important;
-    background: #0088dd !important;
+  .ant-table-wrapper .ant-table-tbody > tr.ant-table-row-selected > td {
+    background: #fff;
   }
-}
-.ant-picker-cell .ant-picker-cell-inner,
-.ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner::before {
-  border-radius: 2px !important;
-  color: #888;
-  font-size: 14px;
-  font-family:
-    Helvetica, Tahoma, Arial, 'Hiragino Sans GB', 'Hiragino Sans GB W3', 'Microsoft YaHei', STXihei,
-    STHeiti, Heiti, SimSun, sans-serif;
-}
-.ant-picker-focused {
-  box-shadow: none !important;
-}
-.ant-picker-panel-container {
-  border-radius: 0;
-  border: 1px solid #ccc;
-}
-.ant-picker-dropdown .ant-picker-cell:not(.ant-picker-cell-in-view) {
-  visibility: hidden; /* 看不见 */
-  pointer-events: none; /* 点不到 */
-}
-/* 隐藏整行都是非当月日期的那一行（比如你截图里的第六行） */
-.ant-picker-dropdown .ant-picker-content tr:not(:has(.ant-picker-cell-in-view)) {
-  display: none;
-}
-.ant-btn {
-  padding-top: 0;
-  padding-bottom: 0;
-  height: 28px;
-  border-radius: 2px;
-}
-.ant-btn-primary {
-  background: #0088dd;
-  border: 1px solid #0088dd;
-  &:hover {
-    background-color: #339fe3 !important;
+  /* 让被 Tooltip 包裹的禁用按钮在容器内占满一行（解决 block 按钮被 span 包裹后宽度变窄的问题） */
+  .ant-tooltip-disabled-compatible-wrapper {
+    display: block;
+    width: 100%;
   }
-}
-.ant-btn-default {
-  border: 1px solid #cccccc;
-  color: #555;
-  &:hover {
-    background: #e6f9ff;
-    color: #222222;
-    border: 1px solid #4fc2f7;
+  .ant-empty-description {
+    color: rgba(38, 38, 38, 0.45);
   }
-}
-
-.ant-picker-dropdown .ant-picker-cell:hover:not(.ant-picker-cell-in-view) .ant-picker-cell-inner,
-.ant-picker-dropdown
-  .ant-picker-cell:hover:not(.ant-picker-cell-selected):not(.ant-picker-cell-range-start):not(
-    .ant-picker-cell-range-end
-  ):not(.ant-picker-cell-range-hover-start):not(.ant-picker-cell-range-hover-end)
-  .ant-picker-cell-inner {
-  background: #e6f9ff;
-  border: 1px solid#7AD9FF;
-  color: #222;
-  line-height: 22px;
-  box-sizing: border-box;
-}
-.ant-upload-wrapper.ant-upload-picture-card-wrapper .ant-upload.ant-upload-select {
-  border: 1px dashed #cccccc;
-  border-radius: 2px;
-  width: 80px;
-  height: 80px;
-  &:hover {
-    border-color: #cccccc !important;
+  .ant-picker-dropdown .ant-picker-ranges {
+    font-size: 14px;
+    padding: 4px 2px !important;
   }
-}
-.ant-upload-wrapper.ant-upload-picture-card-wrapper
-  .ant-upload-list.ant-upload-list-picture-card
-  .ant-upload-list-item-container {
-  border-radius: 2px;
-  width: 80px;
-  height: 80px;
-}
-.ant-upload-wrapper.ant-upload-picture-card-wrapper
-  .ant-upload-list.ant-upload-list-picture-card
-  .ant-upload-list-item {
-  border-radius: 2px;
-  padding: 0;
-}
-.ant-upload-wrapper.ant-upload-picture-card-wrapper
-  .ant-upload-list.ant-upload-list-picture-card
-  .ant-upload-list-item::before {
-  width: 100%;
-  height: 100%;
-}
+  .ant-steps .ant-steps-item-process .ant-steps-item-icon {
+    background-color: #0088dd;
+    border-color: #0088dd;
+  }
 
-.ant-modal .ant-modal-content {
-  border-radius: 0;
-}
-.ant-input-affix-wrapper {
-  height: 32px;
-  border-radius: 2px;
-}
-.ant-btn-dashed:not(:disabled):hover {
-  color: #0088dd;
-  border-color: #0088dd;
-}
-.ant-form-item-control-input-content {
-  color: #555;
-}
-/* 让被 Tooltip 包裹的禁用按钮在容器内占满一行（解决 block 按钮被 span 包裹后宽度变窄的问题） */
-.ant-tooltip-disabled-compatible-wrapper {
-  display: block;
-  width: 100%;
-}
-.ant-empty-description {
-  color: rgba(38, 38, 38, 0.45);
-}
-.ant-picker-dropdown .ant-picker-ranges {
-  font-size: 14px;
-  padding: 4px 2px !important;
-}
-.ant-steps .ant-steps-item-process .ant-steps-item-icon {
-  background-color: #0088dd;
-  border-color: #0088dd;
-}
+  .ant-alert {
+    border-radius: 2px;
+  }
+  .ant-alert-warning {
+    border: 1px solid #ffb866;
+    color: #262626;
 
-.ant-alert {
-  border-radius: 2px;
-}
-.ant-alert-warning {
-  border: 1px solid #ffb866;
-  color: #262626;
-
-  font-family: 'PingFang SC';
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 20px;
-  background: #fff6e6;
-}
-.ant-tree .ant-tree-checkbox-checked .ant-tree-checkbox-inner,
-.ant-checkbox-checked .ant-checkbox-inner {
-  background-color: #0088dd;
-  border-color: #0088dd;
+    font-family: 'PingFang SC';
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+    background: #fff6e6;
+  }
+  .ant-tree .ant-tree-checkbox-checked .ant-tree-checkbox-inner,
+  .ant-checkbox-checked .ant-checkbox-inner {
+    background-color: #0088dd;
+    border-color: #0088dd;
+  }
 }

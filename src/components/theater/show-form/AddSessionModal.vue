@@ -45,12 +45,13 @@ const venueDetail = ref<Venue | null>(null)
 
 const periodicModalVisible = ref(false)
 const initialSnapshot = ref<string | null>(null)
+const sessionTableRef = ref<any>(null)
 
 const formState = reactive<AddSessionFormState>({
   venueId: undefined,
   customSessions: [],
   periodicDateRange: [],
-  periodicWeekdays: [5, 6],
+  periodicWeekdays: [],
   periodicTimes: [],
   periodicDurationMinutes: 90,
   periodicExcludeDates: [],
@@ -102,6 +103,7 @@ const buildPreciseSeatPriceTiers = (venue: Venue, previous?: SessionPriceTier[])
       floorName: floor?.name || zone.floor || '',
       zoneId: zone.id,
       capacity,
+      color: zone.color,
       order: zone.order ?? zone.sort ?? index,
     }
 
@@ -221,7 +223,7 @@ const resetStateFromInitialValues = (config?: SessionConfig) => {
       },
     ]
     formState.periodicDateRange = []
-    formState.periodicWeekdays = [5, 6]
+    formState.periodicWeekdays = []
     formState.periodicTimes = []
     formState.periodicDurationMinutes = 90
     formState.periodicExcludeDates = []
@@ -239,7 +241,7 @@ const resetStateFromInitialValues = (config?: SessionConfig) => {
     durationMinutes: s.durationMinutes,
   }))
   formState.periodicDateRange = []
-  formState.periodicWeekdays = [5, 6]
+  formState.periodicWeekdays = []
   formState.periodicTimes = []
   formState.periodicDurationMinutes = (config.sessions && config.sessions[0]?.durationMinutes) || 90
   formState.periodicExcludeDates = []
@@ -307,6 +309,7 @@ const handleAddCustomSession = () => {
     startTime: '',
     durationMinutes: formState.periodicDurationMinutes || 90,
   })
+  scrollCustomSessionsToBottom()
 }
 
 const handleRemoveCustomSession = (index: number) => {
@@ -373,7 +376,41 @@ const handlePeriodicDateChange = (value: [string, string] | null) => {
   formState.periodicDateRange = value
 }
 
+const resetPeriodicGeneratorForm = () => {
+  formState.periodicDateRange = []
+  formState.periodicWeekdays = []
+  formState.periodicTimes = []
+  formState.periodicExcludeDates = []
+}
+
+const disabledExcludeDate = (current: dayjs.Dayjs) => {
+  if (!formState.periodicDateRange || formState.periodicDateRange.length !== 2) {
+    return true
+  }
+  const [start, end] = formState.periodicDateRange
+  if (!start || !end) return true
+
+  const startDay = dayjs(start).startOf('day')
+  const endDay = dayjs(end).endOf('day')
+
+  // 不在日期范围内的直接禁用
+  if (current.isBefore(startDay) || current.isAfter(endDay)) {
+    return true
+  }
+
+  // 如果选择了星期限制，只允许选择这些星期的日期
+  if (Array.isArray(formState.periodicWeekdays) && formState.periodicWeekdays.length > 0) {
+    const weekday = current.day()
+    if (!formState.periodicWeekdays.includes(weekday)) {
+      return true
+    }
+  }
+
+  return false
+}
+
 const handleOpenPeriodicModal = () => {
+  resetPeriodicGeneratorForm()
   periodicModalVisible.value = true
 }
 
@@ -492,6 +529,7 @@ const handlePeriodicOk = () => {
     })),
   )
   periodicModalVisible.value = false
+  scrollCustomSessionsToBottom()
 }
 
 const handlePeriodicCancel = () => {
@@ -502,6 +540,17 @@ const periodicGeneratedCount = computed<number>(() => {
   const sessions = computeSessionsFromPeriodic()
   return sessions.length
 })
+
+const scrollCustomSessionsToBottom = () => {
+  setTimeout(() => {
+    const tableEl = (sessionTableRef.value?.$el ?? null) as HTMLElement | null
+    if (!tableEl) return
+    const row = tableEl.querySelector('.ant-table-row:last-child') as HTMLElement | null
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, 0)
+}
 
 const totalFreeSeatingCapacity = computed<number>(() => {
   if (currentVenueCapacityType.value !== 'free_seating') return 0
@@ -746,7 +795,18 @@ const handleCancel = () => {
               <a-table-column key="name" :width="'30%'">
                 <template #title>票档名称</template>
                 <template #default="{ index }">
-                  <span>{{ formState.priceTiers[index].name }}</span>
+                  <span class="ticket-price-tier-name">
+                    <span
+                      class="ticket-price-tier-color"
+                      :style="{
+                        backgroundColor:
+                          (formState.priceTiers[index] as any).color || 'transparent',
+                        borderColor:
+                          (formState.priceTiers[index] as any).color || 'rgba(0,0,0,0.15)',
+                      }"
+                    />
+                    <span>{{ formState.priceTiers[index].name }}</span>
+                  </span>
                 </template>
               </a-table-column>
 
@@ -924,6 +984,7 @@ const handleCancel = () => {
           </div>
 
           <a-table
+            ref="sessionTableRef"
             :data-source="formState.customSessions"
             :pagination="false"
             :row-key="(_: ShowFormSession, index: number) => String(index)"
@@ -1007,7 +1068,6 @@ const handleCancel = () => {
             :value="formState.periodicDateRange"
             value-format="YYYY-MM-DD"
             class="full-width-input"
-            placeholder="选择开始和结束日期"
             @change="handlePeriodicDateChange"
           />
         </a-form-item>
@@ -1070,6 +1130,7 @@ const handleCancel = () => {
                 format="YYYY-MM-DD"
                 placeholder="休演日期"
                 class="exclude-date-picker"
+                :disabled-date="disabledExcludeDate"
               />
               <a-input
                 v-model:value="item.reason"
@@ -1133,6 +1194,20 @@ const handleCancel = () => {
   margin-left: auto;
   display: flex;
   gap: 8px;
+}
+
+.ticket-price-tier-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ticket-price-tier-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
 }
 
 .required-asterisk {
